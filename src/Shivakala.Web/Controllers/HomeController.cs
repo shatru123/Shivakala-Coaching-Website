@@ -58,6 +58,6 @@ public sealed class HomeController(
                 : "An unexpected response occurred while serving your request."
         };
 
-        return View(model);
+        return View("StatusCode", model);
     }
 }

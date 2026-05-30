@@ -34,7 +34,7 @@ src/
 - Sticky navigation, glassmorphism cards, gradients, and smooth reveal animations
 - WhatsApp floating action button
 - Error handling and logging
-- Admin-ready layered architecture for future dashboard expansion
+- Admin dashboard for registrations and enquiries
 
 ## Database
 
@@ -100,6 +100,22 @@ Supported cultures:
 
 - `en`
 - `mr`
+
+## Admin Access
+
+Admin pages:
+
+- `/Admin/Login`
+- `/Admin`
+- `/Admin/Registrations`
+- `/Admin/Enquiries`
+
+Default credentials:
+
+```text
+Username: admin
+Password: P@$$w0rd
+```
 
 ## Production Notes
 

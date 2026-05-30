@@ -16,6 +16,13 @@ public static class ServiceCollectionExtensions
         var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? "Data Source=App_Data/shivakala.db";
 
+        var adminSection = configuration.GetSection(AdminCredentialsOptions.SectionName);
+        services.Configure<AdminCredentialsOptions>(options =>
+        {
+            options.Username = adminSection["Username"] ?? "admin";
+            options.Password = adminSection["Password"] ?? "P@$$w0rd";
+        });
+
         services.AddDbContext<ShivakalaDbContext>(options =>
             options.UseSqlite(connectionString));
 
@@ -27,6 +34,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEnquiryService, EnquiryService>();
         services.AddScoped<ICourseService, CourseService>();
         services.AddScoped<IHomePageService, HomePageService>();
+        services.AddScoped<IAdminPortalService, AdminPortalService>();
+        services.AddSingleton<IAdminAuthenticationService, AdminAuthenticationService>();
 
         return services;
     }

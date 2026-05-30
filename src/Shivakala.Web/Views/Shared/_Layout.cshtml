@@ -55,6 +55,7 @@
                         <li class="nav-item"><a class="nav-link" asp-controller="Contact" asp-action="Index">@T["NavContact"]</a></li>
                     </ul>
                     <div class="toolbar ms-lg-3">
+                        <a class="toolbar-btn" asp-controller="Admin" asp-action="Login">Admin</a>
                         <form asp-controller="Home" asp-action="SetLanguage" method="post" class="d-inline">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="culture" value="@(currentCulture == "mr" ? "en" : "mr")" />
