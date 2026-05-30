@@ -10,6 +10,8 @@
 *.userosscache
 *.sln.docstates
 *.env
+src/Shivakala.Web/App_Data/*.db
+src/Shivakala.Web/App_Data/*.db-*
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs

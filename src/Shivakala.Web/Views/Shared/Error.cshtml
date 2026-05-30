@@ -1,0 +1,20 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = T["ErrorTitle"];
+    ViewData["MetaDescription"] = T["ErrorDescription"];
+}
+
+<section class="section-shell py-5">
+    <div class="container py-5">
+        <div class="glass-card text-center mx-auto" style="max-width: 720px;">
+            <span class="badge-soft mb-3">@T["ErrorBadge"]</span>
+            <h1 class="display-5 fw-bold mb-3">@T["ErrorTitle"]</h1>
+            <p class="text-body-secondary mb-4">@T["ErrorDescription"]</p>
+            @if (Model.ShowRequestId)
+            {
+                <p class="small text-body-secondary">@T["RequestId"]: <code>@Model.RequestId</code></p>
+            }
+            <a asp-controller="Home" asp-action="Index" class="btn btn-gradient">@T["BackHome"]</a>
+        </div>
+    </div>
+</section>

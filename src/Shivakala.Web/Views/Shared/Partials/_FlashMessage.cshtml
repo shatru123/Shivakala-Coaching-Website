@@ -1,0 +1,8 @@
+@if (TempData["SuccessMessage"] is string message)
+{
+    <div class="container mt-4">
+        <div class="alert alert-success glass-alert" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i>@message
+        </div>
+    </div>
+}

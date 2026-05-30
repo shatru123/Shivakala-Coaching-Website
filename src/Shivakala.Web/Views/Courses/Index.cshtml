@@ -1,0 +1,26 @@
+@model IReadOnlyList<CourseCardViewModel>
+@{
+    ViewData["Title"] = T["CoursesTitle"];
+    ViewData["MetaDescription"] = T["CoursesLead"];
+}
+
+<section class="page-hero">
+    <div class="container">
+        <span class="badge-soft">@T["NavCourses"]</span>
+        <h1>@T["CoursesTitle"]</h1>
+        <p>@T["CoursesLead"]</p>
+    </div>
+</section>
+
+<section class="section-shell">
+    <div class="container">
+        <div class="row g-4">
+            @foreach (var course in Model)
+            {
+                <div class="col-md-6">
+                    @await Html.PartialAsync("Partials/_CourseCard", course)
+                </div>
+            }
+        </div>
+    </div>
+</section>

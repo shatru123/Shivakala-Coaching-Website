@@ -1,0 +1,39 @@
+@model ContactPageViewModel
+@{
+    ViewData["Title"] = T["ContactTitle"];
+    ViewData["MetaDescription"] = T["ContactLead"];
+}
+
+<section class="page-hero">
+    <div class="container">
+        <span class="badge-soft">@T["NavContact"]</span>
+        <h1>@T["ContactTitle"]</h1>
+        <p>@T["ContactLead"]</p>
+    </div>
+</section>
+
+<section class="section-shell">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="glass-card reveal h-100">
+                    <h3>@T["ContactUs"]</h3>
+                    <p class="mb-3">@T["ContactDescription"]</p>
+                    <ul class="contact-list">
+                        <li><i class="fa-solid fa-phone"></i><span>@Model.Phone</span></li>
+                        <li><i class="fa-solid fa-envelope"></i><span>@Model.Email</span></li>
+                        <li><i class="fa-solid fa-location-dot"></i><span>@Model.Address</span></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-lg-8">
+                <div class="glass-card reveal h-100">
+                    <h3>@T["VisitUs"]</h3>
+                    <div class="map-frame">
+                        <iframe title="Map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=@Uri.EscapeDataString(Model.MapQuery)&output=embed"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

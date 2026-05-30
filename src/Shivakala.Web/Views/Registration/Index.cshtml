@@ -1,0 +1,67 @@
+@model RegistrationFormViewModel
+@{
+    ViewData["Title"] = T["RegistrationTitle"];
+    ViewData["MetaDescription"] = T["RegistrationLead"];
+}
+
+<section class="page-hero">
+    <div class="container">
+        <span class="badge-soft">@T["NavRegistration"]</span>
+        <h1>@T["RegistrationTitle"]</h1>
+        <p>@T["RegistrationLead"]</p>
+    </div>
+</section>
+
+<section class="section-shell">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="glass-card reveal">
+                    <form asp-action="Index" method="post" novalidate>
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label asp-for="FullName" class="form-label">@T["FullName"]</label>
+                                <input asp-for="FullName" class="form-control" />
+                                <span asp-validation-for="FullName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Mobile" class="form-label">@T["MobileNumber"]</label>
+                                <input asp-for="Mobile" class="form-control" />
+                                <span asp-validation-for="Mobile" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label">@T["EmailAddress"]</label>
+                                <input asp-for="Email" class="form-control" />
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Standard" class="form-label">@T["Standard"]</label>
+                                <input asp-for="Standard" class="form-control" />
+                                <span asp-validation-for="Standard" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Subject" class="form-label">@T["Subject"]</label>
+                                <input asp-for="Subject" class="form-control" />
+                                <span asp-validation-for="Subject" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Address" class="form-label">@T["Address"]</label>
+                                <input asp-for="Address" class="form-control" />
+                                <span asp-validation-for="Address" class="text-danger small"></span>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-gradient btn-lg">@T["SubmitRegistration"]</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,14 @@
+@model CourseCardViewModel
+
+<article class="course-card reveal h-100">
+    <span class="badge-soft">@Model.Standard</span>
+    <h3 class="mt-3">@Model.Title</h3>
+    <p>@Model.Description</p>
+    <div class="course-meta pt-3">
+        <span><i class="fa-regular fa-clock me-2"></i>@Model.DurationMonths @T["Months"]</span>
+        @if (Model.IsFeatured)
+        {
+            <span><i class="fa-solid fa-star me-2"></i>@T["Featured"]</span>
+        }
+    </div>
+</article>

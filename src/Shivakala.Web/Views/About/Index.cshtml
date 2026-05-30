@@ -1,0 +1,44 @@
+@model AboutPageViewModel
+@{
+    ViewData["Title"] = T["AboutTitle"];
+    ViewData["MetaDescription"] = T["AboutLead"];
+}
+
+<section class="page-hero">
+    <div class="container">
+        <span class="badge-soft">@T["NavAbout"]</span>
+        <h1>@T["AboutTitle"]</h1>
+        <p>@T["AboutLead"]</p>
+    </div>
+</section>
+
+<section class="section-shell">
+    <div class="container">
+        <div class="row g-4">
+            @foreach (var item in Model.Milestones)
+            {
+                <div class="col-md-4">
+                    <div class="feature-card reveal h-100">
+                        <div class="icon-wrap"><i class="@item.Icon"></i></div>
+                        <h3>@item.Title</h3>
+                        <p>@item.Description</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section-shell warm-section">
+    <div class="container">
+        @await Html.PartialAsync("Partials/_SectionHeader", (T["FacultySection"].Value, T["FacultyLead"].Value))
+        <div class="row g-4">
+            @foreach (var member in Model.FacultyMembers)
+            {
+                <div class="col-md-4">
+                    @await Html.PartialAsync("Partials/_FacultyCard", member)
+                </div>
+            }
+        </div>
+    </div>
+</section>

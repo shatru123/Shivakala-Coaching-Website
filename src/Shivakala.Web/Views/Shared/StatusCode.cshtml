@@ -1,0 +1,16 @@
+@model Shivakala.Web.Models.StatusCodeViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["MetaDescription"] = Model.Description;
+}
+
+<section class="section-shell py-5">
+    <div class="container py-5">
+        <div class="glass-card text-center mx-auto" style="max-width: 720px;">
+            <span class="badge-soft mb-3">@Model.StatusCode</span>
+            <h1 class="display-5 fw-bold mb-3">@Model.Title</h1>
+            <p class="text-body-secondary mb-4">@Model.Description</p>
+            <a asp-controller="Home" asp-action="Index" class="btn btn-gradient">@T["BackHome"]</a>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,136 @@
+@model HomePageViewModel
+@{
+    ViewData["Title"] = T["HomeTitle"];
+    ViewData["MetaDescription"] = T["HomeMetaDescription"];
+}
+
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <span class="badge-soft">@T["AdmissionOpen"]</span>
+                <h1 class="hero-title mt-3">@T["HeroTitle"]</h1>
+                <p class="hero-copy">@T["HeroDescription"]</p>
+                <div class="hero-actions">
+                    <a asp-controller="Registration" asp-action="Index" class="btn btn-gradient btn-lg">@T["AdmissionNow"]</a>
+                    <a asp-controller="Courses" asp-action="Index" class="btn btn-outline-light btn-lg">@T["ExploreCourses"]</a>
+                </div>
+                <div class="stats-grid mt-5">
+                    @foreach (var stat in Model.Statistics)
+                    {
+                        <div class="stat-card reveal">
+                            <strong>@stat.Value</strong>
+                            <span>@stat.Label</span>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="col-lg-5">
+                <div class="glass-hero reveal">
+                    <div class="mini-chip">@T["TopResults"]</div>
+                    <h3>@T["HeroCardTitle"]</h3>
+                    <p>@T["HeroCardDescription"]</p>
+                    <ul class="hero-list">
+                        <li>@T["HeroPoint1"]</li>
+                        <li>@T["HeroPoint2"]</li>
+                        <li>@T["HeroPoint3"]</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="section-shell">
+    <div class="container">
+        @await Html.PartialAsync("Partials/_SectionHeader", (T["WhyChooseUs"].Value, T["WhyChooseUsLead"].Value))
+        <div class="row g-4">
+            @foreach (var item in Model.Highlights)
+            {
+                <div class="col-md-4">
+                    <div class="feature-card reveal">
+                        <div class="icon-wrap"><i class="@item.Icon"></i></div>
+                        <h3>@item.Title</h3>
+                        <p>@item.Description</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section-shell warm-section" id="courses">
+    <div class="container">
+        @await Html.PartialAsync("Partials/_SectionHeader", (T["FeaturedCourses"].Value, T["FeaturedCoursesLead"].Value))
+        <div class="row g-4">
+            @foreach (var course in Model.FeaturedCourses)
+            {
+                <div class="col-md-6 col-xl-4">
+                    @await Html.PartialAsync("Partials/_CourseCard", course)
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section-shell">
+    <div class="container">
+        @await Html.PartialAsync("Partials/_SectionHeader", (T["TopResults"].Value, T["TopResultsLead"].Value))
+        <div class="row g-4">
+            @foreach (var result in Model.Results)
+            {
+                <div class="col-md-4">
+                    <div class="feature-card reveal">
+                        <div class="icon-wrap"><i class="@result.Icon"></i></div>
+                        <h3>@result.Title</h3>
+                        <p>@result.Description</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section-shell warm-section">
+    <div class="container">
+        @await Html.PartialAsync("Partials/_SectionHeader", (T["FacultySection"].Value, T["FacultyLead"].Value))
+        <div class="row g-4">
+            @foreach (var member in Model.FacultyMembers)
+            {
+                <div class="col-md-4">
+                    @await Html.PartialAsync("Partials/_FacultyCard", member)
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section-shell">
+    <div class="container">
+        @await Html.PartialAsync("Partials/_SectionHeader", (T["Testimonials"].Value, T["TestimonialsLead"].Value))
+        <div class="row g-4">
+            @foreach (var testimonial in Model.Testimonials)
+            {
+                <div class="col-md-4">
+                    @await Html.PartialAsync("Partials/_TestimonialCard", testimonial)
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section-shell cta-band">
+    <div class="container">
+        <div class="cta-card reveal">
+            <div>
+                <span class="badge-soft">@T["AdmissionOpen"]</span>
+                <h2 class="mt-3">@T["CtaTitle"]</h2>
+                <p class="mb-0">@T["CtaDescription"]</p>
+            </div>
+            <div class="cta-actions">
+                <a asp-controller="Registration" asp-action="Index" class="btn btn-light btn-lg">@T["AdmissionNow"]</a>
+                <a asp-controller="Contact" asp-action="Index" class="btn btn-outline-light btn-lg">@T["ContactUs"]</a>
+            </div>
+        </div>
+    </div>
+</section>

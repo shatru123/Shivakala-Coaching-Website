@@ -1,0 +1,11 @@
+@model FacultyMemberViewModel
+
+<article class="faculty-card reveal h-100">
+    <div class="faculty-avatar">@Model.Name[..1]</div>
+    <h3>@Model.Name</h3>
+    <p class="faculty-designation">@Model.Designation</p>
+    <ul class="faculty-meta">
+        <li>@Model.Experience</li>
+        <li>@Model.Speciality</li>
+    </ul>
+</article>

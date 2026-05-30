@@ -1,0 +1,115 @@
+@using System.Globalization
+@{
+    var title = ViewData["Title"]?.ToString() ?? "Shivakala Coaching Classes";
+    var description = ViewData["MetaDescription"]?.ToString() ?? "Shivakala Coaching Classes in Maharashtra offering SSC, foundation, and scholarship guidance.";
+    var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+<!DOCTYPE html>
+<html lang="@currentCulture" data-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@title</title>
+    <meta name="description" content="@description" />
+    <meta name="keywords" content="Shivakala Coaching Classes, SSC, foundation batch, scholarship classes, Maharashtra coaching" />
+    <meta property="og:title" content="@title" />
+    <meta property="og:description" content="@description" />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#ff7a18" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkR4j8GDSvQzQ+pcVfVt+e6dkL5q0fZo4p5Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="top-strip">
+        <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <span><i class="fa-solid fa-phone-volume me-2"></i>+91 98765 43210</span>
+            <span><i class="fa-solid fa-location-dot me-2"></i>@T["InstituteLocation"]</span>
+        </div>
+    </div>
+
+    <header class="sticky-top">
+        <nav class="navbar navbar-expand-lg navbar-blur">
+            <div class="container">
+                <a class="navbar-brand brand-mark" asp-controller="Home" asp-action="Index">
+                    <span class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+                    <span>
+                        <strong>Shivakala</strong>
+                        <small>@T["InstituteTagline"]</small>
+                    </span>
+                </a>
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainNav">
+                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">@T["NavHome"]</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="About" asp-action="Index">@T["NavAbout"]</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Courses" asp-action="Index">@T["NavCourses"]</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Registration" asp-action="Index">@T["NavRegistration"]</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Enquiry" asp-action="Index">@T["NavEnquiry"]</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Contact" asp-action="Index">@T["NavContact"]</a></li>
+                    </ul>
+                    <div class="toolbar ms-lg-3">
+                        <form asp-controller="Home" asp-action="SetLanguage" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="culture" value="@(currentCulture == "mr" ? "en" : "mr")" />
+                            <input type="hidden" name="returnUrl" value="@returnUrl" />
+                            <button type="submit" class="toolbar-btn">@T["LanguageSwitcher"]</button>
+                        </form>
+                        <button type="button" class="toolbar-btn" id="themeToggle" aria-label="@T["ThemeToggle"]">
+                            <i class="fa-solid fa-moon"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        @await Html.PartialAsync("Partials/_FlashMessage")
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <h5>Shivakala Coaching Classes</h5>
+                    <p>@T["FooterSummary"]</p>
+                </div>
+                <div class="col-lg-4">
+                    <h6>@T["QuickLinks"]</h6>
+                    <ul class="footer-links">
+                        <li><a asp-controller="About" asp-action="Index">@T["NavAbout"]</a></li>
+                        <li><a asp-controller="Courses" asp-action="Index">@T["NavCourses"]</a></li>
+                        <li><a asp-controller="Registration" asp-action="Index">@T["AdmissionNow"]</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4">
+                    <h6>@T["ContactUs"]</h6>
+                    <p class="mb-1">+91 98765 43210</p>
+                    <p class="mb-1">admissions@shivakalaclasses.in</p>
+                    <p class="mb-0">@T["InstituteLocation"]</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>&copy; @DateTime.UtcNow.Year Shivakala Coaching Classes</span>
+                <span>@T["FooterRights"]</span>
+            </div>
+        </div>
+    </footer>
+
+    <a class="whatsapp-float" href="https://wa.me/919876543210?text=Hello%20Shivakala%20Coaching%20Classes" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
