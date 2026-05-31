@@ -1,42 +1,80 @@
-@model AboutPageViewModel
+@model Shivakala.Core.ViewModels.AboutPageViewModel
+@using System.Globalization
 @{
-    ViewData["Title"] = T["AboutTitle"];
-    ViewData["MetaDescription"] = T["AboutLead"];
+    ViewData["Title"] = Model?.Seo?.Title ?? "About Us | Shivakala Coaching Classes";
+    ViewData["MetaDescription"] = Model?.Seo?.Description ?? "Learn about Shivakala Coaching Classes - KG1 to 10th, Chikhali.";
+    var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
 }
 
 <section class="page-hero">
     <div class="container">
-        <span class="badge-soft">@T["NavAbout"]</span>
-        <h1>@T["AboutTitle"]</h1>
-        <p>@T["AboutLead"]</p>
-    </div>
-</section>
-
-<section class="section-shell">
-    <div class="container">
-        <div class="row g-4">
-            @foreach (var item in Model.Milestones)
-            {
-                <div class="col-md-4">
-                    <div class="feature-card reveal h-100">
-                        <div class="icon-wrap"><i class="@item.Icon"></i></div>
-                        <h3>@item.Title</h3>
-                        <p>@item.Description</p>
-                    </div>
-                </div>
-            }
-        </div>
+        <span class="badge-soft"><i class="fa-solid fa-school me-1"></i>@(isMr ? "आमच्याबद्दल" : "About Us")</span>
+        <h1>@(isMr ? "शिवकला क्लासेस" : "Shivakala Coaching Classes")</h1>
+        <p>@(isMr ? "चिखली, महाराष्ट्र — SK लर्निंग फॉर लाइफ" : "Chikhali, Maharashtra — SK Learning For Life")</p>
     </div>
 </section>
 
 <section class="section-shell warm-section">
     <div class="container">
-        @await Html.PartialAsync("Partials/_SectionHeader", (T["FacultySection"].Value, T["FacultyLead"].Value))
-        <div class="row g-4">
-            @foreach (var member in Model.FacultyMembers)
+        <div class="row g-4 align-items-center">
+            <div class="col-lg-6">
+                <div class="eyebrow mb-2"><i class="fa-solid fa-star me-1"></i>@(isMr ? "आमची ओळख" : "Our Story")</div>
+                <h2 style="color:var(--navy)">@(isMr ? "भक्कम पाया आज, उज्ज्वल यश उद्या!" : "Strong Foundation Today, Brilliant Success Tomorrow!")</h2>
+                <p class="text-muted mt-3">@(isMr ? "शिवकला क्लासेसची स्थापना विद्यार्थ्यांना उत्कृष्ट शिक्षण देण्याच्या उद्देशाने झाली. आम्ही KG1 ते 10वी पर्यंत गणित, इंग्रजी आणि विज्ञान या विषयांत मार्गदर्शन करतो." : "Shivakala Coaching Classes was founded with a mission to provide exceptional academic guidance. We offer coaching for KG1 to 10th Standard in Mathematics, English and Science.")</p>
+                <p class="text-muted">@(isMr ? "आमचे अनुभवी शिक्षक प्रत्येक विद्यार्थ्याकडे वैयक्तिक लक्ष देतात व त्यांना त्यांच्या क्षमतेपर्यंत पोहोचण्यास मदत करतात." : "Our experienced faculty gives personal attention to every student, helping them realize their full potential through concept-based learning.")</p>
+            </div>
+            <div class="col-lg-6">
+                <div class="row g-3">
+                    <div class="col-6"><div class="stat-card"><strong>500+</strong><span>@(isMr ? "विद्यार्थी" : "Students Enrolled")</span></div></div>
+                    <div class="col-6"><div class="stat-card"><strong>10+</strong><span>@(isMr ? "वर्षांचा अनुभव" : "Years of Excellence")</span></div></div>
+                    <div class="col-6"><div class="stat-card"><strong>95%</strong><span>@(isMr ? "उत्तीर्ण दर" : "Pass Rate")</span></div></div>
+                    <div class="col-6"><div class="stat-card"><strong>3</strong><span>@(isMr ? "मुख्य विषय" : "Core Subjects")</span></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@if (Model?.Faculty is { Count: > 0 })
+{
+    <section class="section-shell" style="background:var(--white)">
+        <div class="container">
+            <div class="section-header text-center mb-4">
+                <div class="eyebrow"><i class="fa-solid fa-chalkboard-user me-1"></i>@(isMr ? "आमचे शिक्षक" : "Our Faculty")</div>
+                <h2>@(isMr ? "अनुभवी व तज्ज्ञ शिक्षकवर्ग" : "Meet Our Expert Faculty")</h2>
+            </div>
+            <div class="row g-3">
+                @foreach (var f in Model.Faculty)
+                {
+                    <div class="col-lg-3 col-md-6">
+                        @await Html.PartialAsync("Partials/_FacultyCard", f)
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<section class="section-shell warm-section">
+    <div class="container">
+        <div class="section-header text-center mb-4">
+            <div class="eyebrow"><i class="fa-solid fa-star me-1"></i>@(isMr ? "आमची वैशिष्ट्ये" : "Our Features")</div>
+            <h2>@(isMr ? "आम्हालाच का निवडावे?" : "Why Shivakala?")</h2>
+        </div>
+        <div class="row g-3">
+            @{
+                var features = isMr
+                    ? new[] {("fa-clipboard-list","नियमित चाचण्या","दर शनिवारी साप्ताहिक चाचणी व दर रविवारी निकाल."),("fa-lightbulb","संकल्पना आधारित शिक्षण","कठीण संकल्पना सोप्या भाषेत शिकवल्या जातात."),("fa-user-check","वैयक्तिक लक्ष","प्रत्येक विद्यार्थ्याला स्वतंत्र मार्गदर्शन मिळते."),("fa-chart-line","उत्तम निकाल","आमचे विद्यार्थी नेहमी उत्कृष्ट यश मिळवतात.")}
+                    : new[] {("fa-clipboard-list","Regular Tests","Weekly tests every Saturday with results on Sunday."),("fa-lightbulb","Concept Learning","Difficult concepts explained in simple, engaging ways."),("fa-user-check","Personal Attention","Individual guidance catered to each student's pace."),("fa-chart-line","Better Results","Our students consistently achieve top grades.")};
+            }
+            @foreach (var (icon, title, desc) in features)
             {
-                <div class="col-md-4">
-                    @await Html.PartialAsync("Partials/_FacultyCard", member)
+                <div class="col-lg-3 col-md-6">
+                    <div class="feature-card reveal">
+                        <div class="icon-wrap"><i class="fa-solid @icon"></i></div>
+                        <h3>@title</h3>
+                        <p>@desc</p>
+                    </div>
                 </div>
             }
         </div>

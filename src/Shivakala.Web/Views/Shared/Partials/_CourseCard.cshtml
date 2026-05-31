@@ -1,14 +1,33 @@
-@model CourseCardViewModel
-
-<article class="course-card reveal h-100">
-    <span class="badge-soft">@Model.Standard</span>
-    <h3 class="mt-3">@Model.Title</h3>
-    <p>@Model.Description</p>
-    <div class="course-meta pt-3">
-        <span><i class="fa-regular fa-clock me-2"></i>@Model.DurationMonths @T["Months"]</span>
-        @if (Model.IsFeatured)
+@model Shivakala.Core.ViewModels.CourseViewModel
+@using System.Globalization
+@{
+    var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
+    var iconClass = Model.Subject?.ToLower() switch {
+        "mathematics" or "maths" or "गणित" => "fa-calculator maths",
+        "english" or "इंग्रजी" => "fa-book-open english",
+        "science" or "विज्ञान" => "fa-flask science",
+        _ => "fa-graduation-cap navy"
+    };
+}
+<div class="course-card reveal">
+    <div class="d-flex align-items-center gap-3">
+        <div class="subject-icon-wrap @(iconClass.Split(' ').LastOrDefault())" style="width:44px;height:44px;font-size:1.2rem;flex-shrink:0">
+            <i class="fa-solid @(iconClass.Split(' ').FirstOrDefault())"></i>
+        </div>
+        <div>
+            <h3 style="margin:0;font-size:1rem">@Model.Title</h3>
+            <small class="text-muted">@Model.Standards</small>
+        </div>
+    </div>
+    <p class="mt-2">@Model.Description</p>
+    <div class="course-meta">
+        @if (!string.IsNullOrWhiteSpace(Model.Duration))
         {
-            <span><i class="fa-solid fa-star me-2"></i>@T["Featured"]</span>
+            <span><i class="fa-regular fa-clock me-1" style="color:var(--navy)"></i>@Model.Duration</span>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.Board))
+        {
+            <span><i class="fa-solid fa-award me-1" style="color:var(--gold)"></i>@Model.Board</span>
         }
     </div>
-</article>
+</div>

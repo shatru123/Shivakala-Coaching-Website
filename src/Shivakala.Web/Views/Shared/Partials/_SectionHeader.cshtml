@@ -1,7 +1,23 @@
-@model (string Title, string Description)
-
-<div class="section-header text-center mx-auto reveal">
-    <span class="eyebrow">@T["SectionEyebrow"]</span>
-    <h2>@Model.Title</h2>
-    <p>@Model.Description</p>
+@{
+    var eyebrow = ViewData["Eyebrow"]?.ToString();
+    var title   = ViewData["SectionTitle"]?.ToString();
+    var subtitle= ViewData["Subtitle"]?.ToString();
+    var icon    = ViewData["Icon"]?.ToString() ?? "fa-star";
+    var light   = ViewData["Light"] as bool? ?? false;
+}
+<div class="section-header text-center mb-4">
+    @if (!string.IsNullOrWhiteSpace(eyebrow))
+    {
+        <div class="eyebrow @(light?"eyebrow-light":"")">
+            <i class="fa-solid @icon me-1"></i>@eyebrow
+        </div>
+    }
+    @if (!string.IsNullOrWhiteSpace(title))
+    {
+        <h2 @(light ? Html.Raw("style=\"color:#fff\"") : Html.Raw(""))>@title</h2>
+    }
+    @if (!string.IsNullOrWhiteSpace(subtitle))
+    {
+        <p class="mt-2 @(light?"text-white-50":"text-muted")">@subtitle</p>
+    }
 </div>

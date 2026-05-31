@@ -1,82 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value>
-  </resheader>
-  <data name="InstituteLocation" xml:space="preserve"><value>Maharashtra, India</value></data>
-  <data name="InstituteTagline" xml:space="preserve"><value>Coaching Classes</value></data>
-  <data name="NavHome" xml:space="preserve"><value>Home</value></data>
-  <data name="NavAbout" xml:space="preserve"><value>About</value></data>
-  <data name="NavCourses" xml:space="preserve"><value>Courses</value></data>
-  <data name="NavRegistration" xml:space="preserve"><value>Registration</value></data>
-  <data name="NavEnquiry" xml:space="preserve"><value>Enquiry</value></data>
-  <data name="NavContact" xml:space="preserve"><value>Contact</value></data>
-  <data name="LanguageSwitcher" xml:space="preserve"><value>मराठी</value></data>
-  <data name="ThemeToggle" xml:space="preserve"><value>Toggle theme</value></data>
-  <data name="FooterSummary" xml:space="preserve"><value>Traditional values, modern teaching systems, and result-focused mentorship for SSC, foundation, and scholarship aspirants.</value></data>
-  <data name="QuickLinks" xml:space="preserve"><value>Quick Links</value></data>
-  <data name="FooterRights" xml:space="preserve"><value>All rights reserved.</value></data>
-  <data name="HomeTitle" xml:space="preserve"><value>Shivakala Coaching Classes | Excellence Through Guidance</value></data>
-  <data name="HomeMetaDescription" xml:space="preserve"><value>Shivakala Coaching Classes offers multilingual admissions, SSC guidance, foundation batches, and scholarship preparation.</value></data>
-  <data name="AdmissionOpen" xml:space="preserve"><value>Admissions Open 2026</value></data>
-  <data name="HeroTitle" xml:space="preserve"><value>Empowering Maharashtra's students with modern coaching and traditional discipline.</value></data>
-  <data name="HeroDescription" xml:space="preserve"><value>Build stronger concepts, stronger marks, and stronger confidence with Shivakala Coaching Classes.</value></data>
-  <data name="AdmissionNow" xml:space="preserve"><value>Apply for Admission</value></data>
-  <data name="ExploreCourses" xml:space="preserve"><value>Explore Courses</value></data>
-  <data name="TopResults" xml:space="preserve"><value>Top Results</value></data>
-  <data name="HeroCardTitle" xml:space="preserve"><value>Result-oriented academic support</value></data>
-  <data name="HeroCardDescription" xml:space="preserve"><value>Structured study planning, weekly tests, revision strategy, and parent updates in one polished learning system.</value></data>
-  <data name="HeroPoint1" xml:space="preserve"><value>Concept-based classroom teaching</value></data>
-  <data name="HeroPoint2" xml:space="preserve"><value>Small batches with personal attention</value></data>
-  <data name="HeroPoint3" xml:space="preserve"><value>Board and scholarship preparation</value></data>
-  <data name="WhyChooseUs" xml:space="preserve"><value>Why Choose Us</value></data>
-  <data name="WhyChooseUsLead" xml:space="preserve"><value>A student-first coaching environment with academic rigour, cultural grounding, and polished guidance.</value></data>
-  <data name="FeaturedCourses" xml:space="preserve"><value>Featured Courses</value></data>
-  <data name="FeaturedCoursesLead" xml:space="preserve"><value>High-impact batches designed for SSC, science, maths, and scholarship success.</value></data>
-  <data name="TopResultsLead" xml:space="preserve"><value>Performance systems that help students convert effort into visible results.</value></data>
-  <data name="FacultySection" xml:space="preserve"><value>Faculty Section</value></data>
-  <data name="FacultyLead" xml:space="preserve"><value>Experienced mentors committed to disciplined preparation and individual progress.</value></data>
-  <data name="Testimonials" xml:space="preserve"><value>Testimonials</value></data>
-  <data name="TestimonialsLead" xml:space="preserve"><value>Parents and students trust Shivakala for academic clarity and result consistency.</value></data>
-  <data name="CtaTitle" xml:space="preserve"><value>Ready to begin your child's next success chapter?</value></data>
-  <data name="CtaDescription" xml:space="preserve"><value>Secure your admission and connect with our team for subject guidance and batch details.</value></data>
-  <data name="ErrorTitle" xml:space="preserve"><value>Something went wrong</value></data>
-  <data name="ErrorDescription" xml:space="preserve"><value>We hit an unexpected issue while loading this page. Please try again shortly.</value></data>
-  <data name="ErrorBadge" xml:space="preserve"><value>Application Error</value></data>
-  <data name="RequestId" xml:space="preserve"><value>Request ID</value></data>
-  <data name="BackHome" xml:space="preserve"><value>Back to Home</value></data>
-  <data name="SectionEyebrow" xml:space="preserve"><value>Shivakala Advantage</value></data>
-  <data name="Months" xml:space="preserve"><value>months</value></data>
-  <data name="Featured" xml:space="preserve"><value>Featured</value></data>
-  <data name="AboutTitle" xml:space="preserve"><value>About Shivakala Coaching Classes</value></data>
-  <data name="AboutLead" xml:space="preserve"><value>We blend disciplined learning habits with modern guidance to help students perform with confidence.</value></data>
-  <data name="CoursesTitle" xml:space="preserve"><value>Courses &amp; Subjects</value></data>
-  <data name="CoursesLead" xml:space="preserve"><value>Explore our carefully structured batches for foundation, board, and scholarship learning.</value></data>
-  <data name="RegistrationTitle" xml:space="preserve"><value>Student Registration</value></data>
-  <data name="RegistrationLead" xml:space="preserve"><value>Submit your admission details and our team will connect with you quickly.</value></data>
-  <data name="FullName" xml:space="preserve"><value>Full Name</value></data>
-  <data name="MobileNumber" xml:space="preserve"><value>Mobile Number</value></data>
-  <data name="EmailAddress" xml:space="preserve"><value>Email Address</value></data>
-  <data name="Standard" xml:space="preserve"><value>Standard</value></data>
-  <data name="Subject" xml:space="preserve"><value>Subject</value></data>
-  <data name="Address" xml:space="preserve"><value>Address</value></data>
-  <data name="SubmitRegistration" xml:space="preserve"><value>Submit Registration</value></data>
-  <data name="EnquiryTitle" xml:space="preserve"><value>Quick Enquiry</value></data>
-  <data name="EnquiryLead" xml:space="preserve"><value>Ask us about fees, batches, timings, or subject guidance.</value></data>
-  <data name="Message" xml:space="preserve"><value>Message</value></data>
-  <data name="SubmitEnquiry" xml:space="preserve"><value>Send Enquiry</value></data>
-  <data name="ContactTitle" xml:space="preserve"><value>Contact Shivakala Coaching Classes</value></data>
-  <data name="ContactLead" xml:space="preserve"><value>Reach out for admissions, counselling, batch planning, and institute visits.</value></data>
-  <data name="ContactDescription" xml:space="preserve"><value>Our admissions team is available to guide students and parents with the right course path.</value></data>
-  <data name="VisitUs" xml:space="preserve"><value>Visit Us</value></data>
-  <data name="ContactUs" xml:space="preserve"><value>Contact Us</value></data>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+
+  <!-- Navigation -->
+  <data name="NavHome"><value>Home</value></data>
+  <data name="NavAbout"><value>About Us</value></data>
+  <data name="NavCourses"><value>Courses</value></data>
+  <data name="NavRegistration"><value>Register</value></data>
+  <data name="NavEnquiry"><value>Enquiry</value></data>
+  <data name="NavContact"><value>Contact Us</value></data>
+  <data name="NavAdmin"><value>Admin</value></data>
+  <data name="LanguageSwitcher"><value>मराठी</value></data>
+
+  <!-- Hero -->
+  <data name="HeroAdmissionsOpen"><value>Admissions Open</value></data>
+  <data name="HeroYear"><value>2026 – 27</value></data>
+  <data name="HeroStandard"><value>KG1 TO 10TH STANDARD</value></data>
+  <data name="HeroTagline"><value>Strong Foundation Today, </value></data>
+  <data name="HeroTaglineAccent"><value>Brilliant Success Tomorrow!</value></data>
+  <data name="AdmissionNow"><value>Apply for Admission</value></data>
+  <data name="EnquireNow"><value>Enquire Now</value></data>
+
+  <!-- Info boxes -->
+  <data name="WeeklyTestEvery"><value>WEEKLY TEST EVERY</value></data>
+  <data name="Saturday"><value>SATURDAY</value></data>
+  <data name="ResultMeritEvery"><value>RESULT &amp; MERIT LIST EVERY</value></data>
+  <data name="Sunday"><value>SUNDAY</value></data>
+  <data name="QuestionPaperInfo"><value>QUESTION PAPER &amp; ANSWER SHEET</value></data>
+  <data name="WillBeUploaded"><value>WILL BE UPLOADED</value></data>
+
+  <!-- Quick Actions -->
+  <data name="QuickActions"><value>Quick Actions</value></data>
+  <data name="ApplyAdmission"><value>Apply for Admission</value></data>
+  <data name="DownloadQPaper"><value>Download Question Paper</value></data>
+  <data name="DownloadAnswer"><value>Download Answer Sheet</value></data>
+  <data name="WeeklyTestResult"><value>Weekly Test Result</value></data>
+  <data name="MeritRankList"><value>Merit Rank List</value></data>
+  <data name="BookDemoClass"><value>Book Free Demo Class</value></data>
+  <data name="ContactUs"><value>Contact Us</value></data>
+
+  <!-- Features bar -->
+  <data name="RegularTests"><value>Regular Tests</value></data>
+  <data name="ConceptLearning"><value>Concept Based Learning</value></data>
+  <data name="ExperiencedFaculty"><value>Experienced Faculty</value></data>
+  <data name="PersonalAttention"><value>Personal Attention</value></data>
+  <data name="BetterResults"><value>Better Results</value></data>
+
+  <!-- Footer -->
+  <data name="FooterSummary"><value>Shivakala Coaching Classes provides quality coaching for KG1 to 10th Standard students in Chikhali, Maharashtra. SK Learning For Life.</value></data>
+  <data name="QuickLinks"><value>Quick Links</value></data>
+  <data name="FooterRights"><value>All Rights Reserved</value></data>
+
+  <!-- Forms -->
+  <data name="FullName"><value>Student's Full Name</value></data>
+  <data name="ParentName"><value>Parent / Guardian Name</value></data>
+  <data name="Mobile"><value>Mobile Number</value></data>
+  <data name="Email"><value>Email Address</value></data>
+  <data name="Standard"><value>Standard</value></data>
+  <data name="Subject"><value>Subject</value></data>
+  <data name="Address"><value>Address</value></data>
+  <data name="Message"><value>Message / Query</value></data>
+  <data name="SubmitRegistration"><value>Submit Registration</value></data>
+  <data name="SendEnquiry"><value>Send Enquiry</value></data>
+
+  <!-- Sanskrit motto -->
+  <data name="SanskritMotto"><value>॥ Gyanadeepah Prajvalitah ॥</value></data>
 </root>

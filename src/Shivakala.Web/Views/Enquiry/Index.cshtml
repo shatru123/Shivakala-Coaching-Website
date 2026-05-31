@@ -1,52 +1,83 @@
-@model EnquiryFormViewModel
+@model Shivakala.Core.ViewModels.EnquiryFormViewModel
+@using System.Globalization
 @{
-    ViewData["Title"] = T["EnquiryTitle"];
-    ViewData["MetaDescription"] = T["EnquiryLead"];
+    ViewData["Title"] = Model?.Seo?.Title ?? "Enquiry | Shivakala Coaching Classes";
+    ViewData["MetaDescription"] = Model?.Seo?.Description ?? "Send an enquiry to Shivakala Coaching Classes.";
+    var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
 }
 
-<section class="page-hero">
+<section class="page-hero" style="background:linear-gradient(135deg,var(--green-dark),var(--green))">
     <div class="container">
-        <span class="badge-soft">@T["NavEnquiry"]</span>
-        <h1>@T["EnquiryTitle"]</h1>
-        <p>@T["EnquiryLead"]</p>
+        <span class="badge-soft"><i class="fa-solid fa-comments me-1"></i>@(isMr ? "चौकशी" : "Enquiry")</span>
+        <h1>@(isMr ? "चौकशी अर्ज" : "Send an Enquiry")</h1>
+        <p>@(isMr ? "कोणताही प्रश्न असल्यास खाली लिहा. आम्ही लवकरच उत्तर देऊ." : "Have questions? Write to us and we'll respond as soon as possible.")</p>
     </div>
 </section>
 
 <section class="section-shell">
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="glass-card reveal">
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-7">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="glass-alert d-flex align-items-center gap-2 mb-4">
+                        <i class="fa-solid fa-circle-check fa-lg"></i>
+                        <span>@TempData["SuccessMessage"]</span>
+                    </div>
+                }
+                <div class="glass-card">
+                    <div class="d-flex align-items-center gap-3 mb-4 pb-3" style="border-bottom:2px solid var(--light-gray)">
+                        <div class="icon-wrap mb-0" style="background:linear-gradient(135deg,var(--green),var(--green-dark));color:#fff;margin-bottom:0!important">
+                            <i class="fa-solid fa-envelope"></i>
+                        </div>
+                        <div>
+                            <h2 class="mb-0" style="font-size:1.2rem;color:var(--navy)">@(isMr ? "चौकशी पाठवा" : "Enquiry Form")</h2>
+                            <p class="mb-0 text-muted" style="font-size:0.82rem">@(isMr ? "आम्ही 24 तासांत उत्तर देऊ." : "We'll respond within 24 hours.")</p>
+                        </div>
+                    </div>
                     <form asp-action="Index" method="post" novalidate>
                         @Html.AntiForgeryToken()
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                        <div class="row g-4">
+                        <div class="row g-3">
                             <div class="col-md-6">
-                                <label asp-for="Name" class="form-label">@T["FullName"]</label>
-                                <input asp-for="Name" class="form-control" />
+                                <label asp-for="Name" class="form-label">@(isMr ? "आपले नाव" : "Your Name") <span class="text-danger">*</span></label>
+                                <input asp-for="Name" class="form-control" placeholder="@(isMr ? "पूर्ण नाव" : "Full name")" />
                                 <span asp-validation-for="Name" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="Mobile" class="form-label">@T["MobileNumber"]</label>
-                                <input asp-for="Mobile" class="form-control" />
+                                <label asp-for="Mobile" class="form-label">@(isMr ? "मोबाईल नंबर" : "Mobile Number") <span class="text-danger">*</span></label>
+                                <input asp-for="Mobile" class="form-control" placeholder="+91 XXXXX XXXXX" type="tel" />
                                 <span asp-validation-for="Mobile" class="text-danger small"></span>
                             </div>
                             <div class="col-12">
-                                <label asp-for="Message" class="form-label">@T["Message"]</label>
-                                <textarea asp-for="Message" class="form-control" rows="6"></textarea>
+                                <label asp-for="Message" class="form-label">@(isMr ? "संदेश / प्रश्न" : "Message / Query") <span class="text-danger">*</span></label>
+                                <textarea asp-for="Message" class="form-control" rows="5" placeholder="@(isMr ? "आपला प्रश्न किंवा संदेश..." : "Your question or message...")"></textarea>
                                 <span asp-validation-for="Message" class="text-danger small"></span>
                             </div>
                             <div class="col-12">
-                                <button type="submit" class="btn btn-gradient btn-lg">@T["SubmitEnquiry"]</button>
+                                <button type="submit" class="btn-green-sk w-100 py-3 justify-content-center" style="border-radius:10px;font-size:0.95rem;">
+                                    <i class="fa-solid fa-paper-plane me-2"></i>
+                                    @(isMr ? "चौकशी पाठवा" : "Send Enquiry")
+                                </button>
                             </div>
                         </div>
                     </form>
                 </div>
             </div>
+            <div class="col-lg-4 col-md-8">
+                <div class="glass-card" style="border-top:4px solid var(--green)">
+                    <h6 class="mb-3" style="color:var(--navy);font-weight:700;text-transform:uppercase;letter-spacing:1px;font-size:0.82rem"><i class="fa-solid fa-location-dot me-2" style="color:var(--green)"></i>@(isMr ? "आमचा पत्ता" : "Find Us")</h6>
+                    <ul class="contact-list">
+                        <li><i class="fa-solid fa-location-dot" style="color:var(--green)!important"></i><span>@(isMr ? "शिवकला क्लासेस, चिखली, महाराष्ट्र" : "Shivakala Classes, Chikhali, Maharashtra")</span></li>
+                        <li><i class="fa-solid fa-phone" style="color:var(--green)!important"></i><span>+91 80878 07011</span></li>
+                        <li><i class="fa-solid fa-phone" style="color:var(--green)!important"></i><span>+91 88309 07011</span></li>
+                        <li><i class="fa-solid fa-envelope" style="color:var(--green)!important"></i><span>info@shivkalaclasses.com</span></li>
+                        <li><i class="fa-solid fa-clock" style="color:var(--green)!important"></i><span>@(isMr ? "सोम–शनि: सकाळी ७ ते रात्री ९" : "Mon–Sat: 7:00 AM – 9:00 PM")</span></li>
+                    </ul>
+                    <a href="https://wa.me/918087807011" target="_blank" class="btn-green-sk w-100 justify-content-center mt-3" style="border-radius:8px">
+                        <i class="fa-brands fa-whatsapp"></i>@(isMr ? "WhatsApp वर संपर्क करा" : "Chat on WhatsApp")
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </section>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}

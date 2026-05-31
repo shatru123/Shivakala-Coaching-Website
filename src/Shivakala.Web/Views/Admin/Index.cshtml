@@ -1,97 +1,101 @@
-@model AdminDashboardViewModel
+@model Shivakala.Core.ViewModels.AdminDashboardViewModel
 @{
-    ViewData["Title"] = "Admin Dashboard";
-    ViewData["MetaDescription"] = "Admin dashboard for Shivakala Coaching Classes.";
+    ViewData["Title"] = "Admin Dashboard | Shivakala";
+    ViewData["MetaDescription"] = "Admin dashboard.";
+    Layout = "_Layout";
 }
 
-<section class="page-hero">
-    <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
-        <div>
-            <span class="badge-soft">Admin</span>
-            <h1>Admin Dashboard</h1>
-            <p>Review recent student registrations and incoming enquiries.</p>
-        </div>
-        <form asp-action="Logout" method="post">
-            @Html.AntiForgeryToken()
-            <button type="submit" class="toolbar-btn">Logout</button>
-        </form>
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid))">
+    <div class="container">
+        <span class="badge-soft"><i class="fa-solid fa-gauge me-1"></i>Admin</span>
+        <h1>Dashboard</h1>
+        <p>Welcome back! Here's a quick overview of Shivakala Coaching Classes activity.</p>
     </div>
 </section>
 
-<section class="section-shell pt-0">
+<section class="section-shell">
     <div class="container">
-        <div class="row g-4 mb-4">
-            <div class="col-md-6">
-                <div class="stat-card reveal">
-                    <strong>@Model.RegistrationCount</strong>
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="admin-stat-card" style="border-left-color:var(--green)">
+                    <strong>@(Model?.TotalRegistrations ?? 0)</strong>
                     <span>Total Registrations</span>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="stat-card reveal">
-                    <strong>@Model.EnquiryCount</strong>
+            <div class="col-md-3">
+                <div class="admin-stat-card" style="border-left-color:var(--gold)">
+                    <strong>@(Model?.TotalEnquiries ?? 0)</strong>
                     <span>Total Enquiries</span>
                 </div>
             </div>
-        </div>
-
-        <div class="row g-4">
-            <div class="col-lg-6">
-                <div class="glass-card reveal">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3 class="mb-0">Recent Registrations</h3>
-                        <a asp-action="Registrations" class="btn btn-gradient">View All</a>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table admin-table align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Standard</th>
-                                    <th>Mobile</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var item in Model.RecentRegistrations)
-                                {
-                                    <tr>
-                                        <td>@item.FullName</td>
-                                        <td>@item.Standard</td>
-                                        <td>@item.Mobile</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+            <div class="col-md-3">
+                <div class="admin-stat-card" style="border-left-color:var(--purple)">
+                    <strong>@(Model?.NewRegistrationsThisMonth ?? 0)</strong>
+                    <span>This Month (Reg.)</span>
                 </div>
             </div>
-            <div class="col-lg-6">
-                <div class="glass-card reveal">
+            <div class="col-md-3">
+                <div class="admin-stat-card" style="border-left-color:var(--teal)">
+                    <strong>@(Model?.NewEnquiriesThisMonth ?? 0)</strong>
+                    <span>This Month (Enq.)</span>
+                </div>
+            </div>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="glass-card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3 class="mb-0">Recent Enquiries</h3>
-                        <a asp-action="Enquiries" class="btn btn-gradient">View All</a>
+                        <h5 style="color:var(--navy);margin:0;font-size:1rem"><i class="fa-solid fa-user-plus me-2" style="color:var(--green)"></i>Recent Registrations</h5>
+                        <a asp-action="Registrations" class="toolbar-btn" style="font-size:0.75rem;padding:5px 12px">View All</a>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table admin-table align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Mobile</th>
-                                    <th>Message</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var item in Model.RecentEnquiries)
-                                {
-                                    <tr>
-                                        <td>@item.Name</td>
-                                        <td>@item.Mobile</td>
-                                        <td class="text-truncate" style="max-width: 220px;">@item.Message</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
+                    @if (Model?.RecentRegistrations is { Count: > 0 })
+                    {
+                        <div class="table-responsive">
+                            <table class="table admin-table align-middle mb-0">
+                                <thead><tr><th>Name</th><th>Standard</th><th>Mobile</th><th>Date</th></tr></thead>
+                                <tbody>
+                                    @foreach (var r in Model.RecentRegistrations.Take(5))
+                                    {
+                                        <tr>
+                                            <td>@r.FullName</td>
+                                            <td><span class="badge-soft dark">@r.Standard</span></td>
+                                            <td>@r.Mobile</td>
+                                            <td style="white-space:nowrap">@r.CreatedDate.ToLocalTime().ToString("dd MMM")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else { <p class="text-muted" style="font-size:0.87rem">No registrations yet.</p> }
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="glass-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 style="color:var(--navy);margin:0;font-size:1rem"><i class="fa-solid fa-comments me-2" style="color:var(--gold)"></i>Recent Enquiries</h5>
+                        <a asp-action="Enquiries" class="toolbar-btn" style="font-size:0.75rem;padding:5px 12px">View All</a>
                     </div>
+                    @if (Model?.RecentEnquiries is { Count: > 0 })
+                    {
+                        <div class="table-responsive">
+                            <table class="table admin-table align-middle mb-0">
+                                <thead><tr><th>Name</th><th>Mobile</th><th>Message</th><th>Date</th></tr></thead>
+                                <tbody>
+                                    @foreach (var e in Model.RecentEnquiries.Take(5))
+                                    {
+                                        <tr>
+                                            <td>@e.Name</td>
+                                            <td>@e.Mobile</td>
+                                            <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@e.Message</td>
+                                            <td style="white-space:nowrap">@e.CreatedDate.ToLocalTime().ToString("dd MMM")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else { <p class="text-muted" style="font-size:0.87rem">No enquiries yet.</p> }
                 </div>
             </div>
         </div>
