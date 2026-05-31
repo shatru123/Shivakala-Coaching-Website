@@ -1,9 +1,10 @@
 @using System.Globalization
 @{
     var title = ViewData["Title"]?.ToString() ?? "Shivakala Coaching Classes";
-    var description = ViewData["MetaDescription"]?.ToString() ?? "Shivakala Coaching Classes in Maharashtra offering SSC, foundation, and scholarship guidance.";
+    var description = ViewData["MetaDescription"]?.ToString() ?? "Shivakala Coaching Classes in Chikhali, Maharashtra — SSC, foundation, and scholarship guidance.";
     var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
+    var isMr = currentCulture == "mr";
 }
 <!DOCTYPE html>
 <html lang="@currentCulture" data-theme="light">
@@ -12,11 +13,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@title</title>
     <meta name="description" content="@description" />
-    <meta name="keywords" content="Shivakala Coaching Classes, SSC, foundation batch, scholarship classes, Maharashtra coaching" />
+    <meta name="keywords" content="Shivakala Coaching Classes, SSC, foundation batch, scholarship classes, Chikhali coaching, Maharashtra coaching" />
     <meta property="og:title" content="@title" />
     <meta property="og:description" content="@description" />
     <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#ff7a18" />
+    <meta name="theme-color" content="#ef6c00" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -27,8 +28,19 @@
 <body>
     <div class="top-strip">
         <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <span><i class="fa-solid fa-phone-volume me-2"></i>+91 98765 43210</span>
-            <span><i class="fa-solid fa-location-dot me-2"></i>@T["InstituteLocation"]</span>
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <a href="tel:+918087807011" class="top-strip-link">
+                    <i class="fa-solid fa-phone-volume me-1"></i>+91 80878 07011
+                </a>
+                <span class="top-strip-sep d-none d-sm-inline">|</span>
+                <a href="tel:+918830907011" class="top-strip-link">
+                    <i class="fa-solid fa-phone me-1"></i>+91 88309 07011
+                </a>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <i class="fa-solid fa-location-dot"></i>
+                <span>@(isMr ? "चिखली, महाराष्ट्र" : "Chikhali, Maharashtra")</span>
+            </div>
         </div>
     </div>
 
@@ -36,9 +48,11 @@
         <nav class="navbar navbar-expand-lg navbar-blur">
             <div class="container">
                 <a class="navbar-brand brand-mark" asp-controller="Home" asp-action="Index">
-                    <span class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></span>
+                    <span class="brand-icon">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </span>
                     <span>
-                        <strong>Shivakala</strong>
+                        <strong>@(isMr ? "शिवकला" : "Shivakala")</strong>
                         <small>@T["InstituteTagline"]</small>
                     </span>
                 </a>
@@ -46,23 +60,25 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="mainNav">
-                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
                         <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">@T["NavHome"]</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="About" asp-action="Index">@T["NavAbout"]</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Courses" asp-action="Index">@T["NavCourses"]</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Registration" asp-action="Index">@T["NavRegistration"]</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Enquiry" asp-action="Index">@T["NavEnquiry"]</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Contact" asp-action="Index">@T["NavContact"]</a></li>
+                        <li class="nav-item"><a class="nav-link nav-pill-enq" asp-controller="Enquiry" asp-action="Index">@T["NavEnquiry"]</a></li>
+                        <li class="nav-item"><a class="nav-link nav-pill-reg" asp-controller="Registration" asp-action="Index">@T["NavRegistration"]</a></li>
                     </ul>
                     <div class="toolbar ms-lg-3">
-                        <a class="toolbar-btn" asp-controller="Admin" asp-action="Login">Admin</a>
+                        <a class="toolbar-btn" asp-controller="Admin" asp-action="Login">
+                            <i class="fa-solid fa-lock me-1 d-none d-lg-inline"></i>Admin
+                        </a>
                         <form asp-controller="Home" asp-action="SetLanguage" method="post" class="d-inline">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="culture" value="@(currentCulture == "mr" ? "en" : "mr")" />
                             <input type="hidden" name="returnUrl" value="@returnUrl" />
-                            <button type="submit" class="toolbar-btn">@T["LanguageSwitcher"]</button>
+                            <button type="submit" class="toolbar-btn lang-btn">@T["LanguageSwitcher"]</button>
                         </form>
-                        <button type="button" class="toolbar-btn" id="themeToggle" aria-label="@T["ThemeToggle"]">
+                        <button type="button" class="toolbar-btn icon-btn" id="themeToggle" aria-label="@T["ThemeToggle"]">
                             <i class="fa-solid fa-moon"></i>
                         </button>
                     </div>
@@ -78,34 +94,63 @@
 
     <footer class="site-footer">
         <div class="container">
-            <div class="row g-4">
+            <div class="row g-4 g-lg-5">
                 <div class="col-lg-4">
-                    <h5>Shivakala Coaching Classes</h5>
+                    <div class="footer-brand mb-3">
+                        <span class="brand-icon me-2"><i class="fa-solid fa-graduation-cap"></i></span>
+                        <strong>@(isMr ? "शिवकला" : "Shivakala")</strong>
+                    </div>
+                    <p class="footer-tagline">॥ ज्ञानदीपः प्रज्वलितः ॥</p>
                     <p>@T["FooterSummary"]</p>
+                    <a href="https://wa.me/918087807011?text=Hello%20Shivakala%20Coaching%20Classes" target="_blank" rel="noopener noreferrer" class="whatsapp-inline">
+                        <i class="fa-brands fa-whatsapp me-1"></i>@(isMr ? "WhatsApp वर संपर्क करा" : "Chat on WhatsApp")
+                    </a>
                 </div>
-                <div class="col-lg-4">
+                <div class="col-6 col-lg-2">
                     <h6>@T["QuickLinks"]</h6>
                     <ul class="footer-links">
+                        <li><a asp-controller="Home" asp-action="Index">@T["NavHome"]</a></li>
                         <li><a asp-controller="About" asp-action="Index">@T["NavAbout"]</a></li>
                         <li><a asp-controller="Courses" asp-action="Index">@T["NavCourses"]</a></li>
-                        <li><a asp-controller="Registration" asp-action="Index">@T["AdmissionNow"]</a></li>
+                        <li><a asp-controller="Contact" asp-action="Index">@T["NavContact"]</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <h6>@(isMr ? "प्रवेश" : "Admissions")</h6>
+                    <ul class="footer-links">
+                        <li><a asp-controller="Registration" asp-action="Index">@T["NavRegistration"]</a></li>
+                        <li><a asp-controller="Enquiry" asp-action="Index">@T["NavEnquiry"]</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-4">
                     <h6>@T["ContactUs"]</h6>
-                    <p class="mb-1">+91 98765 43210</p>
-                    <p class="mb-1">admissions@shivakalaclasses.in</p>
-                    <p class="mb-0">@T["InstituteLocation"]</p>
+                    <ul class="footer-contact-list">
+                        <li>
+                            <i class="fa-solid fa-phone"></i>
+                            <div>
+                                <a href="tel:+918087807011">+91 80878 07011</a><br />
+                                <a href="tel:+918830907011">+91 88309 07011</a>
+                            </div>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>@(isMr ? "चिखली, महाराष्ट्र, भारत" : "Chikhali, Maharashtra, India")</span>
+                        </li>
+                        <li>
+                            <i class="fa-solid fa-clock"></i>
+                            <span>@(isMr ? "सोम–शनि: सकाळी ७ – रात्री ९" : "Mon–Sat: 7 AM – 9 PM")</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
             <div class="footer-bottom">
-                <span>&copy; @DateTime.UtcNow.Year Shivakala Coaching Classes</span>
+                <span>&copy; @DateTime.UtcNow.Year Shivakala Coaching Classes, Chikhali</span>
                 <span>@T["FooterRights"]</span>
             </div>
         </div>
     </footer>
 
-    <a class="whatsapp-float" href="https://wa.me/919876543210?text=Hello%20Shivakala%20Coaching%20Classes" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+    <a class="whatsapp-float" href="https://wa.me/918087807011?text=Hello%20Shivakala%20Coaching%20Classes" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
         <i class="fa-brands fa-whatsapp"></i>
     </a>
 
