@@ -35,7 +35,7 @@
     </div>
 </section>
 
-@if (Model?.Faculty is { Count: > 0 })
+@if (Model?.FacultyMembers is { Count: > 0 })
 {
     <section class="section-shell" style="background:var(--white)">
         <div class="container">
@@ -44,7 +44,7 @@
                 <h2>@(isMr ? "अनुभवी व तज्ज्ञ शिक्षकवर्ग" : "Meet Our Expert Faculty")</h2>
             </div>
             <div class="row g-3">
-                @foreach (var f in Model.Faculty)
+                @foreach (var f in Model.FacultyMembers)
                 {
                     <div class="col-lg-3 col-md-6">
                         @await Html.PartialAsync("Partials/_FacultyCard", f)

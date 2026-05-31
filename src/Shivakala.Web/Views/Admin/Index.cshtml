@@ -18,26 +18,26 @@
         <div class="row g-3 mb-4">
             <div class="col-md-3">
                 <div class="admin-stat-card" style="border-left-color:var(--green)">
-                    <strong>@(Model?.TotalRegistrations ?? 0)</strong>
+                    <strong>@(Model?.RegistrationCount ?? 0)</strong>
                     <span>Total Registrations</span>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="admin-stat-card" style="border-left-color:var(--gold)">
-                    <strong>@(Model?.TotalEnquiries ?? 0)</strong>
+                    <strong>@(Model?.EnquiryCount ?? 0)</strong>
                     <span>Total Enquiries</span>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="admin-stat-card" style="border-left-color:var(--purple)">
-                    <strong>@(Model?.NewRegistrationsThisMonth ?? 0)</strong>
-                    <span>This Month (Reg.)</span>
+                    <strong>@(Model?.RecentRegistrations?.Count ?? 0)</strong>
+                    <span>Recent Reg.</span>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="admin-stat-card" style="border-left-color:var(--teal)">
-                    <strong>@(Model?.NewEnquiriesThisMonth ?? 0)</strong>
-                    <span>This Month (Enq.)</span>
+                    <strong>@(Model?.RecentEnquiries?.Count ?? 0)</strong>
+                    <span>Recent Enq.</span>
                 </div>
             </div>
         </div>

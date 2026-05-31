@@ -1,11 +1,10 @@
-@model Shivakala.Core.ViewModels.FacultyViewModel
+@model Shivakala.Core.ViewModels.FacultyMemberViewModel
 <div class="faculty-card reveal">
     <div class="faculty-avatar">@(Model.Name?.Length > 0 ? Model.Name[0].ToString().ToUpper() : "S")</div>
     <h3>@Model.Name</h3>
     <span class="faculty-designation">@Model.Designation</span>
     <ul class="faculty-meta">
-        @if (!string.IsNullOrWhiteSpace(Model.Subject)) { <li>@Model.Subject</li> }
+        @if (!string.IsNullOrWhiteSpace(Model.Speciality)) { <li>@Model.Speciality</li> }
         @if (!string.IsNullOrWhiteSpace(Model.Experience)) { <li>@Model.Experience</li> }
-        @if (!string.IsNullOrWhiteSpace(Model.Qualification)) { <li>@Model.Qualification</li> }
     </ul>
 </div>

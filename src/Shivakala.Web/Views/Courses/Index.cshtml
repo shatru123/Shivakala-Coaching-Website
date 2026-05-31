@@ -1,8 +1,8 @@
-@model Shivakala.Core.ViewModels.CoursesPageViewModel
+@model IReadOnlyList<Shivakala.Core.ViewModels.CourseCardViewModel>
 @using System.Globalization
 @{
-    ViewData["Title"] = Model?.Seo?.Title ?? "Courses | Shivakala Coaching Classes";
-    ViewData["MetaDescription"] = Model?.Seo?.Description ?? "Explore all courses at Shivakala Coaching Classes — KG1 to 10th Standard.";
+    ViewData["Title"] = ViewData["Title"] ?? "Courses | Shivakala Coaching Classes";
+    ViewData["MetaDescription"] = ViewData["MetaDescription"] ?? "Explore all courses at Shivakala Coaching Classes — KG1 to 10th Standard.";
     var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
 }
 
@@ -55,10 +55,10 @@
                     <span style="color:var(--text-mid);font-size:0.82rem">@(isMr ? "1ली – 6वी इयत्ता" : "1st – 6th Standard")</span>
                 </div>
             </div>
-            @if (Model?.Courses is { Count: > 0 })
+            @if (Model is { Count: > 0 })
             {
                 <div class="row g-3">
-                    @foreach (var course in Model.Courses.Where(c => c.Category == "Primary"))
+                    @foreach (var course in Model)
                     {
                         <div class="col-md-6 col-lg-4">
                             @await Html.PartialAsync("Partials/_CourseCard", course)

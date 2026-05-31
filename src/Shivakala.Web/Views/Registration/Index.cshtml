@@ -52,11 +52,6 @@
                                 <span asp-validation-for="FullName" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="ParentName" class="form-label">@(isMr ? "पालकाचे नाव" : "Parent / Guardian Name") <span class="text-danger">*</span></label>
-                                <input asp-for="ParentName" class="form-control" placeholder="@(isMr ? "पालकाचे नाव" : "Parent's name")" />
-                                <span asp-validation-for="ParentName" class="text-danger small"></span>
-                            </div>
-                            <div class="col-md-6">
                                 <label asp-for="Mobile" class="form-label">@(isMr ? "मोबाईल नंबर" : "Mobile Number") <span class="text-danger">*</span></label>
                                 <input asp-for="Mobile" class="form-control" placeholder="+91 XXXXX XXXXX" type="tel" />
                                 <span asp-validation-for="Mobile" class="text-danger small"></span>

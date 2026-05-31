@@ -1,11 +1,12 @@
-@model Shivakala.Core.ViewModels.CourseViewModel
+@model Shivakala.Core.ViewModels.CourseCardViewModel
 @using System.Globalization
 @{
     var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
-    var iconClass = Model.Subject?.ToLower() switch {
-        "mathematics" or "maths" or "गणित" => "fa-calculator maths",
-        "english" or "इंग्रजी" => "fa-book-open english",
-        "science" or "विज्ञान" => "fa-flask science",
+    var title = Model.Title.ToLower(CultureInfo.CurrentCulture);
+    var iconClass = title switch {
+        var value when value.Contains("mathematics") || value.Contains("maths") || value.Contains("गणित") => "fa-calculator maths",
+        var value when value.Contains("english") || value.Contains("इंग्रजी") => "fa-book-open english",
+        var value when value.Contains("science") || value.Contains("विज्ञान") => "fa-flask science",
         _ => "fa-graduation-cap navy"
     };
 }
@@ -16,18 +17,15 @@
         </div>
         <div>
             <h3 style="margin:0;font-size:1rem">@Model.Title</h3>
-            <small class="text-muted">@Model.Standards</small>
+            <small class="text-muted">@Model.Standard</small>
         </div>
     </div>
     <p class="mt-2">@Model.Description</p>
     <div class="course-meta">
-        @if (!string.IsNullOrWhiteSpace(Model.Duration))
+        @if (Model.DurationMonths > 0)
         {
-            <span><i class="fa-regular fa-clock me-1" style="color:var(--navy)"></i>@Model.Duration</span>
+            <span><i class="fa-regular fa-clock me-1" style="color:var(--navy)"></i>@Model.DurationMonths @(isMr ? "महिने" : "months")</span>
         }
-        @if (!string.IsNullOrWhiteSpace(Model.Board))
-        {
-            <span><i class="fa-solid fa-award me-1" style="color:var(--gold)"></i>@Model.Board</span>
-        }
+        <span><i class="fa-solid fa-award me-1" style="color:var(--gold)"></i>@(isMr ? "सर्व बोर्ड" : "All boards")</span>
     </div>
 </div>
