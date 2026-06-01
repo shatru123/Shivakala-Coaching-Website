@@ -1,0 +1,129 @@
+@model Shivakala.Core.ViewModels.ResultsPageViewModel
+@using System.Globalization
+@{
+    ViewData["Title"] = Model.Seo.Title;
+    var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
+    string RankBg(int rank) => rank switch { 1 => "linear-gradient(135deg,#FFD700,#FFA500)", 2 => "linear-gradient(135deg,#C0C0C0,#A0A0A0)", 3 => "linear-gradient(135deg,#CD7F32,#A0522D)", _ => "var(--light-gray)" };
+    string RankColor(int rank) => rank <= 3 ? "#fff" : "var(--text)";
+    string GradeColor(string? g) => g switch { "A+" => "var(--green)", "A" => "var(--green-light)", "B+" => "var(--navy)", "B" => "var(--navy-mid)", _ => "var(--text-mid)" };
+}
+<section class="page-hero" style="background:linear-gradient(135deg,var(--green-dark),var(--navy))">
+    <div class="container">
+        <span class="badge-soft"><i class="fa-solid fa-trophy me-1"></i>@(isMr ? "निकाल" : "Results")</span>
+        <h1>@(isMr ? "साप्ताहिक चाचणी निकाल" : "Weekly Test Results")</h1>
+        <p>@(isMr ? "गुणवत्ता यादी दर रविवारी प्रकाशित होते" : "Merit rank list published every Sunday")</p>
+    </div>
+</section>
+<section class="section-shell warm-section">
+    <div class="container">
+        <!-- Filters -->
+        <div class="glass-card mb-4">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label fw-600" style="font-size:0.82rem;text-transform:uppercase;letter-spacing:0.5px">@(isMr ? "चाचणी निवडा" : "Select Test")</label>
+                    <select name="testTitle" class="form-select" onchange="this.form.submit()">
+                        @foreach (var t in Model.AvailableTests)
+                        {
+                            <option value="@t" selected="@(Model.SelectedTest == t)">@t</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-600" style="font-size:0.82rem;text-transform:uppercase;letter-spacing:0.5px">@(isMr ? "इयत्ता" : "Standard")</label>
+                    <select name="standard" class="form-select" onchange="this.form.submit()">
+                        <option value="">@(isMr ? "सर्व" : "All Standards")</option>
+                        @foreach (var s in new[]{"KG1","KG2","1st","2nd","3rd","4th","5th","6th","7th","8th","9th","10th"})
+                        {<option value="@s" selected="@(Model.SelectedStandard==s)">@s</option>}
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex gap-2">
+                    <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-filter"></i>@(isMr?"फिल्टर":"Filter")</button>
+                    <a asp-action="Index" class="btn-outline-sk"><i class="fa-solid fa-rotate-left"></i>@(isMr?"रीसेट":"Reset")</a>
+                </div>
+            </form>
+        </div>
+
+        @if (!Model.Results.Any())
+        {
+            <div class="text-center py-5"><i class="fa-solid fa-trophy fa-3x mb-3" style="color:var(--border)"></i><p class="text-muted">@(isMr ? "सध्या कोणताही निकाल उपलब्ध नाही." : "No results available yet. Check back after the test.")</p></div>
+        }
+        else
+        {
+            <!-- Top 3 podium -->
+            @{var top3 = Model.Results.Where(r => r.Rank <= 3).OrderBy(r => r.Rank).ToList();}
+            @if (top3.Any())
+            {
+                <div class="d-flex justify-content-center gap-4 mb-4 flex-wrap">
+                    @foreach (var r in top3)
+                    {
+                        <div class="text-center reveal" style="min-width:120px">
+                            <div style="width:64px;height:64px;border-radius:50%;background:@RankBg(r.Rank);display:inline-flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:900;color:@RankColor(r.Rank);margin-bottom:8px;box-shadow:0 4px 16px rgba(0,0,0,0.2)">@(r.Rank == 1 ? "🥇" : r.Rank == 2 ? "🥈" : "🥉")</div>
+                            <div style="font-weight:700;font-size:0.9rem;color:var(--navy)">@r.StudentName</div>
+                            <div style="font-size:0.78rem;color:var(--text-mid)">@r.Standard • @r.Percentage%</div>
+                        </div>
+                    }
+                </div>
+            }
+
+            <!-- Full table -->
+            <div class="glass-card reveal">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <h5 style="margin:0;color:var(--navy);font-size:1rem"><i class="fa-solid fa-list-ol me-2" style="color:var(--gold)"></i>@(Model.SelectedTest ?? "") — @Model.Results.Count @(isMr?"विद्यार्थी":"Students")</h5>
+                    <button onclick="printResults()" class="toolbar-btn" style="background:var(--green)"><i class="fa-solid fa-print"></i>@(isMr?"प्रिंट":"Print")</button>
+                </div>
+                <div class="table-responsive" id="resultsTable">
+                    <table class="table admin-table align-middle">
+                        <thead>
+                            <tr>
+                                <th>@(isMr?"क्रमांक":"Rank")</th>
+                                <th>@(isMr?"विद्यार्थी":"Student")</th>
+                                <th>@(isMr?"इयत्ता":"Standard")</th>
+                                <th>@(isMr?"विषय":"Subject")</th>
+                                <th>@(isMr?"गुण":"Score")</th>
+                                <th>@(isMr?"टक्केवारी":"%")</th>
+                                <th>@(isMr?"श्रेणी":"Grade")</th>
+                                <th>@(isMr?"तारीख":"Date")</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var r in Model.Results)
+                            {
+                                <tr>
+                                    <td><span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:@RankBg(r.Rank);color:@RankColor(r.Rank);font-weight:700;font-size:0.82rem">@r.Rank</span></td>
+                                    <td style="font-weight:600;color:var(--text)">@r.StudentName</td>
+                                    <td><span class="badge-soft dark">@r.Standard</span></td>
+                                    <td style="color:var(--text-mid)">@r.Subject</td>
+                                    <td style="font-weight:700;color:var(--navy)">@r.Score / @r.TotalMarks</td>
+                                    <td>
+                                        <div style="display:flex;align-items:center;gap:6px">
+                                            <div style="flex:1;height:6px;background:var(--border);border-radius:3px;min-width:50px">
+                                                <div style="height:100%;width:@(r.Percentage)%;background:@GradeColor(r.Grade);border-radius:3px;transition:width 1s ease"></div>
+                                            </div>
+                                            <span style="font-size:0.82rem;font-weight:700;color:@GradeColor(r.Grade)">@r.Percentage%</span>
+                                        </div>
+                                    </td>
+                                    <td><span style="font-weight:700;color:@GradeColor(r.Grade)">@r.Grade</span></td>
+                                    <td style="white-space:nowrap;font-size:0.8rem;color:var(--text-mid)">@r.TestDate.ToString("dd MMM yyyy")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+@section Scripts {
+<script>
+function printResults() {
+    const t = document.getElementById('resultsTable');
+    const w = window.open('', '_blank');
+    w.document.write('<html><head><title>Results</title><style>body{font-family:sans-serif;padding:20px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:8px;text-align:left}th{background:#1B2B6B;color:#fff}</style></head><body>');
+    w.document.write('<h2>Shivakala Coaching Classes — @Model.SelectedTest</h2>');
+    w.document.write(t.innerHTML);
+    w.document.write('</body></html>');
+    w.document.close();
+    w.print();
+}
+</script>
+}

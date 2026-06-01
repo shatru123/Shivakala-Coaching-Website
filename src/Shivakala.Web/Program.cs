@@ -6,6 +6,9 @@ using Shivakala.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(x => {
+    x.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10 MB
+});
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services

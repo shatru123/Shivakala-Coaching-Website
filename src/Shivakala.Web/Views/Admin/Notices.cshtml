@@ -1,0 +1,48 @@
+@model IReadOnlyList<Shivakala.Core.Entities.Notice>
+@{ ViewData["Title"] = "Notices | Admin"; ViewData["MetaDescription"] = "Admin notices."; }
+<section class="page-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div><span class="badge-soft">Admin</span><h1>Notices</h1><p>Manage notice board announcements</p></div>
+        <div class="d-flex gap-2">
+            <a asp-action="CreateNotice" class="btn-green-sk"><i class="fa-solid fa-plus"></i>New Notice</a>
+            <a asp-action="Index" class="toolbar-btn"><i class="fa-solid fa-gauge"></i>Dashboard</a>
+        </div>
+    </div>
+</section>
+<section class="section-shell pt-0">
+    <div class="container">
+        <div class="glass-card">
+            <div class="table-responsive">
+                <table class="table admin-table align-middle">
+                    <thead><tr><th>#</th><th>Title</th><th>Category</th><th>Pinned</th><th>Active</th><th>Published</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        @foreach (var n in Model)
+                        {
+                            <tr>
+                                <td style="font-size:0.78rem;color:var(--text-light)">@n.Id</td>
+                                <td>
+                                    <div style="font-weight:600;color:var(--text)">@n.Title</div>
+                                    <div style="font-size:0.72rem;color:var(--text-mid)">@n.TitleMarathi</div>
+                                </td>
+                                <td><span class="badge-soft dark" style="font-size:0.7rem">@n.Category</span></td>
+                                <td>@(n.IsPinned ? "📌 Yes" : "-")</td>
+                                <td><span style="font-size:0.7rem;font-weight:700;color:@(n.IsActive?"var(--green)":"var(--red)")">@(n.IsActive?"Active":"Hidden")</span></td>
+                                <td style="font-size:0.78rem;white-space:nowrap">@n.PublishedDate.ToString("dd MMM yyyy")</td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a asp-action="EditNotice" asp-route-id="@n.Id" class="toolbar-btn" style="font-size:0.7rem;padding:4px 8px"><i class="fa-solid fa-pen"></i></a>
+                                        <form asp-action="DeleteNotice" method="post" onsubmit="return confirm('Delete this notice?')">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@n.Id" />
+                                            <button type="submit" class="toolbar-btn" style="font-size:0.7rem;padding:4px 8px;background:var(--red)"><i class="fa-solid fa-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

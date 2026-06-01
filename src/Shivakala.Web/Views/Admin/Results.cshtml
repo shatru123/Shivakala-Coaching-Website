@@ -1,0 +1,46 @@
+@model IReadOnlyList<Shivakala.Core.Entities.TestResult>
+@{ ViewData["Title"] = "Test Results | Admin"; ViewData["MetaDescription"] = "Admin results."; }
+<section class="page-hero" style="background:linear-gradient(135deg,var(--green-dark),var(--navy))">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div><span class="badge-soft">Admin</span><h1>Test Results</h1><p>Weekly test merit list management</p></div>
+        <div class="d-flex gap-2">
+            <a asp-action="CreateResult" class="btn-green-sk"><i class="fa-solid fa-plus"></i>Add Result</a>
+            <a asp-action="Index" class="toolbar-btn"><i class="fa-solid fa-gauge"></i>Dashboard</a>
+        </div>
+    </div>
+</section>
+<section class="section-shell pt-0">
+    <div class="container">
+        <div class="glass-card">
+            <div class="table-responsive">
+                <table class="table admin-table align-middle">
+                    <thead><tr><th>Rank</th><th>Student</th><th>Test</th><th>Std</th><th>Subject</th><th>Score</th><th>%</th><th>Grade</th><th>Date</th><th></th></tr></thead>
+                    <tbody>
+                        @foreach (var r in Model)
+                        {
+                            var pct = r.TotalMarks > 0 ? Math.Round(r.Score * 100.0 / r.TotalMarks, 1) : 0;
+                            <tr>
+                                <td><span style="display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:@(r.Rank==1?"var(--gold)":r.Rank==2?"#C0C0C0":r.Rank==3?"#CD7F32":"var(--light-gray)");font-weight:700;font-size:0.78rem;color:@(r.Rank<=3?"#fff":"var(--text)")">@r.Rank</span></td>
+                                <td style="font-weight:600">@r.StudentName</td>
+                                <td style="font-size:0.8rem;color:var(--text-mid);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@r.TestTitle</td>
+                                <td><span class="badge-soft dark" style="font-size:0.68rem">@r.Standard</span></td>
+                                <td style="font-size:0.82rem">@r.Subject</td>
+                                <td style="font-weight:700;color:var(--navy)">@r.Score/@r.TotalMarks</td>
+                                <td style="font-size:0.82rem;color:var(--green);font-weight:600">@pct%</td>
+                                <td style="font-weight:700;color:var(--green)">@r.Grade</td>
+                                <td style="font-size:0.78rem;white-space:nowrap">@r.TestDate.ToString("dd MMM")</td>
+                                <td>
+                                    <form asp-action="DeleteResult" method="post" onsubmit="return confirm('Delete?')">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@r.Id" />
+                                        <button type="submit" class="toolbar-btn" style="font-size:0.7rem;padding:4px 8px;background:var(--red)"><i class="fa-solid fa-trash"></i></button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,66 +1,80 @@
 @model Shivakala.Core.ViewModels.AdminDashboardViewModel
-@{
-    ViewData["Title"] = "Admin Dashboard | Shivakala";
-    ViewData["MetaDescription"] = "Admin dashboard.";
-    Layout = "_Layout";
-}
+@{ ViewData["Title"] = "Dashboard | Admin"; ViewData["MetaDescription"] = "Admin dashboard."; }
 
 <section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid))">
-    <div class="container">
-        <span class="badge-soft"><i class="fa-solid fa-gauge me-1"></i>Admin</span>
-        <h1>Dashboard</h1>
-        <p>Welcome back! Here's a quick overview of Shivakala Coaching Classes activity.</p>
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="badge-soft"><i class="fa-solid fa-gauge me-1"></i>Admin</span>
+            <h1>Dashboard</h1>
+            <p>Welcome back! Here's your Shivakala overview.</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-action="CreateNotice" class="btn-green-sk" style="font-size:0.82rem"><i class="fa-solid fa-plus"></i>Add Notice</a>
+            <a asp-action="CreateResult" class="btn-primary-sk" style="background:var(--gold);color:var(--navy);font-size:0.82rem"><i class="fa-solid fa-plus"></i>Add Result</a>
+        </div>
     </div>
 </section>
 
 <section class="section-shell">
     <div class="container">
+        <!-- Stat Cards -->
         <div class="row g-3 mb-4">
-            <div class="col-md-3">
-                <div class="admin-stat-card" style="border-left-color:var(--green)">
-                    <strong>@(Model?.RegistrationCount ?? 0)</strong>
-                    <span>Total Registrations</span>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="admin-stat-card" style="border-left-color:var(--gold)">
-                    <strong>@(Model?.EnquiryCount ?? 0)</strong>
-                    <span>Total Enquiries</span>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="admin-stat-card" style="border-left-color:var(--purple)">
-                    <strong>@(Model?.RecentRegistrations?.Count ?? 0)</strong>
-                    <span>Recent Reg.</span>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="admin-stat-card" style="border-left-color:var(--teal)">
-                    <strong>@(Model?.RecentEnquiries?.Count ?? 0)</strong>
-                    <span>Recent Enq.</span>
-                </div>
-            </div>
+            <div class="col-6 col-md-3"><div class="admin-stat-card" style="border-left-color:var(--green)"><strong>@Model.RegistrationCount</strong><span>Total Registrations</span><small style="color:var(--green);font-size:0.72rem;font-weight:600">+@Model.NewRegistrationsThisMonth this month</small></div></div>
+            <div class="col-6 col-md-3"><div class="admin-stat-card" style="border-left-color:var(--gold)"><strong>@Model.EnquiryCount</strong><span>Total Enquiries</span><small style="color:var(--gold);font-size:0.72rem;font-weight:600">@Model.UnreadEnquiries unread</small></div></div>
+            <div class="col-6 col-md-3"><div class="admin-stat-card" style="border-left-color:var(--red)"><strong>@Model.PendingAdmissions</strong><span>Pending Admissions</span><small style="color:var(--red);font-size:0.72rem;font-weight:600">Needs action</small></div></div>
+            <div class="col-6 col-md-3"><div class="admin-stat-card" style="border-left-color:var(--navy)"><strong>@Model.NoticeCount</strong><span>Active Notices</span><small style="color:var(--text-mid);font-size:0.72rem">@Model.MaterialCount materials</small></div></div>
         </div>
-        <div class="row g-3">
-            <div class="col-md-6">
+
+        <!-- Quick Nav -->
+        <div class="row g-2 mb-4">
+            @{
+                var navItems = new[]{
+                    ("Registrations","fa-user-plus","var(--green)","Registrations","Export"),
+                    ("Enquiries","fa-comments","var(--gold)","Enquiries","Export"),
+                    ("Notices","fa-bullhorn","var(--navy)","Notices","Create"),
+                    ("Results","fa-trophy","var(--orange)","Results","Create"),
+                    ("Materials","fa-folder-open","var(--purple)","Materials","Upload"),
+                    ("Testimonials","fa-star","var(--teal)","Testimonials","Manage"),
+                    ("Gallery","fa-images","var(--red)","Gallery","Upload"),
+                };
+            }
+            @foreach (var (action, icon, color, label, sub) in navItems)
+            {
+                <div class="col-6 col-sm-4 col-md-3">
+                    <a asp-action="@action" class="d-block glass-card text-center p-3 reveal" style="text-decoration:none;border-top:3px solid @color">
+                        <i class="fa-solid @icon fa-lg mb-2" style="color:@color"></i>
+                        <div style="font-size:0.85rem;font-weight:700;color:var(--navy)">@label</div>
+                        <div style="font-size:0.7rem;color:var(--text-mid)">@sub</div>
+                    </a>
+                </div>
+            }
+        </div>
+
+        <div class="row g-4">
+            <!-- Recent Registrations -->
+            <div class="col-lg-7">
                 <div class="glass-card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 style="color:var(--navy);margin:0;font-size:1rem"><i class="fa-solid fa-user-plus me-2" style="color:var(--green)"></i>Recent Registrations</h5>
-                        <a asp-action="Registrations" class="toolbar-btn" style="font-size:0.75rem;padding:5px 12px">View All</a>
+                        <h5 style="margin:0;color:var(--navy);font-size:0.95rem"><i class="fa-solid fa-user-plus me-2" style="color:var(--green)"></i>Recent Registrations</h5>
+                        <div class="d-flex gap-2">
+                            <a asp-action="ExportRegistrations" class="toolbar-btn" style="background:var(--green);font-size:0.72rem;padding:5px 10px"><i class="fa-solid fa-download"></i>CSV</a>
+                            <a asp-action="Registrations" class="toolbar-btn" style="font-size:0.72rem;padding:5px 10px">View All</a>
+                        </div>
                     </div>
-                    @if (Model?.RecentRegistrations is { Count: > 0 })
+                    @if (Model.RecentRegistrations.Any())
                     {
                         <div class="table-responsive">
                             <table class="table admin-table align-middle mb-0">
-                                <thead><tr><th>Name</th><th>Standard</th><th>Mobile</th><th>Date</th></tr></thead>
+                                <thead><tr><th>Name</th><th>Std</th><th>Mobile</th><th>Status</th><th>Date</th></tr></thead>
                                 <tbody>
-                                    @foreach (var r in Model.RecentRegistrations.Take(5))
+                                    @foreach (var r in Model.RecentRegistrations)
                                     {
                                         <tr>
-                                            <td>@r.FullName</td>
-                                            <td><span class="badge-soft dark">@r.Standard</span></td>
+                                            <td style="font-weight:600">@r.FullName</td>
+                                            <td><span class="badge-soft dark" style="font-size:0.7rem">@r.Standard</span></td>
                                             <td>@r.Mobile</td>
-                                            <td style="white-space:nowrap">@r.CreatedDate.ToLocalTime().ToString("dd MMM")</td>
+                                            <td><span style="font-size:0.7rem;padding:2px 8px;border-radius:99px;font-weight:700;background:@(r.Status=="Admitted"?"rgba(27,122,62,0.15)":r.Status=="Pending"?"rgba(245,166,35,0.15)":"rgba(192,57,43,0.15)");color:@(r.Status=="Admitted"?"var(--green)":r.Status=="Pending"?"var(--orange)":"var(--red)")">@r.Status</span></td>
+                                            <td style="font-size:0.78rem;white-space:nowrap">@r.CreatedDate.ToLocalTime().ToString("dd MMM")</td>
                                         </tr>
                                     }
                                 </tbody>
@@ -70,34 +84,47 @@
                     else { <p class="text-muted" style="font-size:0.87rem">No registrations yet.</p> }
                 </div>
             </div>
-            <div class="col-md-6">
+
+            <!-- Recent Enquiries -->
+            <div class="col-lg-5">
                 <div class="glass-card">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 style="color:var(--navy);margin:0;font-size:1rem"><i class="fa-solid fa-comments me-2" style="color:var(--gold)"></i>Recent Enquiries</h5>
-                        <a asp-action="Enquiries" class="toolbar-btn" style="font-size:0.75rem;padding:5px 12px">View All</a>
+                        <h5 style="margin:0;color:var(--navy);font-size:0.95rem">
+                            <i class="fa-solid fa-comments me-2" style="color:var(--gold)"></i>Recent Enquiries
+                            @if (Model.UnreadEnquiries > 0)
+                            { <span style="background:var(--red);color:#fff;font-size:0.68rem;padding:2px 8px;border-radius:99px;margin-left:4px;font-weight:700">@Model.UnreadEnquiries new</span> }
+                        </h5>
+                        <a asp-action="Enquiries" class="toolbar-btn" style="font-size:0.72rem;padding:5px 10px">View All</a>
                     </div>
-                    @if (Model?.RecentEnquiries is { Count: > 0 })
+                    @if (Model.RecentEnquiries.Any())
                     {
-                        <div class="table-responsive">
-                            <table class="table admin-table align-middle mb-0">
-                                <thead><tr><th>Name</th><th>Mobile</th><th>Message</th><th>Date</th></tr></thead>
-                                <tbody>
-                                    @foreach (var e in Model.RecentEnquiries.Take(5))
-                                    {
-                                        <tr>
-                                            <td>@e.Name</td>
-                                            <td>@e.Mobile</td>
-                                            <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@e.Message</td>
-                                            <td style="white-space:nowrap">@e.CreatedDate.ToLocalTime().ToString("dd MMM")</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+                        <div class="d-flex flex-column gap-2">
+                            @foreach (var e in Model.RecentEnquiries)
+                            {
+                                <div style="padding:10px;border:1px solid var(--border);border-radius:8px;background:@(e.IsRead?"var(--off-white)":"rgba(245,166,35,0.06)");border-left:3px solid @(e.IsRead?"var(--border)":"var(--gold)")">
+                                    <div class="d-flex justify-content-between align-items-start gap-2">
+                                        <div style="font-weight:600;font-size:0.85rem;color:var(--text)">@e.Name</div>
+                                        <span style="font-size:0.68rem;color:var(--text-light);white-space:nowrap">@e.CreatedDate.ToLocalTime().ToString("dd MMM")</span>
+                                    </div>
+                                    <div style="font-size:0.78rem;color:var(--text-mid)">📞 @e.Mobile</div>
+                                    <div style="font-size:0.8rem;color:var(--text-mid);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@e.Message</div>
+                                    @if (!e.IsRead)
+                                    { <span style="font-size:0.65rem;font-weight:700;color:var(--gold);text-transform:uppercase">● Unread</span> }
+                                </div>
+                            }
                         </div>
                     }
                     else { <p class="text-muted" style="font-size:0.87rem">No enquiries yet.</p> }
                 </div>
             </div>
+        </div>
+
+        <!-- Logout -->
+        <div class="mt-4 pt-2 d-flex justify-content-end">
+            <form asp-action="Logout" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-outline-sk" style="color:var(--red);border-color:var(--red)"><i class="fa-solid fa-right-from-bracket"></i>Sign Out</button>
+            </form>
         </div>
     </div>
 </section>

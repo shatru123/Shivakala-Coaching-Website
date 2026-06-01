@@ -83,7 +83,9 @@
                         <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">@T["NavHome"]</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="About" asp-action="Index">@T["NavAbout"]</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Courses" asp-action="Index">@T["NavCourses"]</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index" fragment="weekly-test">@(isMr ? "साप्ताहिक चाचणी" : "Weekly Test")</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Results" asp-action="Index">@(isMr ? "साप्ताहिक निकाल" : "Weekly Test")</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="StudyMaterial" asp-action="Index">@(isMr ? "अभ्यास साहित्य" : "Study Material")</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="NoticeBoard" asp-action="Index">@(isMr ? "सूचना" : "Notice Board")</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Registration" asp-action="Index">@T["NavRegistration"]</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Enquiry" asp-action="Index">@T["NavEnquiry"]</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Contact" asp-action="Index">@T["NavContact"]</a></li>
@@ -143,6 +145,10 @@
                         <li><a asp-controller="Home" asp-action="Index">@T["NavHome"]</a></li>
                         <li><a asp-controller="About" asp-action="Index">@T["NavAbout"]</a></li>
                         <li><a asp-controller="Courses" asp-action="Index">@T["NavCourses"]</a></li>
+                        <li><a asp-controller="Results" asp-action="Index">@(isMr ? "साप्ताहिक निकाल" : "Weekly Results")</a></li>
+                        <li><a asp-controller="StudyMaterial" asp-action="Index">@(isMr ? "अभ्यास साहित्य" : "Study Materials")</a></li>
+                        <li><a asp-controller="NoticeBoard" asp-action="Index">@(isMr ? "सूचना फलक" : "Notice Board")</a></li>
+                        <li><a asp-controller="Gallery" asp-action="Index">@(isMr ? "गॅलरी" : "Gallery")</a></li>
                         <li><a asp-controller="Registration" asp-action="Index">@T["AdmissionNow"]</a></li>
                         <li><a asp-controller="Enquiry" asp-action="Index">@T["NavEnquiry"]</a></li>
                         <li><a asp-controller="Contact" asp-action="Index">@T["NavContact"]</a></li>
