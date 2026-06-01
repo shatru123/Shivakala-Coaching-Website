@@ -23,10 +23,10 @@
                             <div class="quote-mark"><i class="fa-solid fa-quote-left"></i></div>
                             <p>"@t.Quote"</p>
                             <div class="d-flex align-items-center gap-3 mt-3">
-                                <div class="faculty-avatar" style="width:42px;height:42px;font-size:1rem">@t.Name[0]</div>
+                                <div class="faculty-avatar" style="width:42px;height:42px;font-size:1rem">@(t.StudentName.Length > 0 ? t.StudentName[0] : 'S')</div>
                                 <div>
-                                    <h3 style="margin:0;font-size:0.92rem">@t.Name</h3>
-                                    <span style="color:var(--green);font-size:0.78rem;font-weight:600">@t.Role</span>
+                                    <h3 style="margin:0;font-size:0.92rem">@t.StudentName</h3>
+                                    <span style="color:var(--green);font-size:0.78rem;font-weight:600">@t.Achievement</span>
                                 </div>
                                 <div class="ms-auto" style="color:var(--gold);font-size:0.85rem;letter-spacing:1px">
                                     @for (int i = 0; i < t.Rating; i++) { <text>★</text> }

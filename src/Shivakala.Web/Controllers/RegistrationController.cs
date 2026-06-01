@@ -16,7 +16,19 @@ public sealed class RegistrationController(IRegistrationService registrationServ
     public async Task<IActionResult> Index(RegistrationFormViewModel model, CancellationToken ct)
     {
         if (!ModelState.IsValid)
-            return View(await registrationService.GetFormViewModelAsync(ct) with { FullName = model.FullName, Mobile = model.Mobile, Email = model.Email, Standard = model.Standard, Subject = model.Subject, Address = model.Address, Board = model.Board, Medium = model.Medium, ParentName = model.ParentName });
+        {
+            var viewModel = await registrationService.GetFormViewModelAsync(ct);
+            viewModel.FullName = model.FullName;
+            viewModel.Mobile = model.Mobile;
+            viewModel.Email = model.Email;
+            viewModel.Standard = model.Standard;
+            viewModel.Subject = model.Subject;
+            viewModel.Address = model.Address;
+            viewModel.Board = model.Board;
+            viewModel.Medium = model.Medium;
+            viewModel.ParentName = model.ParentName;
+            return View(viewModel);
+        }
 
         await registrationService.RegisterAsync(model, ct);
         var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";

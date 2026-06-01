@@ -10,17 +10,17 @@ namespace Shivakala.Infrastructure.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // Alter Students: add new columns
-            migrationBuilder.AddColumn<string>("ParentName","Students","TEXT",120,nullable:true);
-            migrationBuilder.AddColumn<string>("Board","Students","TEXT",80,nullable:true);
-            migrationBuilder.AddColumn<string>("Medium","Students","TEXT",60,nullable:true);
-            migrationBuilder.AddColumn<string>("Status","Students","TEXT",40,nullable:false,defaultValue:"Pending");
-            migrationBuilder.AddColumn<string>("AdminNotes","Students","TEXT",500,nullable:true);
+            migrationBuilder.AddColumn<string>("ParentName", "Students", "TEXT", maxLength: 120, nullable: true);
+            migrationBuilder.AddColumn<string>("Board", "Students", "TEXT", maxLength: 80, nullable: true);
+            migrationBuilder.AddColumn<string>("Medium", "Students", "TEXT", maxLength: 60, nullable: true);
+            migrationBuilder.AddColumn<string>("Status", "Students", "TEXT", maxLength: 40, nullable: false, defaultValue: "Pending");
+            migrationBuilder.AddColumn<string>("AdminNotes", "Students", "TEXT", maxLength: 500, nullable: true);
 
             // Alter Enquiries: add new columns
-            migrationBuilder.AddColumn<string>("Email","Enquiries","TEXT",150,nullable:true);
-            migrationBuilder.AddColumn<string>("ClassInterested","Enquiries","TEXT",40,nullable:true);
-            migrationBuilder.AddColumn<bool>("IsRead","Enquiries","INTEGER",nullable:false,defaultValue:false);
-            migrationBuilder.AddColumn<string>("AdminReply","Enquiries","TEXT",500,nullable:true);
+            migrationBuilder.AddColumn<string>("Email", "Enquiries", "TEXT", maxLength: 150, nullable: true);
+            migrationBuilder.AddColumn<string>("ClassInterested", "Enquiries", "TEXT", maxLength: 40, nullable: true);
+            migrationBuilder.AddColumn<bool>("IsRead", "Enquiries", "INTEGER", nullable: false, defaultValue: false);
+            migrationBuilder.AddColumn<string>("AdminReply", "Enquiries", "TEXT", maxLength: 500, nullable: true);
 
             // Notices
             migrationBuilder.CreateTable("Notices", table => new

@@ -50,7 +50,7 @@
         else
         {
             <!-- Top 3 podium -->
-            @{var top3 = Model.Results.Where(r => r.Rank <= 3).OrderBy(r => r.Rank).ToList();}
+            var top3 = Model.Results.Where(r => r.Rank <= 3).OrderBy(r => r.Rank).ToList();
             @if (top3.Any())
             {
                 <div class="d-flex justify-content-center gap-4 mb-4 flex-wrap">

@@ -13,7 +13,8 @@ public sealed class TestimonialsController(ITestimonialRepository testimonialRep
         var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
         var items = await testimonialRepo.GetApprovedAsync(ct: ct);
         var vms = items.Select(t => new TestimonialViewModel {
-            Name = t.Name, Role = t.Role,
+            StudentName = t.Name,
+            Achievement = t.Role,
             Quote = isMr && !string.IsNullOrWhiteSpace(t.QuoteMarathi) ? t.QuoteMarathi : t.Quote,
             Rating = t.Rating
         }).ToList();

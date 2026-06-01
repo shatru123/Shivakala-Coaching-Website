@@ -7,4 +7,6 @@ public sealed class TestimonialViewModel
     public string Achievement { get; set; } = string.Empty;
 
     public string Quote { get; set; } = string.Empty;
+
+    public int Rating { get; set; } = 5;
 }
