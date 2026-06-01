@@ -24,4 +24,22 @@ public sealed class CourseRepository(ShivakalaDbContext dbContext) : Repository<
         => await DbContext.Courses
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Slug == slug, cancellationToken);
+
+    public async Task UpdateAsync(Course course, CancellationToken cancellationToken = default)
+    {
+        DbContext.Courses.Update(course);
+        await DbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var course = await DbContext.Courses.FindAsync([id], cancellationToken);
+        if (course == null)
+        {
+            return;
+        }
+
+        DbContext.Courses.Remove(course);
+        await DbContext.SaveChangesAsync(cancellationToken);
+    }
 }

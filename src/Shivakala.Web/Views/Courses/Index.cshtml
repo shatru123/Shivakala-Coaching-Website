@@ -1,26 +1,49 @@
-@model IReadOnlyList<CourseCardViewModel>
+@model IReadOnlyList<Shivakala.Core.ViewModels.CourseCardViewModel>
+@using System.Globalization
 @{
-    ViewData["Title"] = T["CoursesTitle"];
-    ViewData["MetaDescription"] = T["CoursesLead"];
+    ViewData["Title"] = ViewData["Title"] ?? "Courses | Shivakala Coaching Classes";
+    ViewData["MetaDescription"] = ViewData["MetaDescription"] ?? "Explore all courses at Shivakala Coaching Classes.";
+    var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
 }
 
-<section class="page-hero">
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--green-dark) 80%)">
     <div class="container">
-        <span class="badge-soft">@T["NavCourses"]</span>
-        <h1>@T["CoursesTitle"]</h1>
-        <p>@T["CoursesLead"]</p>
+        <span class="badge-soft"><i class="fa-solid fa-book me-1"></i>@(isMr ? "अभ्यासक्रम" : "Courses")</span>
+        <h1>@(isMr ? "आमचे अभ्यासक्रम" : "Our Courses")</h1>
+        <p>@(isMr ? "अॅडमिन पॅनेलमधून अद्ययावत केलेले अभ्यासक्रम" : "Course offerings managed from the admin panel")</p>
     </div>
 </section>
 
-<section class="section-shell">
+<section class="section-shell warm-section">
     <div class="container">
-        <div class="row g-4">
-            @foreach (var course in Model)
-            {
-                <div class="col-md-6">
-                    @await Html.PartialAsync("Partials/_CourseCard", course)
-                </div>
-            }
+        @if (Model is { Count: > 0 })
+        {
+            <div class="row g-3">
+                @foreach (var course in Model.OrderByDescending(x => x.IsFeatured))
+                {
+                    <div class="col-md-6 col-lg-4">
+                        @await Html.PartialAsync("Partials/_CourseCard", course)
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fa-solid fa-book-open fa-3x mb-3" style="color:var(--border)"></i>
+                <p class="text-muted">@(isMr ? "सध्या कोणतेही अभ्यासक्रम उपलब्ध नाहीत." : "No courses are available yet.")</p>
+            </div>
+        }
+
+        <div class="cta-card mt-4">
+            <div>
+                <h2>@(isMr ? "आजच प्रवेश घ्या!" : "Enroll Today!")</h2>
+                <p>@(isMr ? "प्रवेश व बॅच तपशीलासाठी आमच्याशी संपर्क साधा." : "Contact us for admission and batch details.")</p>
+            </div>
+            <div class="cta-actions">
+                <a asp-controller="Registration" asp-action="Index" class="btn-white-sk"><i class="fa-solid fa-user-plus"></i>@(isMr ? "प्रवेश अर्ज करा" : "Apply Now")</a>
+                <a asp-controller="Enquiry" asp-action="Index" class="btn-outline-light-sk"><i class="fa-solid fa-comments"></i>@(isMr ? "चौकशी करा" : "Enquire")</a>
+            </div>
         </div>
     </div>
 </section>

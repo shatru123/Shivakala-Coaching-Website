@@ -1,0 +1,58 @@
+@model Shivakala.Core.ViewModels.StudyMaterialFormViewModel
+@{ ViewData["Title"] = "Upload Material | Admin"; ViewData["MetaDescription"] = "Upload study material."; }
+<section class="page-hero"><div class="container"><span class="badge-soft">Admin</span><h1>Upload Study Material</h1></div></section>
+<section class="section-shell pt-0">
+    <div class="container" style="max-width:700px">
+        <div class="glass-card">
+            <form asp-action="CreateMaterial" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label">Title (English) *</label>
+                        <input asp-for="Title" class="form-control" required />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Type *</label>
+                        <select asp-for="MaterialType" class="form-select">
+                            @foreach (var t in new[]{"QuestionPaper","AnswerSheet","Notes","Worksheet"})
+                            { <option value="@t">@t</option> }
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Title (मराठी)</label>
+                        <input asp-for="TitleMarathi" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Standard *</label>
+                        <select asp-for="Standard" class="form-select">
+                            @foreach (var s in new[]{"KG1","KG2","1st","2nd","3rd","4th","5th","6th","7th","8th","9th","10th"})
+                            { <option value="@s">@s</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Subject *</label>
+                        <select asp-for="Subject" class="form-select">
+                            @foreach (var s in new[]{"Mathematics","English","Science","All Subjects"})
+                            { <option value="@s">@s</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="form-check">
+                            <input asp-for="IsActive" type="checkbox" class="form-check-input" checked />
+                            <label class="form-check-label">Active / Visible</label>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">File (PDF, DOC, Image) *</label>
+                        <input asp-for="File" type="file" class="form-control" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" required />
+                        <small class="text-muted">Max size: 10 MB. Accepted: PDF, Word, Images.</small>
+                    </div>
+                    <div class="col-12 d-flex gap-2 pt-2">
+                        <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-upload"></i>Upload</button>
+                        <a asp-action="Materials" class="btn-outline-sk">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>

@@ -1,14 +1,31 @@
-@model CourseCardViewModel
-
-<article class="course-card reveal h-100">
-    <span class="badge-soft">@Model.Standard</span>
-    <h3 class="mt-3">@Model.Title</h3>
-    <p>@Model.Description</p>
-    <div class="course-meta pt-3">
-        <span><i class="fa-regular fa-clock me-2"></i>@Model.DurationMonths @T["Months"]</span>
-        @if (Model.IsFeatured)
-        {
-            <span><i class="fa-solid fa-star me-2"></i>@T["Featured"]</span>
-        }
+@model Shivakala.Core.ViewModels.CourseCardViewModel
+@using System.Globalization
+@{
+    var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
+    var title = Model.Title.ToLower(CultureInfo.CurrentCulture);
+    var iconClass = title switch {
+        var value when value.Contains("mathematics") || value.Contains("maths") || value.Contains("गणित") => "fa-calculator maths",
+        var value when value.Contains("english") || value.Contains("इंग्रजी") => "fa-book-open english",
+        var value when value.Contains("science") || value.Contains("विज्ञान") => "fa-flask science",
+        _ => "fa-graduation-cap navy"
+    };
+}
+<div class="course-card reveal">
+    <div class="d-flex align-items-center gap-3">
+        <div class="subject-icon-wrap @(iconClass.Split(' ').LastOrDefault())" style="width:44px;height:44px;font-size:1.2rem;flex-shrink:0">
+            <i class="fa-solid @(iconClass.Split(' ').FirstOrDefault())"></i>
+        </div>
+        <div>
+            <h3 style="margin:0;font-size:1rem">@Model.Title</h3>
+            <small class="text-muted">@Model.Standard</small>
+        </div>
     </div>
-</article>
+    <p class="mt-2">@Model.Description</p>
+    <div class="course-meta">
+        @if (Model.DurationMonths > 0)
+        {
+            <span><i class="fa-regular fa-clock me-1" style="color:var(--navy)"></i>@Model.DurationMonths @(isMr ? "महिने" : "months")</span>
+        }
+        <span><i class="fa-solid fa-award me-1" style="color:var(--gold)"></i>@(isMr ? "सर्व बोर्ड" : "All boards")</span>
+    </div>
+</div>

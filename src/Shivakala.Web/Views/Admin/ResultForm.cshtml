@@ -1,0 +1,60 @@
+@model Shivakala.Core.ViewModels.TestResultFormViewModel
+@{ ViewData["Title"] = "Add Result | Admin"; ViewData["MetaDescription"] = "Admin result form."; }
+<section class="page-hero"><div class="container"><span class="badge-soft">Admin</span><h1>Add Test Result</h1></div></section>
+<section class="section-shell pt-0">
+    <div class="container" style="max-width:700px">
+        <div class="glass-card">
+            <form asp-action="CreateResult" method="post">
+                @Html.AntiForgeryToken()
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Test Title *</label>
+                        <input asp-for="TestTitle" class="form-control" required placeholder="e.g. Weekly Test – Week 22 June 2026" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Student Name *</label>
+                        <input asp-for="StudentName" class="form-control" required />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Standard *</label>
+                        <select asp-for="Standard" class="form-select">
+                            @foreach (var s in new[]{"KG1","KG2","1st","2nd","3rd","4th","5th","6th","7th","8th","9th","10th"})
+                            { <option value="@s">@s</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Subject</label>
+                        <select asp-for="Subject" class="form-select">
+                            @foreach (var s in new[]{"Mathematics","English","Science","All"})
+                            { <option value="@s">@s</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Score *</label>
+                        <input asp-for="Score" type="number" class="form-control" required min="0" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Total Marks</label>
+                        <input asp-for="TotalMarks" type="number" class="form-control" value="100" min="1" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Rank *</label>
+                        <input asp-for="Rank" type="number" class="form-control" required min="1" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Test Date *</label>
+                        <input asp-for="TestDate" type="date" class="form-control" required />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Remarks</label>
+                        <input asp-for="Remarks" class="form-control" placeholder="Optional remarks..." />
+                    </div>
+                    <div class="col-12 d-flex gap-2 pt-2">
+                        <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-save"></i>Save Result</button>
+                        <a asp-action="Results" class="btn-outline-sk">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>

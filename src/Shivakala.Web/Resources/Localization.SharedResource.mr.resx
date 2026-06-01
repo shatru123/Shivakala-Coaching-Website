@@ -1,82 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value>
-  </resheader>
-  <data name="InstituteLocation" xml:space="preserve"><value>महाराष्ट्र, भारत</value></data>
-  <data name="InstituteTagline" xml:space="preserve"><value>कोचिंग क्लासेस</value></data>
-  <data name="NavHome" xml:space="preserve"><value>मुख्यपृष्ठ</value></data>
-  <data name="NavAbout" xml:space="preserve"><value>आमच्याविषयी</value></data>
-  <data name="NavCourses" xml:space="preserve"><value>कोर्सेस</value></data>
-  <data name="NavRegistration" xml:space="preserve"><value>नोंदणी</value></data>
-  <data name="NavEnquiry" xml:space="preserve"><value>चौकशी</value></data>
-  <data name="NavContact" xml:space="preserve"><value>संपर्क</value></data>
-  <data name="LanguageSwitcher" xml:space="preserve"><value>English</value></data>
-  <data name="ThemeToggle" xml:space="preserve"><value>थीम बदला</value></data>
-  <data name="FooterSummary" xml:space="preserve"><value>परंपरागत मूल्ये, आधुनिक अध्यापन पद्धती आणि निकालकेंद्री मार्गदर्शनासह SSC, फाउंडेशन आणि शिष्यवृत्तीची तयारी.</value></data>
-  <data name="QuickLinks" xml:space="preserve"><value>महत्त्वाचे दुवे</value></data>
-  <data name="FooterRights" xml:space="preserve"><value>सर्व हक्क राखीव.</value></data>
-  <data name="HomeTitle" xml:space="preserve"><value>शिवकला कोचिंग क्लासेस | मार्गदर्शनातून उत्कृष्टता</value></data>
-  <data name="HomeMetaDescription" xml:space="preserve"><value>शिवकला कोचिंग क्लासेसमध्ये मराठी आणि इंग्रजीत प्रवेश, SSC मार्गदर्शन, फाउंडेशन आणि शिष्यवृत्ती तयारी उपलब्ध आहे.</value></data>
-  <data name="AdmissionOpen" xml:space="preserve"><value>प्रवेश सुरू 2026</value></data>
-  <data name="HeroTitle" xml:space="preserve"><value>आधुनिक कोचिंग आणि पारंपरिक शिस्तीसह महाराष्ट्रातील विद्यार्थ्यांना यशाच्या दिशेने.</value></data>
-  <data name="HeroDescription" xml:space="preserve"><value>मजबूत संकल्पना, अधिक गुण आणि अधिक आत्मविश्वासासाठी शिवकला कोचिंग क्लासेस.</value></data>
-  <data name="AdmissionNow" xml:space="preserve"><value>प्रवेशासाठी अर्ज करा</value></data>
-  <data name="ExploreCourses" xml:space="preserve"><value>कोर्सेस पाहा</value></data>
-  <data name="TopResults" xml:space="preserve"><value>उत्कृष्ट निकाल</value></data>
-  <data name="HeroCardTitle" xml:space="preserve"><value>निकालकेंद्री शैक्षणिक साथ</value></data>
-  <data name="HeroCardDescription" xml:space="preserve"><value>अभ्यास नियोजन, साप्ताहिक चाचण्या, पुनरावृत्ती रणनीती आणि पालक अपडेट्स यांचा समन्वित शैक्षणिक अनुभव.</value></data>
-  <data name="HeroPoint1" xml:space="preserve"><value>संकल्पनांवर आधारित अध्यापन</value></data>
-  <data name="HeroPoint2" xml:space="preserve"><value>लहान बॅचेस आणि वैयक्तिक लक्ष</value></data>
-  <data name="HeroPoint3" xml:space="preserve"><value>बोर्ड आणि शिष्यवृत्तीची तयारी</value></data>
-  <data name="WhyChooseUs" xml:space="preserve"><value>आम्हाला का निवडावे</value></data>
-  <data name="WhyChooseUsLead" xml:space="preserve"><value>शैक्षणिक काटेकोरपणा, संस्कार आणि समर्पित मार्गदर्शन असलेले विद्यार्थी-केंद्रित वातावरण.</value></data>
-  <data name="FeaturedCourses" xml:space="preserve"><value>प्रमुख कोर्सेस</value></data>
-  <data name="FeaturedCoursesLead" xml:space="preserve"><value>SSC, सायन्स, मॅथ्स आणि शिष्यवृत्ती यशासाठी तयार केलेल्या प्रभावी बॅचेस.</value></data>
-  <data name="TopResultsLead" xml:space="preserve"><value>विद्यार्थ्यांच्या प्रयत्नांना प्रत्यक्ष निकालात रूपांतरित करणारी प्रगती प्रणाली.</value></data>
-  <data name="FacultySection" xml:space="preserve"><value>प्राध्यापक विभाग</value></data>
-  <data name="FacultyLead" xml:space="preserve"><value>शिस्तबद्ध तयारी आणि वैयक्तिक प्रगतीसाठी कटिबद्ध अनुभवी मार्गदर्शक.</value></data>
-  <data name="Testimonials" xml:space="preserve"><value>विद्यार्थी अभिप्राय</value></data>
-  <data name="TestimonialsLead" xml:space="preserve"><value>शैक्षणिक स्पष्टता आणि सातत्यपूर्ण निकालांसाठी पालक आणि विद्यार्थी शिवकलावर विश्वास ठेवतात.</value></data>
-  <data name="CtaTitle" xml:space="preserve"><value>तुमच्या मुलाच्या पुढील यशस्वी टप्प्यासाठी तयार आहात?</value></data>
-  <data name="CtaDescription" xml:space="preserve"><value>प्रवेश निश्चित करा आणि योग्य विषय व बॅच मार्गदर्शनासाठी आमच्या टीमशी संपर्क साधा.</value></data>
-  <data name="ErrorTitle" xml:space="preserve"><value>काहीतरी चूक झाली</value></data>
-  <data name="ErrorDescription" xml:space="preserve"><value>हे पृष्ठ लोड करताना अनपेक्षित अडचण आली. कृपया थोड्या वेळाने पुन्हा प्रयत्न करा.</value></data>
-  <data name="ErrorBadge" xml:space="preserve"><value>अॅप्लिकेशन त्रुटी</value></data>
-  <data name="RequestId" xml:space="preserve"><value>विनंती आयडी</value></data>
-  <data name="BackHome" xml:space="preserve"><value>मुख्यपृष्ठावर जा</value></data>
-  <data name="SectionEyebrow" xml:space="preserve"><value>शिवकला विशेषता</value></data>
-  <data name="Months" xml:space="preserve"><value>महिने</value></data>
-  <data name="Featured" xml:space="preserve"><value>विशेष</value></data>
-  <data name="AboutTitle" xml:space="preserve"><value>शिवकला कोचिंग क्लासेस बद्दल</value></data>
-  <data name="AboutLead" xml:space="preserve"><value>शिस्तबद्ध अभ्यास सवयी आणि आधुनिक मार्गदर्शन यांचा संगम विद्यार्थ्यांना आत्मविश्वासाने यश मिळवून देतो.</value></data>
-  <data name="CoursesTitle" xml:space="preserve"><value>कोर्सेस आणि विषय</value></data>
-  <data name="CoursesLead" xml:space="preserve"><value>फाउंडेशन, बोर्ड आणि शिष्यवृत्ती शिक्षणासाठी आमच्या नियोजित बॅचेस पाहा.</value></data>
-  <data name="RegistrationTitle" xml:space="preserve"><value>विद्यार्थी नोंदणी</value></data>
-  <data name="RegistrationLead" xml:space="preserve"><value>तुमची प्रवेश माहिती पाठवा आणि आमची टीम त्वरीत संपर्क साधेल.</value></data>
-  <data name="FullName" xml:space="preserve"><value>पूर्ण नाव</value></data>
-  <data name="MobileNumber" xml:space="preserve"><value>मोबाइल नंबर</value></data>
-  <data name="EmailAddress" xml:space="preserve"><value>ईमेल पत्ता</value></data>
-  <data name="Standard" xml:space="preserve"><value>इयत्ता</value></data>
-  <data name="Subject" xml:space="preserve"><value>विषय</value></data>
-  <data name="Address" xml:space="preserve"><value>पत्ता</value></data>
-  <data name="SubmitRegistration" xml:space="preserve"><value>नोंदणी पाठवा</value></data>
-  <data name="EnquiryTitle" xml:space="preserve"><value>त्वरित चौकशी</value></data>
-  <data name="EnquiryLead" xml:space="preserve"><value>फी, बॅचेस, वेळापत्रक किंवा विषय मार्गदर्शनाबद्दल विचारणा करा.</value></data>
-  <data name="Message" xml:space="preserve"><value>संदेश</value></data>
-  <data name="SubmitEnquiry" xml:space="preserve"><value>चौकशी पाठवा</value></data>
-  <data name="ContactTitle" xml:space="preserve"><value>शिवकला कोचिंग क्लासेस संपर्क</value></data>
-  <data name="ContactLead" xml:space="preserve"><value>प्रवेश, समुपदेशन, बॅच नियोजन आणि भेटीसाठी आमच्याशी संपर्क साधा.</value></data>
-  <data name="ContactDescription" xml:space="preserve"><value>विद्यार्थी आणि पालकांना योग्य कोर्स निवडण्यासाठी आमची प्रवेश टीम मार्गदर्शनासाठी उपलब्ध आहे.</value></data>
-  <data name="VisitUs" xml:space="preserve"><value>आमच्याकडे या</value></data>
-  <data name="ContactUs" xml:space="preserve"><value>संपर्क करा</value></data>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms</value></resheader>
+
+  <!-- Navigation -->
+  <data name="NavHome"><value>मुख्यपृष्ठ</value></data>
+  <data name="NavAbout"><value>आमच्याबद्दल</value></data>
+  <data name="NavCourses"><value>अभ्यासक्रम</value></data>
+  <data name="NavRegistration"><value>नोंदणी</value></data>
+  <data name="NavEnquiry"><value>चौकशी</value></data>
+  <data name="NavContact"><value>संपर्क करा</value></data>
+  <data name="NavAdmin"><value>प्रशासक</value></data>
+  <data name="LanguageSwitcher"><value>English</value></data>
+
+  <!-- Hero -->
+  <data name="HeroAdmissionsOpen"><value>प्रवेश सुरू आहेत</value></data>
+  <data name="HeroYear"><value>२०२६ – २७</value></data>
+  <data name="HeroStandard"><value>KG1 ते 10 वी इयत्ता</value></data>
+  <data name="HeroTagline"><value>भक्कम पाया आज, </value></data>
+  <data name="HeroTaglineAccent"><value>उज्ज्वल यश उद्या!</value></data>
+  <data name="AdmissionNow"><value>प्रवेश अर्ज करा</value></data>
+  <data name="EnquireNow"><value>चौकशी करा</value></data>
+
+  <!-- Info boxes -->
+  <data name="WeeklyTestEvery"><value>साप्ताहिक चाचणी</value></data>
+  <data name="Saturday"><value>शनिवार</value></data>
+  <data name="ResultMeritEvery"><value>निकाल व गुणवत्ता यादी</value></data>
+  <data name="Sunday"><value>रविवार</value></data>
+  <data name="QuestionPaperInfo"><value>प्रश्नपत्रिका व उत्तरपत्रिका</value></data>
+  <data name="WillBeUploaded"><value>अपलोड केले जाईल</value></data>
+
+  <!-- Quick Actions -->
+  <data name="QuickActions"><value>त्वरित क्रिया</value></data>
+  <data name="ApplyAdmission"><value>प्रवेश अर्ज करा</value></data>
+  <data name="DownloadQPaper"><value>प्रश्नपत्रिका डाउनलोड</value></data>
+  <data name="DownloadAnswer"><value>उत्तरपत्रिका डाउनलोड</value></data>
+  <data name="WeeklyTestResult"><value>साप्ताहिक निकाल</value></data>
+  <data name="MeritRankList"><value>गुणवत्ता यादी</value></data>
+  <data name="BookDemoClass"><value>मोफत डेमो बुक करा</value></data>
+  <data name="ContactUs"><value>संपर्क करा</value></data>
+
+  <!-- Features bar -->
+  <data name="RegularTests"><value>नियमित चाचण्या</value></data>
+  <data name="ConceptLearning"><value>संकल्पना आधारित शिक्षण</value></data>
+  <data name="ExperiencedFaculty"><value>अनुभवी शिक्षक</value></data>
+  <data name="PersonalAttention"><value>वैयक्तिक लक्ष</value></data>
+  <data name="BetterResults"><value>उत्तम निकाल</value></data>
+
+  <!-- Footer -->
+  <data name="FooterSummary"><value>शिवकला क्लासेस, चिखली, महाराष्ट्र — KG1 ते 10वी इयत्तेच्या विद्यार्थ्यांसाठी दर्जेदार शिक्षण. SK लर्निंग फॉर लाइफ.</value></data>
+  <data name="QuickLinks"><value>जलद दुवे</value></data>
+  <data name="FooterRights"><value>सर्व हक्क राखीव</value></data>
+
+  <!-- Forms -->
+  <data name="FullName"><value>विद्यार्थ्याचे पूर्ण नाव</value></data>
+  <data name="ParentName"><value>पालकाचे नाव</value></data>
+  <data name="Mobile"><value>मोबाईल नंबर</value></data>
+  <data name="Email"><value>ईमेल पत्ता</value></data>
+  <data name="Standard"><value>इयत्ता</value></data>
+  <data name="Subject"><value>विषय</value></data>
+  <data name="Address"><value>पत्ता</value></data>
+  <data name="Message"><value>संदेश / प्रश्न</value></data>
+  <data name="SubmitRegistration"><value>अर्ज सादर करा</value></data>
+  <data name="SendEnquiry"><value>चौकशी पाठवा</value></data>
+
+  <!-- Sanskrit motto -->
+  <data name="SanskritMotto"><value>॥ ज्ञानदीपः प्रज्वलितः ॥</value></data>
 </root>

@@ -1,0 +1,82 @@
+@model Shivakala.Core.ViewModels.NoticeBoardViewModel
+@using System.Globalization
+@{
+    ViewData["Title"] = Model.Seo.Title;
+    ViewData["MetaDescription"] = Model.Seo.Description;
+    var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
+    var categories = new[] { "All", "General", "Exam", "Holiday", "Result", "Admission" };
+    string CatColor(string c) => c switch { "Exam" => "var(--red)", "Holiday" => "var(--green)", "Result" => "var(--gold)", "Admission" => "var(--navy)", _ => "var(--text-mid)" };
+}
+<section class="page-hero" style="background:linear-gradient(135deg,#1A0050,var(--navy))">
+    <div class="container">
+        <span class="badge-soft"><i class="fa-solid fa-bullhorn me-1"></i>@(isMr ? "सूचना फलक" : "Notice Board")</span>
+        <h1>@(isMr ? "सूचना व जाहिराती" : "Notices & Announcements")</h1>
+        <p>@(isMr ? "महत्त्वाच्या घोषणा, परीक्षा वेळापत्रक आणि बातम्या" : "Important announcements, exam schedules and updates")</p>
+    </div>
+</section>
+<section class="section-shell warm-section">
+    <div class="container">
+        <!-- Category filter -->
+        <div class="d-flex flex-wrap gap-2 mb-4">
+            @foreach (var cat in categories)
+            {
+                var isSelected = (cat == "All" && string.IsNullOrEmpty(Model.SelectedCategory)) || Model.SelectedCategory == cat;
+                <a asp-action="Index" asp-route-category="@(cat == "All" ? "" : cat)"
+                   class="@(isSelected ? "btn-primary-sk" : "btn-outline-sk")" style="padding:7px 16px;font-size:0.8rem;border-radius:20px">
+                    @(isMr ? cat switch { "All"=>"सर्व","General"=>"सामान्य","Exam"=>"परीक्षा","Holiday"=>"सुट्टी","Result"=>"निकाल","Admission"=>"प्रवेश",_=>cat } : cat)
+                </a>
+            }
+        </div>
+
+        <!-- Pinned -->
+        @if (Model.Pinned.Any())
+        {
+            <div class="mb-4">
+                <h5 class="mb-3" style="color:var(--navy);font-size:0.88rem;text-transform:uppercase;letter-spacing:1px;font-weight:700"><i class="fa-solid fa-thumbtack me-2" style="color:var(--red)"></i>@(isMr ? "महत्त्वाच्या सूचना" : "Pinned Notices")</h5>
+                @foreach (var n in Model.Pinned)
+                {
+                    <div class="glass-card mb-3 reveal" style="border-left:5px solid var(--red)">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                            <h3 style="font-size:1.05rem;color:var(--navy);margin:0">@n.Title</h3>
+                            <div class="d-flex gap-2 align-items-center">
+                                <span style="font-size:0.7rem;padding:3px 10px;border-radius:99px;background:rgba(192,57,43,0.1);color:var(--red);font-weight:700">📌 @(isMr?"पिन केलेले":"Pinned")</span>
+                                <span style="font-size:0.7rem;padding:3px 10px;border-radius:99px;background:rgba(27,43,107,0.08);color:var(--navy);font-weight:600">@n.Category</span>
+                            </div>
+                        </div>
+                        <p style="color:var(--text-mid);font-size:0.9rem;margin:0">@n.Body</p>
+                        <small class="text-muted mt-2 d-block"><i class="fa-regular fa-calendar me-1"></i>@n.PublishedDate.ToLocalTime().ToString("dd MMM yyyy")</small>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- All notices -->
+        @if (Model.All.Any())
+        {
+            <h5 class="mb-3" style="color:var(--navy);font-size:0.88rem;text-transform:uppercase;letter-spacing:1px;font-weight:700"><i class="fa-solid fa-list me-2" style="color:var(--navy)"></i>@(isMr ? "सर्व सूचना" : "All Notices")</h5>
+            <div class="row g-3">
+                @foreach (var n in Model.All)
+                {
+                    <div class="col-md-6">
+                        <div class="glass-card reveal" style="border-left:4px solid @CatColor(n.Category);height:100%">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <h3 style="font-size:0.98rem;color:var(--navy);margin:0">@n.Title</h3>
+                                <span style="font-size:0.68rem;padding:2px 8px;border-radius:99px;background:rgba(27,43,107,0.08);color:@CatColor(n.Category);font-weight:700;white-space:nowrap">@n.Category</span>
+                            </div>
+                            <p style="color:var(--text-mid);font-size:0.87rem;margin:0">@n.Body</p>
+                            <small class="text-muted mt-2 d-block"><i class="fa-regular fa-calendar me-1"></i>@n.PublishedDate.ToLocalTime().ToString("dd MMM yyyy")</small>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (!Model.Pinned.Any() && !Model.All.Any())
+        {
+            <div class="text-center py-5">
+                <i class="fa-solid fa-bullhorn fa-3x mb-3" style="color:var(--border)"></i>
+                <p class="text-muted">@(isMr ? "सध्या कोणतीही सूचना नाही." : "No notices available at the moment.")</p>
+            </div>
+        }
+    </div>
+</section>

@@ -1,0 +1,55 @@
+@model IReadOnlyList<Shivakala.Core.Entities.GalleryItem>
+@{ ViewData["Title"] = "Gallery | Admin"; ViewData["MetaDescription"] = "Admin gallery."; }
+<section class="page-hero" style="background:linear-gradient(135deg,var(--teal),var(--green-dark))">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div><span class="badge-soft">Admin</span><h1>Gallery</h1><p>Upload and manage photos</p></div>
+        <a asp-action="Index" class="toolbar-btn"><i class="fa-solid fa-gauge"></i>Dashboard</a>
+    </div>
+</section>
+<section class="section-shell pt-0">
+    <div class="container">
+        <!-- Upload Form -->
+        <div class="glass-card mb-4" style="border-top:4px solid var(--teal)">
+            <h5 style="color:var(--navy);margin-bottom:16px"><i class="fa-solid fa-upload me-2" style="color:var(--teal)"></i>Upload New Image</h5>
+            <form asp-action="UploadGalleryItem" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4"><label class="form-label">Title *</label><input name="title" class="form-control" required /></div>
+                    <div class="col-md-2">
+                        <label class="form-label">Category</label>
+                        <select name="category" class="form-select">
+                            @foreach (var c in new[]{"General","Event","Results","Classroom","Achievement"})
+                            { <option>@c</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-3"><label class="form-label">Caption</label><input name="caption" class="form-control" placeholder="Optional caption" /></div>
+                    <div class="col-md-2"><label class="form-label">Image *</label><input name="image" type="file" class="form-control" accept="image/*" required /></div>
+                    <div class="col-md-1"><button type="submit" class="btn-primary-sk w-100 justify-content-center" style="border-radius:8px"><i class="fa-solid fa-upload"></i></button></div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Gallery Grid -->
+        <div class="row g-3">
+            @foreach (var g in Model)
+            {
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div style="border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--white)">
+                        <div style="aspect-ratio:4/3;overflow:hidden;background:var(--light-gray)">
+                            <img src="@g.ImageUrl" alt="@g.Title" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<div style=\'padding:20px;text-align:center;color:var(--text-mid)\'>🖼️ Image not found</div>'" />
+                        </div>
+                        <div style="padding:10px">
+                            <div style="font-size:0.8rem;font-weight:600;color:var(--navy);margin-bottom:2px">@g.Title</div>
+                            <div style="font-size:0.68rem;color:var(--text-mid)">@g.Category • @g.CreatedDate.ToLocalTime().ToString("dd MMM")</div>
+                            <form asp-action="DeleteGalleryItem" method="post" onsubmit="return confirm('Delete image?')" class="mt-2">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@g.Id" />
+                                <button type="submit" class="toolbar-btn w-100 justify-content-center" style="background:var(--red);font-size:0.72rem;padding:5px;border-radius:6px"><i class="fa-solid fa-trash me-1"></i>Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>

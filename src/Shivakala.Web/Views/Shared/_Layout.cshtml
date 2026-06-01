@@ -1,8 +1,9 @@
 @using System.Globalization
 @{
     var title = ViewData["Title"]?.ToString() ?? "Shivakala Coaching Classes";
-    var description = ViewData["MetaDescription"]?.ToString() ?? "Shivakala Coaching Classes in Maharashtra offering SSC, foundation, and scholarship guidance.";
+    var description = ViewData["MetaDescription"]?.ToString() ?? "Shivakala Coaching Classes — KG1 to 10th Standard. Strong Foundation Today, Brilliant Success Tomorrow!";
     var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+    var isMr = currentCulture == "mr";
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
 }
 <!DOCTYPE html>
@@ -12,59 +13,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@title</title>
     <meta name="description" content="@description" />
-    <meta name="keywords" content="Shivakala Coaching Classes, SSC, foundation batch, scholarship classes, Maharashtra coaching" />
+    <meta name="keywords" content="Shivakala Coaching Classes, SK Classes, KG1 to 10th, SSC coaching, Chikhali, Maharashtra" />
     <meta property="og:title" content="@title" />
     <meta property="og:description" content="@description" />
-    <meta property="og:type" content="website" />
-    <meta name="theme-color" content="#ff7a18" />
+    <meta name="theme-color" content="#1B2B6B" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkR4j8GDSvQzQ+pcVfVt+e6dkL5q0fZo4p5Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
+
+    <!-- TOP STRIP -->
     <div class="top-strip">
         <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <span><i class="fa-solid fa-phone-volume me-2"></i>+91 98765 43210</span>
-            <span><i class="fa-solid fa-location-dot me-2"></i>@T["InstituteLocation"]</span>
+            <span><i class="fa-solid fa-phone-volume me-2"></i>+91 80878 07011 &nbsp;|&nbsp; +91 88309 07011</span>
+            <span><i class="fa-solid fa-location-dot me-2"></i>@(isMr ? "चिखली, महाराष्ट्र" : "Chikhali, Maharashtra")</span>
         </div>
     </div>
 
-    <header class="sticky-top">
-        <nav class="navbar navbar-expand-lg navbar-blur">
+    <!-- NAVBAR -->
+    <header class="sk-navbar">
+        <nav class="navbar navbar-expand-lg py-0">
             <div class="container">
-                <a class="navbar-brand brand-mark" asp-controller="Home" asp-action="Index">
-                    <span class="brand-icon"><i class="fa-solid fa-graduation-cap"></i></span>
-                    <span>
-                        <strong>Shivakala</strong>
-                        <small>@T["InstituteTagline"]</small>
-                    </span>
+                <!-- BRAND LOGO -->
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">
+                    <img class="brand-logo-img" src="~/img/ShivKalaLogo.jpeg" asp-append-version="true" alt="Shivakala Classes logo" />
+                    <div class="brand-text-block">
+                        <span class="brand-name">SHIVKALA</span>
+                        <span class="brand-rule">CLASSES</span>
+                        <span style="font-size:0.62rem;color:var(--text-mid);letter-spacing:1.5px;">SK LEARNING FOR LIFE</span>
+                    </div>
                 </a>
-                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+
+                <button class="navbar-toggler border-0 ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
+
                 <div class="collapse navbar-collapse" id="mainNav">
-                    <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                    <ul class="navbar-nav mx-auto align-items-lg-center gap-lg-1">
                         <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">@T["NavHome"]</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="About" asp-action="Index">@T["NavAbout"]</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Courses" asp-action="Index">@T["NavCourses"]</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Results" asp-action="Index">@(isMr ? "साप्ताहिक निकाल" : "Weekly Test")</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="StudyMaterial" asp-action="Index">@(isMr ? "अभ्यास साहित्य" : "Study Material")</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="NoticeBoard" asp-action="Index">@(isMr ? "सूचना" : "Notice Board")</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Registration" asp-action="Index">@T["NavRegistration"]</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Enquiry" asp-action="Index">@T["NavEnquiry"]</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Contact" asp-action="Index">@T["NavContact"]</a></li>
                     </ul>
-                    <div class="toolbar ms-lg-3">
-                        <a class="toolbar-btn" asp-controller="Admin" asp-action="Login">Admin</a>
+                    <div class="d-flex align-items-center gap-2 ms-lg-2">
+                        <!-- Language switcher -->
                         <form asp-controller="Home" asp-action="SetLanguage" method="post" class="d-inline">
                             @Html.AntiForgeryToken()
-                            <input type="hidden" name="culture" value="@(currentCulture == "mr" ? "en" : "mr")" />
+                            <input type="hidden" name="culture" value="@(isMr ? "en" : "mr")" />
                             <input type="hidden" name="returnUrl" value="@returnUrl" />
-                            <button type="submit" class="toolbar-btn">@T["LanguageSwitcher"]</button>
+                            <button type="submit" class="btn-lang">@T["LanguageSwitcher"]</button>
                         </form>
-                        <button type="button" class="toolbar-btn" id="themeToggle" aria-label="@T["ThemeToggle"]">
+                        <!-- Dark mode -->
+                        <button type="button" id="themeToggle" aria-label="Toggle theme">
                             <i class="fa-solid fa-moon"></i>
                         </button>
+                        <!-- Admin / Login -->
+                        <a class="btn-login nav-link" asp-controller="Admin" asp-action="Login">
+                            <i class="fa-solid fa-user me-1"></i>@(isMr ? "लॉगिन / नोंदणी" : "Login / Register")
+                        </a>
                     </div>
                 </div>
             </div>
@@ -76,40 +91,79 @@
         @RenderBody()
     </main>
 
+    <!-- FOOTER -->
     <footer class="site-footer">
         <div class="container">
             <div class="row g-4">
                 <div class="col-lg-4">
-                    <h5>Shivakala Coaching Classes</h5>
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <img class="footer-logo-img" src="~/img/ShivKalaLogo.jpeg" asp-append-version="true" alt="Shivakala Classes logo" />
+                        <div>
+                            <div style="color:#fff;font-family:'Marcellus',serif;font-size:1.1rem;font-weight:700;">SHIVKALA CLASSES</div>
+                            <div style="color:var(--gold-light);font-size:0.7rem;letter-spacing:2px;">SK LEARNING FOR LIFE</div>
+                        </div>
+                    </div>
                     <p>@T["FooterSummary"]</p>
                 </div>
-                <div class="col-lg-4">
+                <div class="col-lg-4 col-md-6">
                     <h6>@T["QuickLinks"]</h6>
                     <ul class="footer-links">
+                        <li><a asp-controller="Home" asp-action="Index">@T["NavHome"]</a></li>
                         <li><a asp-controller="About" asp-action="Index">@T["NavAbout"]</a></li>
                         <li><a asp-controller="Courses" asp-action="Index">@T["NavCourses"]</a></li>
+                        <li><a asp-controller="Results" asp-action="Index">@(isMr ? "साप्ताहिक निकाल" : "Weekly Results")</a></li>
+                        <li><a asp-controller="StudyMaterial" asp-action="Index">@(isMr ? "अभ्यास साहित्य" : "Study Materials")</a></li>
+                        <li><a asp-controller="NoticeBoard" asp-action="Index">@(isMr ? "सूचना फलक" : "Notice Board")</a></li>
+                        <li><a asp-controller="Gallery" asp-action="Index">@(isMr ? "गॅलरी" : "Gallery")</a></li>
                         <li><a asp-controller="Registration" asp-action="Index">@T["AdmissionNow"]</a></li>
+                        <li><a asp-controller="Enquiry" asp-action="Index">@T["NavEnquiry"]</a></li>
+                        <li><a asp-controller="Contact" asp-action="Index">@T["NavContact"]</a></li>
                     </ul>
                 </div>
-                <div class="col-lg-4">
+                <div class="col-lg-4 col-md-6">
                     <h6>@T["ContactUs"]</h6>
-                    <p class="mb-1">+91 98765 43210</p>
-                    <p class="mb-1">admissions@shivakalaclasses.in</p>
-                    <p class="mb-0">@T["InstituteLocation"]</p>
+                    <p class="mb-2"><i class="fa-solid fa-location-dot me-2" style="color:var(--gold-light)"></i>@(isMr ? "शिवकला क्लासेस, चिखली, महाराष्ट्र" : "Shivakala Classes, Chikhali, Maharashtra")</p>
+                    <p class="mb-2"><i class="fa-solid fa-phone me-2" style="color:var(--gold-light)"></i>+91 80878 07011</p>
+                    <p class="mb-2"><i class="fa-solid fa-phone me-2" style="color:var(--gold-light)"></i>+91 88309 07011</p>
+                    <p class="mb-2"><i class="fa-solid fa-envelope me-2" style="color:var(--gold-light)"></i>info@shivkalaclasses.com</p>
+                    <p class="mb-0"><i class="fa-solid fa-globe me-2" style="color:var(--gold-light)"></i>www.shivkalaclasses.com</p>
                 </div>
             </div>
-            <div class="footer-bottom">
-                <span>&copy; @DateTime.UtcNow.Year Shivakala Coaching Classes</span>
-                <span>@T["FooterRights"]</span>
+        </div>
+        <!-- Contact Strip -->
+        <div class="footer-contact-strip mt-4">
+            <div class="container">
+                <div class="contact-items">
+                    <div class="footer-contact-item">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <div><strong>@(isMr ? "पत्ता" : "ADDRESS")</strong>@(isMr ? "शिवकला क्लासेस, चिखली" : "Shivakala Classes, Chikhali")</div>
+                    </div>
+                    <div class="footer-contact-item">
+                        <i class="fa-solid fa-phone"></i>
+                        <div><strong>@(isMr ? "फोन" : "PHONE")</strong>+91 80878 07011</div>
+                    </div>
+                    <div class="footer-contact-item">
+                        <i class="fa-solid fa-envelope"></i>
+                        <div><strong>EMAIL</strong>info@shivkalaclasses.com</div>
+                    </div>
+                    <div class="footer-contact-item">
+                        <i class="fa-solid fa-globe"></i>
+                        <div><strong>WEBSITE</strong>www.shivkalaclasses.com</div>
+                    </div>
+                </div>
             </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; @DateTime.UtcNow.Year Shivakala Coaching Classes, Chikhali &nbsp;|&nbsp; @T["FooterRights"] &nbsp;|&nbsp; SK Learning For Life</p>
         </div>
     </footer>
 
-    <a class="whatsapp-float" href="https://wa.me/919876543210?text=Hello%20Shivakala%20Coaching%20Classes" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+    <!-- WhatsApp Float -->
+    <a class="whatsapp-float" href="https://wa.me/918087807011?text=Hello%20Shivakala%20Coaching%20Classes" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
         <i class="fa-brands fa-whatsapp"></i>
     </a>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

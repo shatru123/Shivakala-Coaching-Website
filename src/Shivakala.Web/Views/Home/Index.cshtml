@@ -1,135 +1,326 @@
-@model HomePageViewModel
+@model Shivakala.Core.ViewModels.HomePageViewModel
+@using System.Globalization
 @{
-    ViewData["Title"] = T["HomeTitle"];
-    ViewData["MetaDescription"] = T["HomeMetaDescription"];
+    ViewData["Title"] = "Home | Shivakala Coaching Classes";
+    ViewData["MetaDescription"] = "Shivakala Coaching Classes — KG1 to 10th Standard. Admissions Open 2026-27. Strong Foundation Today, Brilliant Success Tomorrow!";
+    var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
 }
 
-<section class="hero-section">
+<!-- ===== HERO BANNER ===== -->
+<section class="hero-banner">
     <div class="container">
-        <div class="row align-items-center g-5">
-            <div class="col-lg-7">
-                <span class="badge-soft">@T["AdmissionOpen"]</span>
-                <h1 class="hero-title mt-3">@T["HeroTitle"]</h1>
-                <p class="hero-copy">@T["HeroDescription"]</p>
-                <div class="hero-actions">
-                    <a asp-controller="Registration" asp-action="Index" class="btn btn-gradient btn-lg">@T["AdmissionNow"]</a>
-                    <a asp-controller="Courses" asp-action="Index" class="btn btn-outline-light btn-lg">@T["ExploreCourses"]</a>
+        <div class="hero-main">
+            <!-- Homepage banner -->
+            <div class="hero-kids-img">
+                <img src="~/img/Banner.jpeg" asp-append-version="true" alt="Shivakala Classes admissions banner" />
+            </div>
+
+            <!-- Center content -->
+            <div class="hero-center">
+                <div class="hero-admissions-badge">
+                    <i class="fa-solid fa-graduation-cap me-2"></i>@(isMr ? "प्रवेश सुरू आहेत" : "ADMISSIONS OPEN")
                 </div>
-                <div class="stats-grid mt-5">
-                    @foreach (var stat in Model.Statistics)
-                    {
-                        <div class="stat-card reveal">
-                            <strong>@stat.Value</strong>
-                            <span>@stat.Label</span>
-                        </div>
-                    }
+                <div class="hero-year">
+                    @(isMr ? "२०२६" : "2026") <span>–</span> @(isMr ? "२७" : "27")
+                </div>
+                <div class="hero-standard-bar">
+                    @(isMr ? "KG1 ते 10 वी इयत्ता" : "KG1 TO 10TH STANDARD")
+                </div>
+                <p class="hero-tagline">
+                    @(isMr
+                        ? "भक्कम पाया आज, "
+                        : "Strong Foundation Today, ")
+                    <span>@(isMr ? "उज्ज्वल यश उद्या!" : "Brilliant Success Tomorrow!")</span>
+                </p>
+                <div class="hero-cta-btns">
+                    <a asp-controller="Registration" asp-action="Index" class="btn-green-sk">
+                        <i class="fa-solid fa-user-plus"></i>
+                        @(isMr ? "प्रवेश अर्ज करा" : "Apply for Admission")
+                    </a>
+                    <a asp-controller="Enquiry" asp-action="Index" class="btn-outline-sk">
+                        <i class="fa-solid fa-comments"></i>
+                        @(isMr ? "चौकशी करा" : "Enquire Now")
+                    </a>
                 </div>
             </div>
-            <div class="col-lg-5">
-                <div class="glass-hero reveal">
-                    <div class="mini-chip">@T["TopResults"]</div>
-                    <h3>@T["HeroCardTitle"]</h3>
-                    <p>@T["HeroCardDescription"]</p>
-                    <ul class="hero-list">
-                        <li>@T["HeroPoint1"]</li>
-                        <li>@T["HeroPoint2"]</li>
-                        <li>@T["HeroPoint3"]</li>
-                    </ul>
+
+            <!-- Right info boxes -->
+            <div class="hero-right-info">
+                <div class="info-box">
+                    <div class="info-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                    <div>
+                        <strong>@(isMr ? "साप्ताहिक चाचणी" : "WEEKLY TEST EVERY")</strong>
+                        <span class="info-day">@(isMr ? "शनिवार" : "SATURDAY")</span>
+                    </div>
+                </div>
+                <div class="info-box">
+                    <div class="info-icon"><i class="fa-solid fa-trophy"></i></div>
+                    <div>
+                        <strong>@(isMr ? "निकाल व गुणवत्ता यादी" : "RESULT & MERIT LIST EVERY")</strong>
+                        <span class="info-day red">@(isMr ? "रविवार" : "SUNDAY")</span>
+                    </div>
+                </div>
+                <div class="info-box">
+                    <div class="info-icon"><i class="fa-solid fa-file-lines"></i></div>
+                    <div>
+                        <strong>@(isMr ? "प्रश्नपत्रिका व उत्तरपत्रिका" : "QUESTION PAPER &")</strong>
+                        <span class="info-day" style="color:var(--navy);">@(isMr ? "अपलोड केले जाईल" : "ANSWER SHEET WILL BE UPLOADED")</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<section class="section-shell">
+<!-- ===== OUR COURSES ===== -->
+<section class="courses-section">
     <div class="container">
-        @await Html.PartialAsync("Partials/_SectionHeader", (T["WhyChooseUs"].Value, T["WhyChooseUsLead"].Value))
-        <div class="row g-4">
-            @foreach (var item in Model.Highlights)
-            {
-                <div class="col-md-4">
-                    <div class="feature-card reveal">
-                        <div class="icon-wrap"><i class="@item.Icon"></i></div>
-                        <h3>@item.Title</h3>
-                        <p>@item.Description</p>
+        <div class="courses-section-header">@(isMr ? "आमचे अभ्यासक्रम" : "OUR COURSES")</div>
+        <div class="courses-grid">
+            <!-- Pre-Primary -->
+            <div class="course-col">
+                <div class="course-col-header purple">@(isMr ? "पूर्व-प्राथमिक" : "PRE-PRIMARY")</div>
+                <div class="course-col-body">
+                    <div class="subject-item">
+                        <div class="subject-icon-wrap kg">🐻</div>
+                        <span class="subject-label purple">KG1</span>
+                        <span class="subject-sub">@(isMr ? "प्रवेश" : "Admission")</span>
+                    </div>
+                    <div class="subject-item">
+                        <div class="subject-icon-wrap kg">🐻</div>
+                        <span class="subject-label purple">KG2</span>
+                        <span class="subject-sub">@(isMr ? "प्रवेश" : "Admission")</span>
                     </div>
                 </div>
-            }
-        </div>
-    </div>
-</section>
-
-<section class="section-shell warm-section" id="courses">
-    <div class="container">
-        @await Html.PartialAsync("Partials/_SectionHeader", (T["FeaturedCourses"].Value, T["FeaturedCoursesLead"].Value))
-        <div class="row g-4">
-            @foreach (var course in Model.FeaturedCourses)
-            {
-                <div class="col-md-6 col-xl-4">
-                    @await Html.PartialAsync("Partials/_CourseCard", course)
-                </div>
-            }
-        </div>
-    </div>
-</section>
-
-<section class="section-shell">
-    <div class="container">
-        @await Html.PartialAsync("Partials/_SectionHeader", (T["TopResults"].Value, T["TopResultsLead"].Value))
-        <div class="row g-4">
-            @foreach (var result in Model.Results)
-            {
-                <div class="col-md-4">
-                    <div class="feature-card reveal">
-                        <div class="icon-wrap"><i class="@result.Icon"></i></div>
-                        <h3>@result.Title</h3>
-                        <p>@result.Description</p>
+            </div>
+            <!-- Primary -->
+            <div class="course-col">
+                <div class="course-col-header green">@(isMr ? "प्राथमिक (1 ली – 6 वी)" : "PRIMARY (1ST – 6TH STANDARD)")</div>
+                <div class="course-col-body">
+                    <div class="subject-item">
+                        <div class="subject-icon-wrap maths"><i class="fa-solid fa-calculator"></i></div>
+                        <span class="subject-label">@(isMr ? "गणित" : "MATHEMATICS")</span>
+                    </div>
+                    <div class="subject-item">
+                        <div class="subject-icon-wrap english"><i class="fa-solid fa-book-open"></i></div>
+                        <span class="subject-label blue">@(isMr ? "इंग्रजी" : "ENGLISH")</span>
+                    </div>
+                    <div class="subject-item">
+                        <div class="subject-icon-wrap science"><i class="fa-solid fa-flask"></i></div>
+                        <span class="subject-label purple">@(isMr ? "विज्ञान" : "SCIENCE")</span>
                     </div>
                 </div>
-            }
+            </div>
+            <!-- Secondary -->
+            <div class="course-col">
+                <div class="course-col-header navy">@(isMr ? "माध्यमिक (7 वी – 10 वी)" : "SECONDARY (7TH – 10TH STANDARD)")</div>
+                <div class="course-col-body">
+                    <div class="subject-item">
+                        <div class="subject-icon-wrap maths"><i class="fa-solid fa-calculator"></i></div>
+                        <span class="subject-label">@(isMr ? "गणित" : "MATHEMATICS")</span>
+                    </div>
+                    <div class="subject-item">
+                        <div class="subject-icon-wrap english"><i class="fa-solid fa-book-open"></i></div>
+                        <span class="subject-label blue">@(isMr ? "इंग्रजी" : "ENGLISH")</span>
+                    </div>
+                    <div class="subject-item">
+                        <div class="subject-icon-wrap science"><i class="fa-solid fa-flask"></i></div>
+                        <span class="subject-label purple">@(isMr ? "विज्ञान" : "SCIENCE")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Test Series + Quick Actions -->
+        <div class="test-actions-row" id="weekly-test">
+            <!-- Test Series -->
+            <div class="test-series-panel">
+                <div class="panel-header">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    @(isMr ? "साप्ताहिक चाचणी मालिका" : "WEEKLY TEST SERIES")
+                    <span class="header-note">
+                        @(isMr ? "चाचणी दर " : "TEST EVERY ")
+                        <span>@(isMr ? "शनिवार" : "SATURDAY")</span>
+                        @(isMr ? " | निकाल दर " : " | RESULT & MERIT LIST EVERY ")
+                        <span class="red-day">@(isMr ? "रविवार" : "SUNDAY")</span>
+                    </span>
+                </div>
+                <div class="test-flow">
+                    <div class="flow-step">
+                        <div class="flow-step-icon"><i class="fa-solid fa-file-arrow-down"></i></div>
+                        <div class="flow-step-label">@(isMr ? "प्रश्नपत्रिका डाउनलोड" : "QUESTION PAPER DOWNLOAD")</div>
+                    </div>
+                    <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    <div class="flow-step">
+                        <div class="flow-step-icon"><i class="fa-solid fa-file-pen"></i></div>
+                        <div class="flow-step-label">@(isMr ? "उत्तरपत्रिका डाउनलोड" : "ANSWER SHEET DOWNLOAD")</div>
+                    </div>
+                    <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    <div class="flow-step">
+                        <div class="flow-step-icon green-bg"><i class="fa-solid fa-desktop"></i></div>
+                        <div class="flow-step-label">@(isMr ? "ऑनलाइन निकाल" : "ONLINE TEST RESULT")</div>
+                    </div>
+                    <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    <div class="flow-step">
+                        <div class="flow-step-icon gold-bg"><i class="fa-solid fa-trophy"></i></div>
+                        <div class="flow-step-label">@(isMr ? "गुणवत्ता यादी" : "MERIT RANK LIST")</div>
+                    </div>
+                    <div class="flow-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+                    <div class="flow-step">
+                        <div class="flow-step-icon red-bg"><i class="fa-solid fa-chart-line"></i></div>
+                        <div class="flow-step-label">@(isMr ? "प्रगती विश्लेषण" : "PERFORMANCE ANALYSIS")</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions-panel">
+                <div class="panel-header">
+                    <i class="fa-solid fa-bolt"></i>
+                    @(isMr ? "त्वरित क्रिया" : "QUICK ACTIONS")
+                </div>
+                <div class="qa-grid">
+                    <a asp-controller="Registration" asp-action="Index" class="qa-btn green-btn">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>@(isMr ? "प्रवेश अर्ज" : "APPLY FOR ADMISSION")</span>
+                    </a>
+                    <a href="#" class="qa-btn blue-btn">
+                        <i class="fa-solid fa-file-arrow-down"></i>
+                        <span>@(isMr ? "प्रश्नपत्रिका डाउनलोड" : "DOWNLOAD QUESTION PAPER")</span>
+                    </a>
+                    <a href="#" class="qa-btn orange-btn">
+                        <i class="fa-solid fa-file-pen"></i>
+                        <span>@(isMr ? "उत्तरपत्रिका डाउनलोड" : "DOWNLOAD ANSWER SHEET")</span>
+                    </a>
+                    <a href="#" class="qa-btn purple-btn">
+                        <i class="fa-solid fa-chart-bar"></i>
+                        <span>@(isMr ? "साप्ताहिक निकाल" : "WEEKLY TEST RESULT")</span>
+                    </a>
+                    <a href="#" class="qa-btn red-btn">
+                        <i class="fa-solid fa-trophy"></i>
+                        <span>@(isMr ? "गुणवत्ता यादी" : "MERIT RANK LIST")</span>
+                    </a>
+                    <a asp-controller="Registration" asp-action="Index" class="qa-btn gold-btn">
+                        <i class="fa-solid fa-calendar-plus"></i>
+                        <span>@(isMr ? "मोफत डेमो बुक करा" : "BOOK FREE DEMO CLASS")</span>
+                    </a>
+                    <a asp-controller="Contact" asp-action="Index" class="qa-btn qa-contact-btn">
+                        <i class="fa-solid fa-phone-volume me-2"></i>
+                        @(isMr ? "आमच्याशी संपर्क करा" : "CONTACT US")
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Bar -->
+        <div class="features-bar rounded-3 mt-0" style="border-radius:0 0 10px 10px !important;">
+            <div class="features-bar-inner">
+                <div class="feat-item"><i class="fa-solid fa-clipboard-check"></i>@(isMr ? "नियमित चाचण्या" : "REGULAR TESTS")</div>
+                <div class="feat-item"><i class="fa-solid fa-lightbulb"></i>@(isMr ? "संकल्पना आधारित शिक्षण" : "CONCEPT BASED LEARNING")</div>
+                <div class="feat-item"><i class="fa-solid fa-chalkboard-user"></i>@(isMr ? "अनुभवी शिक्षक" : "EXPERIENCED FACULTY")</div>
+                <div class="feat-item"><i class="fa-solid fa-user-check"></i>@(isMr ? "वैयक्तिक लक्ष" : "PERSONAL ATTENTION")</div>
+                <div class="feat-item"><i class="fa-solid fa-chart-line"></i>@(isMr ? "उत्तम निकाल" : "BETTER RESULTS")</div>
+            </div>
         </div>
     </div>
 </section>
 
+<!-- ===== WHY CHOOSE US ===== -->
 <section class="section-shell warm-section">
     <div class="container">
-        @await Html.PartialAsync("Partials/_SectionHeader", (T["FacultySection"].Value, T["FacultyLead"].Value))
-        <div class="row g-4">
-            @foreach (var member in Model.FacultyMembers)
-            {
-                <div class="col-md-4">
-                    @await Html.PartialAsync("Partials/_FacultyCard", member)
+        <div class="section-header text-center mb-4">
+            <div class="eyebrow"><i class="fa-solid fa-star me-1"></i>@(isMr ? "आमची वैशिष्ट्ये" : "Why Choose Us")</div>
+            <h2>@(isMr ? "आम्हालाच का निवडावे?" : "Excellence in Every Aspect")</h2>
+            <p class="mt-2">@(isMr ? "शिवकला क्लासेसमध्ये विद्यार्थ्यांना दर्जेदार शिक्षण मिळते." : "At Shivakala, we deliver quality education that builds confident, capable students.")</p>
+        </div>
+        <div class="row g-3">
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card reveal">
+                    <div class="icon-wrap"><i class="fa-solid fa-chalkboard-user"></i></div>
+                    <h3>@(isMr ? "अनुभवी शिक्षक" : "Experienced Faculty")</h3>
+                    <p>@(isMr ? "प्रत्येक विषयात तज्ज्ञ शिक्षक मार्गदर्शन करतात." : "Expert teachers guide every student with dedication and expertise.")</p>
                 </div>
-            }
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card reveal" style="border-top-color:var(--green)">
+                    <div class="icon-wrap" style="color:var(--green)"><i class="fa-solid fa-clipboard-list"></i></div>
+                    <h3>@(isMr ? "नियमित चाचण्या" : "Regular Tests")</h3>
+                    <p>@(isMr ? "दर शनिवारी चाचणी व दर रविवारी निकाल जाहीर होतो." : "Weekly tests every Saturday, results and merit list every Sunday.")</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card reveal" style="border-top-color:var(--gold)">
+                    <div class="icon-wrap" style="color:var(--gold)"><i class="fa-solid fa-user-check"></i></div>
+                    <h3>@(isMr ? "वैयक्तिक लक्ष" : "Personal Attention")</h3>
+                    <p>@(isMr ? "प्रत्येक विद्यार्थ्याला स्वतंत्र मार्गदर्शन मिळते." : "Individual attention tailored to each student's pace and needs.")</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="feature-card reveal" style="border-top-color:var(--purple)">
+                    <div class="icon-wrap" style="color:var(--purple)"><i class="fa-solid fa-chart-line"></i></div>
+                    <h3>@(isMr ? "उत्तम निकाल" : "Better Results")</h3>
+                    <p>@(isMr ? "आमच्या विद्यार्थ्यांनी शाळा परीक्षांमध्ये उत्कृष्ट यश मिळवले आहे." : "Our students consistently achieve outstanding results in school exams.")</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="row g-3 mt-2">
+            <div class="col-6 col-md-3">
+                <div class="stat-card reveal"><strong>500+</strong><span>@(isMr ? "विद्यार्थी" : "Students")</span></div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card reveal"><strong>10+</strong><span>@(isMr ? "वर्षांचा अनुभव" : "Years Experience")</span></div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card reveal"><strong>95%</strong><span>@(isMr ? "उत्तीर्ण दर" : "Pass Rate")</span></div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-card reveal"><strong>KG–10</strong><span>@(isMr ? "सर्व वर्ग" : "All Standards")</span></div>
+            </div>
         </div>
     </div>
 </section>
 
-<section class="section-shell">
-    <div class="container">
-        @await Html.PartialAsync("Partials/_SectionHeader", (T["Testimonials"].Value, T["TestimonialsLead"].Value))
-        <div class="row g-4">
-            @foreach (var testimonial in Model.Testimonials)
-            {
-                <div class="col-md-4">
-                    @await Html.PartialAsync("Partials/_TestimonialCard", testimonial)
-                </div>
-            }
+<!-- ===== TESTIMONIALS ===== -->
+@if (Model?.Testimonials is { Count: > 0 })
+{
+    <section class="section-shell" style="background:var(--white);">
+        <div class="container">
+            <div class="section-header text-center mb-4">
+                <div class="eyebrow"><i class="fa-solid fa-quote-left me-1"></i>@(isMr ? "विद्यार्थी व पालकांचे मत" : "Testimonials")</div>
+                <h2>@(isMr ? "आमच्या विद्यार्थ्यांचे अनुभव" : "What Parents & Students Say")</h2>
+            </div>
+            <div class="row g-3">
+                @foreach (var t in Model.Testimonials)
+                {
+                    <div class="col-md-4">
+                        @await Html.PartialAsync("Partials/_TestimonialCard", t)
+                    </div>
+                }
+            </div>
         </div>
-    </div>
-</section>
+    </section>
+}
 
+<!-- ===== CTA ===== -->
 <section class="section-shell cta-band">
     <div class="container">
-        <div class="cta-card reveal">
+        <div class="cta-card">
             <div>
-                <span class="badge-soft">@T["AdmissionOpen"]</span>
-                <h2 class="mt-3">@T["CtaTitle"]</h2>
-                <p class="mb-0">@T["CtaDescription"]</p>
+                <div class="eyebrow" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.25)">
+                    <i class="fa-solid fa-graduation-cap me-1"></i>@(isMr ? "प्रवेश सुरू आहेत" : "Admissions Open 2026–27")
+                </div>
+                <h2 class="mt-2">@(isMr ? "आजच आमच्यात सामील व्हा!" : "Join Shivakala Today!")</h2>
+                <p>@(isMr ? "उज्ज्वल भविष्यासाठी आत्ताच पहिले पाऊल टाका. चिखलीतील सर्वोत्तम कोचिंग क्लासेसमध्ये प्रवेश मिळवा." : "Take the first step towards a brilliant future. Join the best coaching classes in Chikhali.")</p>
             </div>
             <div class="cta-actions">
-                <a asp-controller="Registration" asp-action="Index" class="btn btn-light btn-lg">@T["AdmissionNow"]</a>
-                <a asp-controller="Contact" asp-action="Index" class="btn btn-outline-light btn-lg">@T["ContactUs"]</a>
+                <a asp-controller="Registration" asp-action="Index" class="btn-white-sk">
+                    <i class="fa-solid fa-user-plus"></i>@(isMr ? "प्रवेश अर्ज करा" : "Apply for Admission")
+                </a>
+                <a asp-controller="Contact" asp-action="Index" class="btn-outline-light-sk">
+                    <i class="fa-solid fa-phone"></i>@(isMr ? "संपर्क करा" : "Contact Us")
+                </a>
             </div>
         </div>
     </div>

@@ -1,0 +1,89 @@
+@model IReadOnlyList<Shivakala.Core.ViewModels.TestimonialViewModel>
+@using System.Globalization
+@{
+    ViewData["Title"] = "Testimonials | Shivakala Coaching Classes";
+    var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
+}
+<section class="page-hero" style="background:linear-gradient(135deg,var(--gold),var(--orange))">
+    <div class="container">
+        <span class="badge-soft"><i class="fa-solid fa-star me-1"></i>@(isMr ? "अभिप्राय" : "Testimonials")</span>
+        <h1>@(isMr ? "पालक व विद्यार्थ्यांचे अनुभव" : "What Parents & Students Say")</h1>
+        <p>@(isMr ? "आमच्या विद्यार्थ्यांचे शब्द" : "Real stories from our Shivakala family")</p>
+    </div>
+</section>
+<section class="section-shell warm-section">
+    <div class="container">
+        @if (Model.Any())
+        {
+            <div class="row g-3 mb-5">
+                @foreach (var t in Model)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="testimonial-card reveal">
+                            <div class="quote-mark"><i class="fa-solid fa-quote-left"></i></div>
+                            <p>"@t.Quote"</p>
+                            <div class="d-flex align-items-center gap-3 mt-3">
+                                <div class="faculty-avatar" style="width:42px;height:42px;font-size:1rem">@(t.StudentName.Length > 0 ? t.StudentName[0] : 'S')</div>
+                                <div>
+                                    <h3 style="margin:0;font-size:0.92rem">@t.StudentName</h3>
+                                    <span style="color:var(--green);font-size:0.78rem;font-weight:600">@t.Achievement</span>
+                                </div>
+                                <div class="ms-auto" style="color:var(--gold);font-size:0.85rem;letter-spacing:1px">
+                                    @for (int i = 0; i < t.Rating; i++) { <text>★</text> }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- Submit testimonial form -->
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="glass-alert d-flex align-items-center gap-2 mb-4">
+                        <i class="fa-solid fa-circle-check"></i><span>@TempData["SuccessMessage"]</span>
+                    </div>
+                }
+                <div class="glass-card" style="border-top:4px solid var(--gold)">
+                    <h3 style="color:var(--navy);font-size:1.1rem;margin-bottom:4px"><i class="fa-solid fa-pen me-2" style="color:var(--gold)"></i>@(isMr ? "आपला अभिप्राय द्या" : "Share Your Experience")</h3>
+                    <p class="text-muted mb-4" style="font-size:0.85rem">@(isMr ? "आपला अभिप्राय मंजुरीनंतर प्रकाशित केला जाईल." : "Your review will be published after approval.")</p>
+                    <form asp-controller="Testimonials" asp-action="Submit" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">@(isMr ? "आपले नाव" : "Your Name") *</label>
+                                <input name="name" class="form-control" required placeholder="@(isMr?"पूर्ण नाव":"Full name")" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">@(isMr ? "भूमिका" : "Role")</label>
+                                <input name="role" class="form-control" placeholder="@(isMr?"उदा. पालक / 10वीचा विद्यार्थी":"e.g. Parent / 10th Std Student")" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">@(isMr ? "आपला अनुभव" : "Your Experience") *</label>
+                                <textarea name="quote" class="form-control" rows="3" required placeholder="@(isMr?"आपला अनुभव लिहा...":"Write your experience...")"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">@(isMr ? "रेटिंग" : "Rating")</label>
+                                <div class="d-flex gap-2">
+                                    @for (int i = 5; i >= 1; i--)
+                                    {
+                                        <label style="cursor:pointer;font-size:1.4rem;color:var(--gold)">
+                                            <input type="radio" name="rating" value="@i" style="display:none" @(i == 5 ? "checked" : "") />
+                                            ★
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn-green-sk"><i class="fa-solid fa-paper-plane"></i>@(isMr?"अभिप्राय पाठवा":"Submit Review")</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

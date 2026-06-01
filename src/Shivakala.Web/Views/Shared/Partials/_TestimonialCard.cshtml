@@ -1,8 +1,13 @@
-@model TestimonialViewModel
-
-<article class="testimonial-card reveal h-100">
+@model Shivakala.Core.ViewModels.TestimonialViewModel
+<div class="testimonial-card reveal">
     <div class="quote-mark"><i class="fa-solid fa-quote-left"></i></div>
-    <p>@Model.Quote</p>
-    <h3>@Model.StudentName</h3>
-    <span>@Model.Achievement</span>
-</article>
+    <p>"@Model.Quote"</p>
+    <div class="d-flex align-items-center gap-2 mt-2">
+        <div class="faculty-avatar" style="width:36px;height:36px;font-size:0.9rem">@(Model.StudentName?.Length > 0 ? Model.StudentName[0].ToString().ToUpper() : "S")</div>
+        <div>
+            <h3>@Model.StudentName</h3>
+            <span>@Model.Achievement</span>
+        </div>
+        <div class="ms-auto" style="color:var(--gold);font-size:0.75rem">★★★★★</div>
+    </div>
+</div>

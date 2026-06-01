@@ -1,37 +1,89 @@
-@model ContactPageViewModel
+@model Shivakala.Core.ViewModels.ContactPageViewModel
+@using System.Globalization
 @{
-    ViewData["Title"] = T["ContactTitle"];
-    ViewData["MetaDescription"] = T["ContactLead"];
+    ViewData["Title"] = Model?.Seo?.Title ?? "Contact Us | Shivakala Coaching Classes";
+    ViewData["MetaDescription"] = Model?.Seo?.Description ?? "Contact Shivakala Coaching Classes, Chikhali, Maharashtra.";
+    var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
 }
 
-<section class="page-hero">
+<section class="page-hero" style="background:linear-gradient(135deg,var(--teal),var(--navy-mid))">
     <div class="container">
-        <span class="badge-soft">@T["NavContact"]</span>
-        <h1>@T["ContactTitle"]</h1>
-        <p>@T["ContactLead"]</p>
+        <span class="badge-soft"><i class="fa-solid fa-phone-volume me-1"></i>@(isMr ? "संपर्क करा" : "Contact Us")</span>
+        <h1>@(isMr ? "आमच्याशी संपर्क करा" : "Get in Touch")</h1>
+        <p>@(isMr ? "कोणत्याही प्रश्नासाठी आम्ही नेहमी तयार आहोत." : "We're always here to answer your questions.")</p>
     </div>
 </section>
 
-<section class="section-shell">
+<section class="section-shell warm-section">
     <div class="container">
         <div class="row g-4">
+            <!-- Contact Cards -->
             <div class="col-lg-4">
-                <div class="glass-card reveal h-100">
-                    <h3>@T["ContactUs"]</h3>
-                    <p class="mb-3">@T["ContactDescription"]</p>
+                <div class="glass-card mb-3" style="border-top:4px solid var(--navy)">
+                    <h5 style="color:var(--navy);font-size:1rem;margin-bottom:16px"><i class="fa-solid fa-address-book me-2" style="color:var(--gold)"></i>@(isMr ? "संपर्क माहिती" : "Contact Information")</h5>
                     <ul class="contact-list">
-                        <li><i class="fa-solid fa-phone"></i><span>@Model.Phone</span></li>
-                        <li><i class="fa-solid fa-envelope"></i><span>@Model.Email</span></li>
-                        <li><i class="fa-solid fa-location-dot"></i><span>@Model.Address</span></li>
+                        <li><i class="fa-solid fa-location-dot"></i><span>@(isMr ? "शिवकला क्लासेस, चिखली, महाराष्ट्र" : "Shivakala Classes, Chikhali, Maharashtra")</span></li>
+                        <li><i class="fa-solid fa-phone"></i><a href="tel:+918087807011" style="color:var(--text-mid)">+91 80878 07011</a></li>
+                        <li><i class="fa-solid fa-phone"></i><a href="tel:+918830907011" style="color:var(--text-mid)">+91 88309 07011</a></li>
+                        <li><i class="fa-solid fa-envelope"></i><a href="mailto:info@shivkalaclasses.com" style="color:var(--text-mid)">info@shivkalaclasses.com</a></li>
+                        <li><i class="fa-solid fa-globe"></i><a href="#" style="color:var(--text-mid)">www.shivkalaclasses.com</a></li>
+                        <li><i class="fa-solid fa-clock"></i><span>@(isMr ? "सोम–शनि: सकाळी ७ ते रात्री ९" : "Mon–Sat: 7:00 AM – 9:00 PM")</span></li>
                     </ul>
                 </div>
-            </div>
-            <div class="col-lg-8">
-                <div class="glass-card reveal h-100">
-                    <h3>@T["VisitUs"]</h3>
-                    <div class="map-frame">
-                        <iframe title="Map" loading="lazy" referrerpolicy="no-referrer-when-downgrade" src="https://www.google.com/maps?q=@Uri.EscapeDataString(Model.MapQuery)&output=embed"></iframe>
+                <div class="glass-card" style="border-top:4px solid var(--green)">
+                    <h5 style="color:var(--navy);font-size:1rem;margin-bottom:16px"><i class="fa-solid fa-share-nodes me-2" style="color:var(--green)"></i>@(isMr ? "सोशल मीडिया" : "Social Media")</h5>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="https://wa.me/918087807011" target="_blank" class="btn-green-sk py-2 px-3" style="border-radius:8px;font-size:0.82rem"><i class="fa-brands fa-whatsapp"></i>WhatsApp</a>
+                        <a href="#" class="btn-primary-sk py-2 px-3" style="border-radius:8px;font-size:0.82rem"><i class="fa-brands fa-facebook"></i>Facebook</a>
+                        <a href="#" class="btn-primary-sk py-2 px-3" style="background:var(--purple);border-radius:8px;font-size:0.82rem"><i class="fa-brands fa-instagram"></i>Instagram</a>
+                        <a href="#" class="btn-primary-sk py-2 px-3" style="background:#FF0000;border-radius:8px;font-size:0.82rem"><i class="fa-brands fa-youtube"></i>YouTube</a>
                     </div>
+                </div>
+            </div>
+
+            <!-- Map + Enquiry -->
+            <div class="col-lg-8">
+                <div class="glass-card mb-4">
+                    <h5 style="color:var(--navy);font-size:1rem;margin-bottom:12px"><i class="fa-solid fa-map-location-dot me-2" style="color:var(--gold)"></i>@(isMr ? "आमचे ठिकाण" : "Our Location")</h5>
+                    <div class="map-frame">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3782.1!2d73.79!3d18.65!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2sChikhali%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1234567890"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                            title="Shivakala Classes Location">
+                        </iframe>
+                    </div>
+                </div>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="glass-alert d-flex align-items-center gap-2 mb-3">
+                        <i class="fa-solid fa-circle-check"></i><span>@TempData["SuccessMessage"]</span>
+                    </div>
+                }
+                <div class="glass-card">
+                    <h5 style="color:var(--navy);font-size:1rem;margin-bottom:16px"><i class="fa-solid fa-envelope me-2" style="color:var(--teal)"></i>@(isMr ? "चौकशी पाठवा" : "Quick Enquiry")</h5>
+                    <form asp-controller="Enquiry" asp-action="Index" method="post" novalidate>
+                        @Html.AntiForgeryToken()
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">@(isMr ? "आपले नाव" : "Your Name") *</label>
+                                <input name="Name" class="form-control" placeholder="@(isMr ? "पूर्ण नाव" : "Full name")" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">@(isMr ? "मोबाईल" : "Mobile") *</label>
+                                <input name="Mobile" class="form-control" placeholder="+91 XXXXX XXXXX" type="tel" required />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">@(isMr ? "संदेश" : "Message") *</label>
+                                <textarea name="Message" class="form-control" rows="3" placeholder="@(isMr ? "आपला प्रश्न..." : "Your message...")" required></textarea>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-paper-plane"></i>@(isMr ? "पाठवा" : "Send Message")</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

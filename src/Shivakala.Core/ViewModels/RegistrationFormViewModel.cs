@@ -4,29 +4,38 @@ namespace Shivakala.Core.ViewModels;
 
 public sealed class RegistrationFormViewModel
 {
-    [Required]
+    [Required(ErrorMessage = "Student name is required.")]
     [StringLength(120)]
     public string FullName { get; set; } = string.Empty;
 
-    [Required]
-    [RegularExpression(@"^[0-9]{10}$")]
+    [StringLength(120)]
+    public string? ParentName { get; set; }
+
+    [Required(ErrorMessage = "Mobile number is required.")]
+    [RegularExpression(@"^[0-9]{10}$", ErrorMessage = "Enter a valid 10-digit mobile number.")]
     public string Mobile { get; set; } = string.Empty;
 
-    [EmailAddress]
+    [EmailAddress(ErrorMessage = "Enter a valid email address.")]
     [StringLength(150)]
     public string? Email { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "Standard is required.")]
     [StringLength(80)]
     public string Standard { get; set; } = string.Empty;
 
-    [Required]
+    [Required(ErrorMessage = "Subject is required.")]
     [StringLength(120)]
     public string Subject { get; set; } = string.Empty;
 
-    [Required]
+    [Required(ErrorMessage = "Address is required.")]
     [StringLength(250)]
     public string Address { get; set; } = string.Empty;
+
+    [StringLength(80)]
+    public string? Board { get; set; }
+
+    [StringLength(60)]
+    public string? Medium { get; set; }
 
     public SeoViewModel Seo { get; set; } = new();
 }

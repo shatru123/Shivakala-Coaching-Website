@@ -1,40 +1,41 @@
 using Microsoft.AspNetCore.Mvc;
 using Shivakala.Core.Services;
 using Shivakala.Core.ViewModels;
+using System.Globalization;
 
 namespace Shivakala.Web.Controllers;
 
-public sealed class RegistrationController(
-    IRegistrationService registrationService,
-    ILogger<RegistrationController> logger) : Controller
+public sealed class RegistrationController(IRegistrationService registrationService, ILogger<RegistrationController> logger) : Controller
 {
     [HttpGet]
-    public IActionResult Index() => View(CreateModel());
+    public async Task<IActionResult> Index(CancellationToken ct)
+        => View(await registrationService.GetFormViewModelAsync(ct));
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Index(RegistrationFormViewModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> Index(RegistrationFormViewModel model, CancellationToken ct)
     {
-        model.Seo = CreateSeo();
-
         if (!ModelState.IsValid)
         {
-            return View(model);
+            var viewModel = await registrationService.GetFormViewModelAsync(ct);
+            viewModel.FullName = model.FullName;
+            viewModel.Mobile = model.Mobile;
+            viewModel.Email = model.Email;
+            viewModel.Standard = model.Standard;
+            viewModel.Subject = model.Subject;
+            viewModel.Address = model.Address;
+            viewModel.Board = model.Board;
+            viewModel.Medium = model.Medium;
+            viewModel.ParentName = model.ParentName;
+            return View(viewModel);
         }
 
-        await registrationService.RegisterStudentAsync(model, cancellationToken);
-        TempData["SuccessMessage"] = "Registration submitted successfully.";
-        logger.LogInformation("Registration form submitted by {Name}", model.FullName);
-
+        await registrationService.RegisterAsync(model, ct);
+        var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
+        TempData["SuccessMessage"] = isMr
+            ? "नोंदणी यशस्वीरीत्या झाली! आम्ही लवकरच संपर्क करू."
+            : "Registration submitted successfully! We will contact you soon.";
+        logger.LogInformation("New registration: {Name} for Std {Standard}", model.FullName, model.Standard);
         return RedirectToAction(nameof(Index));
     }
-
-    private static RegistrationFormViewModel CreateModel() => new() { Seo = CreateSeo() };
-
-    private static SeoViewModel CreateSeo() => new()
-    {
-        Title = "Student Registration | Shivakala Coaching Classes",
-        Description = "Register for coaching admissions at Shivakala Coaching Classes through our secure online form.",
-        Keywords = "Shivakala registration, coaching admission form, student registration"
-    };
 }

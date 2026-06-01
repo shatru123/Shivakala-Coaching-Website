@@ -1,67 +1,142 @@
-@model RegistrationFormViewModel
+@model Shivakala.Core.ViewModels.RegistrationFormViewModel
+@using System.Globalization
 @{
-    ViewData["Title"] = T["RegistrationTitle"];
-    ViewData["MetaDescription"] = T["RegistrationLead"];
+    ViewData["Title"] = Model?.Seo?.Title ?? "Student Registration | Shivakala Coaching Classes";
+    ViewData["MetaDescription"] = Model?.Seo?.Description ?? "Register for Shivakala Coaching Classes admission 2026-27.";
+    var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
 }
 
 <section class="page-hero">
     <div class="container">
-        <span class="badge-soft">@T["NavRegistration"]</span>
-        <h1>@T["RegistrationTitle"]</h1>
-        <p>@T["RegistrationLead"]</p>
+        <span class="badge-soft"><i class="fa-solid fa-user-plus me-1"></i>@(isMr ? "प्रवेश अर्ज" : "Registration")</span>
+        <h1>@(isMr ? "विद्यार्थी नोंदणी अर्ज" : "Student Registration Form")</h1>
+        <p>@(isMr ? "खालील फॉर्म भरा. आम्ही लवकरच संपर्क करू." : "Fill in the form below and we will get in touch with you shortly.")</p>
     </div>
 </section>
 
 <section class="section-shell">
     <div class="container">
-        <div class="row justify-content-center">
+        <div class="row g-4 justify-content-center">
+            <!-- Form -->
             <div class="col-lg-8">
-                <div class="glass-card reveal">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="glass-alert d-flex align-items-center gap-2 mb-4">
+                        <i class="fa-solid fa-circle-check fa-lg"></i>
+                        <span>@TempData["SuccessMessage"]</span>
+                    </div>
+                }
+                <div class="glass-card">
+                    <div class="d-flex align-items-center gap-3 mb-4 pb-3" style="border-bottom:2px solid var(--light-gray)">
+                        <div class="icon-wrap mb-0" style="background:linear-gradient(135deg,var(--navy),var(--navy-mid));color:#fff;margin-bottom:0!important">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+                        <div>
+                            <h2 class="mb-0" style="font-size:1.25rem;color:var(--navy)">@(isMr ? "नोंदणी अर्ज" : "Admission Registration")</h2>
+                            <p class="mb-0 text-muted" style="font-size:0.82rem">@(isMr ? "सर्व * चिन्हांकित माहिती भरणे आवश्यक आहे" : "All fields marked * are required")</p>
+                        </div>
+                    </div>
+
                     <form asp-action="Index" method="post" novalidate>
                         @Html.AntiForgeryToken()
-                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                        <div class="row g-4">
+                        <div asp-validation-summary="All" class="alert alert-danger d-none"></div>
+
+                        <!-- Personal Info -->
+                        <h6 class="mb-3 fw-700" style="color:var(--navy);font-size:0.82rem;text-transform:uppercase;letter-spacing:1px;border-left:3px solid var(--navy);padding-left:10px">
+                            <i class="fa-solid fa-user me-2"></i>@(isMr ? "वैयक्तिक माहिती" : "Personal Information")
+                        </h6>
+                        <div class="row g-3 mb-3">
                             <div class="col-md-6">
-                                <label asp-for="FullName" class="form-label">@T["FullName"]</label>
-                                <input asp-for="FullName" class="form-control" />
+                                <label asp-for="FullName" class="form-label">@(isMr ? "विद्यार्थ्याचे पूर्ण नाव" : "Student's Full Name") <span class="text-danger">*</span></label>
+                                <input asp-for="FullName" class="form-control" placeholder="@(isMr ? "पूर्ण नाव लिहा" : "Enter full name")" />
                                 <span asp-validation-for="FullName" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="Mobile" class="form-label">@T["MobileNumber"]</label>
-                                <input asp-for="Mobile" class="form-control" />
+                                <label asp-for="Mobile" class="form-label">@(isMr ? "मोबाईल नंबर" : "Mobile Number") <span class="text-danger">*</span></label>
+                                <input asp-for="Mobile" class="form-control" placeholder="+91 XXXXX XXXXX" type="tel" />
                                 <span asp-validation-for="Mobile" class="text-danger small"></span>
                             </div>
                             <div class="col-md-6">
-                                <label asp-for="Email" class="form-label">@T["EmailAddress"]</label>
-                                <input asp-for="Email" class="form-control" />
+                                <label asp-for="Email" class="form-label">@(isMr ? "ईमेल पत्ता" : "Email Address")</label>
+                                <input asp-for="Email" class="form-control" placeholder="example@email.com" type="email" />
                                 <span asp-validation-for="Email" class="text-danger small"></span>
                             </div>
-                            <div class="col-md-6">
-                                <label asp-for="Standard" class="form-label">@T["Standard"]</label>
-                                <input asp-for="Standard" class="form-control" />
+                        </div>
+
+                        <!-- Academic Info -->
+                        <h6 class="mb-3 fw-700" style="color:var(--navy);font-size:0.82rem;text-transform:uppercase;letter-spacing:1px;border-left:3px solid var(--green);padding-left:10px">
+                            <i class="fa-solid fa-graduation-cap me-2"></i>@(isMr ? "शैक्षणिक माहिती" : "Academic Details")
+                        </h6>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label asp-for="Standard" class="form-label">@(isMr ? "इयत्ता" : "Standard") <span class="text-danger">*</span></label>
+                                <select asp-for="Standard" class="form-select">
+                                    <option value="">@(isMr ? "-- इयत्ता निवडा --" : "-- Select Standard --")</option>
+                                    <option value="KG1">KG1</option>
+                                    <option value="KG2">KG2</option>
+                                    @for (int i = 1; i <= 10; i++) {
+                                        <option value="@i">@i@(isMr ? "वी" : (i==1?"st":i==2?"nd":i==3?"rd":"th")) @(isMr ? "इयत्ता" : "Standard")</option>
+                                    }
+                                </select>
                                 <span asp-validation-for="Standard" class="text-danger small"></span>
                             </div>
-                            <div class="col-md-6">
-                                <label asp-for="Subject" class="form-label">@T["Subject"]</label>
-                                <input asp-for="Subject" class="form-control" />
-                                <span asp-validation-for="Subject" class="text-danger small"></span>
+                            <div class="col-md-4">
+                                <label asp-for="Subject" class="form-label">@(isMr ? "आवडीचा विषय" : "Subject")</label>
+                                <select asp-for="Subject" class="form-select">
+                                    <option value="">@(isMr ? "-- विषय निवडा --" : "-- Select Subject --")</option>
+                                    <option value="Mathematics">@(isMr ? "गणित" : "Mathematics")</option>
+                                    <option value="English">@(isMr ? "इंग्रजी" : "English")</option>
+                                    <option value="Science">@(isMr ? "विज्ञान" : "Science")</option>
+                                    <option value="All Subjects">@(isMr ? "सर्व विषय" : "All Subjects")</option>
+                                </select>
                             </div>
-                            <div class="col-md-6">
-                                <label asp-for="Address" class="form-label">@T["Address"]</label>
-                                <input asp-for="Address" class="form-control" />
-                                <span asp-validation-for="Address" class="text-danger small"></span>
+                            <div class="col-md-4">
+                                <label class="form-label">@(isMr ? "बोर्ड" : "Board")</label>
+                                <select class="form-select" name="Board">
+                                    <option value="">@(isMr ? "-- बोर्ड निवडा --" : "-- Select Board --")</option>
+                                    <option value="SSC">SSC (Maharashtra)</option>
+                                    <option value="CBSE">CBSE</option>
+                                    <option value="ICSE">ICSE</option>
+                                </select>
                             </div>
                             <div class="col-12">
-                                <button type="submit" class="btn btn-gradient btn-lg">@T["SubmitRegistration"]</button>
+                                <label asp-for="Address" class="form-label">@(isMr ? "पत्ता" : "Address")</label>
+                                <textarea asp-for="Address" class="form-control" rows="2" placeholder="@(isMr ? "संपूर्ण पत्ता लिहा" : "Enter full address")"></textarea>
                             </div>
                         </div>
+
+                        <button type="submit" class="btn-green-sk w-100 py-3 justify-content-center" style="border-radius:10px;font-size:0.95rem;">
+                            <i class="fa-solid fa-paper-plane me-2"></i>
+                            @(isMr ? "अर्ज सादर करा" : "Submit Registration")
+                        </button>
                     </form>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="glass-hero mb-3">
+                    <div class="mini-chip mb-2"><i class="fa-solid fa-calendar-check me-1"></i>2026–27</div>
+                    <h3>@(isMr ? "प्रवेश सुरू आहेत" : "Admissions Open")</h3>
+                    <ul class="hero-list">
+                        <li>@(isMr ? "KG1 ते 10वी सर्व इयत्तांसाठी" : "KG1 to 10th — All Standards")</li>
+                        <li>@(isMr ? "गणित, इंग्रजी, विज्ञान" : "Maths, English, Science")</li>
+                        <li>@(isMr ? "SSC, CBSE, ICSE सर्व बोर्ड" : "SSC, CBSE, ICSE All Boards")</li>
+                        <li>@(isMr ? "दर शनिवारी साप्ताहिक चाचणी" : "Weekly Test every Saturday")</li>
+                        <li>@(isMr ? "वैयक्तिक लक्ष व मार्गदर्शन" : "Personal attention & guidance")</li>
+                    </ul>
+                </div>
+                <div class="glass-card p-3">
+                    <h6 class="mb-3" style="color:var(--navy);font-size:0.88rem;font-weight:700;text-transform:uppercase;letter-spacing:1px">
+                        <i class="fa-solid fa-phone me-2"></i>@(isMr ? "संपर्क" : "Contact Us")
+                    </h6>
+                    <ul class="contact-list">
+                        <li><i class="fa-solid fa-phone"></i><div><strong style="color:var(--text);font-size:0.9rem">+91 80878 07011</strong></div></li>
+                        <li><i class="fa-solid fa-phone"></i><div><strong style="color:var(--text);font-size:0.9rem">+91 88309 07011</strong></div></li>
+                        <li><i class="fa-solid fa-location-dot"></i><span>@(isMr ? "शिवकला क्लासेस, चिखली, महाराष्ट्र" : "Shivakala Classes, Chikhali, Maharashtra")</span></li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 </section>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
