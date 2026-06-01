@@ -2,7 +2,7 @@
 @using System.Globalization
 @{
     ViewData["Title"] = ViewData["Title"] ?? "Courses | Shivakala Coaching Classes";
-    ViewData["MetaDescription"] = ViewData["MetaDescription"] ?? "Explore all courses at Shivakala Coaching Classes — KG1 to 10th Standard.";
+    ViewData["MetaDescription"] = ViewData["MetaDescription"] ?? "Explore all courses at Shivakala Coaching Classes.";
     var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
 }
 
@@ -10,125 +10,35 @@
     <div class="container">
         <span class="badge-soft"><i class="fa-solid fa-book me-1"></i>@(isMr ? "अभ्यासक्रम" : "Courses")</span>
         <h1>@(isMr ? "आमचे अभ्यासक्रम" : "Our Courses")</h1>
-        <p>@(isMr ? "KG1 ते 10वी — गणित, इंग्रजी, विज्ञान | सर्व बोर्ड" : "KG1 to 10th Standard — Maths, English, Science | All Boards")</p>
+        <p>@(isMr ? "अॅडमिन पॅनेलमधून अद्ययावत केलेले अभ्यासक्रम" : "Course offerings managed from the admin panel")</p>
     </div>
 </section>
 
 <section class="section-shell warm-section">
     <div class="container">
-        <!-- Pre-Primary -->
-        <div class="mb-5">
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <div class="icon-wrap mb-0" style="background:linear-gradient(135deg,var(--purple),var(--purple-light));color:#fff;margin-bottom:0!important;flex-shrink:0"><i class="fa-solid fa-child"></i></div>
-                <div>
-                    <h2 style="font-size:1.3rem;color:var(--navy);margin:0">@(isMr ? "पूर्व-प्राथमिक" : "Pre-Primary")</h2>
-                    <span style="color:var(--text-mid);font-size:0.82rem">KG1 &amp; KG2</span>
-                </div>
-            </div>
+        @if (Model is { Count: > 0 })
+        {
             <div class="row g-3">
-                @foreach (var cls in new[]{"KG1","KG2"})
+                @foreach (var course in Model.OrderByDescending(x => x.IsFeatured))
                 {
                     <div class="col-md-6 col-lg-4">
-                        <div class="course-card reveal">
-                            <div style="display:flex;align-items:center;gap:10px">
-                                <div class="subject-icon-wrap kg" style="width:42px;height:42px;font-size:1.4rem;flex-shrink:0">🐻</div>
-                                <span class="badge-soft dark" style="font-size:0.72rem">@cls</span>
-                            </div>
-                            <h3>@cls @(isMr ? "— खेळ व शिक्षण" : "— Play & Learn")</h3>
-                            <p>@(isMr ? "मूलभूत संकल्पना खेळाद्वारे शिकवल्या जातात. वाचन, लेखन आणि अंकगणिताची ओळख." : "Foundational concepts taught through play. Introduction to reading, writing, and basic numeracy.")</p>
-                            <div class="course-meta">
-                                <span><i class="fa-solid fa-users me-1" style="color:var(--navy)"></i>@(isMr ? "सर्व माध्यमे" : "All Mediums")</span>
-                                <span><i class="fa-solid fa-calendar me-1" style="color:var(--green)"></i>2026–27</span>
-                            </div>
-                        </div>
+                        @await Html.PartialAsync("Partials/_CourseCard", course)
                     </div>
                 }
             </div>
-        </div>
-
-        <!-- Primary -->
-        <div class="mb-5">
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <div class="icon-wrap mb-0" style="background:linear-gradient(135deg,var(--green),var(--green-light));color:#fff;margin-bottom:0!important;flex-shrink:0"><i class="fa-solid fa-book-open"></i></div>
-                <div>
-                    <h2 style="font-size:1.3rem;color:var(--navy);margin:0">@(isMr ? "प्राथमिक" : "Primary")</h2>
-                    <span style="color:var(--text-mid);font-size:0.82rem">@(isMr ? "1ली – 6वी इयत्ता" : "1st – 6th Standard")</span>
-                </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fa-solid fa-book-open fa-3x mb-3" style="color:var(--border)"></i>
+                <p class="text-muted">@(isMr ? "सध्या कोणतेही अभ्यासक्रम उपलब्ध नाहीत." : "No courses are available yet.")</p>
             </div>
-            @if (Model is { Count: > 0 })
-            {
-                <div class="row g-3">
-                    @foreach (var course in Model)
-                    {
-                        <div class="col-md-6 col-lg-4">
-                            @await Html.PartialAsync("Partials/_CourseCard", course)
-                        </div>
-                    }
-                </div>
-            }
-            else
-            {
-                <div class="row g-3">
-                    @foreach (var (subj, icon, color) in new[]{("Mathematics","fa-calculator","maths"),("English","fa-book-open","english"),("Science","fa-flask","science")})
-                    {
-                        <div class="col-md-6 col-lg-4">
-                            <div class="course-card reveal">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="subject-icon-wrap @color" style="width:44px;height:44px;font-size:1.2rem;flex-shrink:0"><i class="fa-solid @icon"></i></div>
-                                    <div>
-                                        <h3 style="margin:0;font-size:1rem">@(isMr && subj=="Mathematics" ? "गणित" : isMr && subj=="English" ? "इंग्रजी" : isMr ? "विज्ञान" : subj)</h3>
-                                        <small style="color:var(--text-mid)">@(isMr ? "1ली – 6वी" : "1st – 6th Std")</small>
-                                    </div>
-                                </div>
-                                <p class="mt-2">@(subj=="Mathematics" ? (isMr ? "पाया भक्कम करणे, अंकगणित, बीजगणित व भूमिती." : "Build strong number sense, arithmetic, algebra and geometry.") : subj=="English" ? (isMr ? "वाचन, लेखन, व्याकरण आणि संभाषण कौशल्य." : "Reading comprehension, grammar, writing and communication.") : (isMr ? "भौतिकशास्त्र, रसायनशास्त्र आणि जीवशास्त्र — सोप्या भाषेत." : "Physics, Chemistry and Biology made simple and engaging."))</p>
-                                <div class="course-meta">
-                                    <span><i class="fa-solid fa-calendar me-1" style="color:var(--green)"></i>2026–27</span>
-                                    <span><i class="fa-solid fa-chalkboard-user me-1" style="color:var(--navy)"></i>@(isMr ? "तज्ज्ञ शिक्षक" : "Expert Faculty")</span>
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
-        </div>
+        }
 
-        <!-- Secondary -->
-        <div class="mb-4">
-            <div class="d-flex align-items-center gap-3 mb-3">
-                <div class="icon-wrap mb-0" style="background:linear-gradient(135deg,var(--navy),var(--navy-mid));color:#fff;margin-bottom:0!important;flex-shrink:0"><i class="fa-solid fa-graduation-cap"></i></div>
-                <div>
-                    <h2 style="font-size:1.3rem;color:var(--navy);margin:0">@(isMr ? "माध्यमिक" : "Secondary")</h2>
-                    <span style="color:var(--text-mid);font-size:0.82rem">@(isMr ? "7वी – 10वी इयत्ता" : "7th – 10th Standard")</span>
-                </div>
-            </div>
-            <div class="row g-3">
-                @foreach (var (subj, icon, color) in new[]{("Mathematics","fa-calculator","maths"),("English","fa-book-open","english"),("Science","fa-flask","science")})
-                {
-                    <div class="col-md-6 col-lg-4">
-                        <div class="course-card reveal" style="border-left-color:var(--navy-mid)">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="subject-icon-wrap @color" style="width:44px;height:44px;font-size:1.2rem;flex-shrink:0"><i class="fa-solid @icon"></i></div>
-                                <div>
-                                    <h3 style="margin:0;font-size:1rem">@(isMr && subj=="Mathematics" ? "गणित" : isMr && subj=="English" ? "इंग्रजी" : isMr ? "विज्ञान" : subj)</h3>
-                                    <small style="color:var(--text-mid)">@(isMr ? "7वी – 10वी" : "7th – 10th Std")</small>
-                                </div>
-                            </div>
-                            <p class="mt-2">@(subj=="Mathematics" ? (isMr ? "बोर्ड परीक्षेची तयारी. बीजगणित, भूमिती, सांख्यिकी." : "Board exam preparation — Algebra, Geometry, Statistics, Trigonometry.") : subj=="English" ? (isMr ? "बोर्ड परीक्षेची तयारी. निबंध, व्याकरण आणि साहित्य." : "Board exam prep — Essays, grammar, literature and writing skills.") : (isMr ? "बोर्ड परीक्षेची तयारी. भौतिकशास्त्र, रसायनशास्त्र, जीवशास्त्र." : "Board exam preparation — Physics, Chemistry, Biology."))</p>
-                            <div class="course-meta">
-                                <span><i class="fa-solid fa-calendar me-1" style="color:var(--green)"></i>2026–27</span>
-                                <span><i class="fa-solid fa-award me-1" style="color:var(--gold)"></i>@(isMr ? "बोर्ड तयारी" : "Board Prep")</span>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-
-        <!-- CTA -->
         <div class="cta-card mt-4">
             <div>
                 <h2>@(isMr ? "आजच प्रवेश घ्या!" : "Enroll Today!")</h2>
-                <p>@(isMr ? "2026–27 साठी प्रवेश सुरू आहेत. मर्यादित जागा उपलब्ध आहेत." : "Admissions for 2026–27 are now open. Limited seats available.")</p>
+                <p>@(isMr ? "प्रवेश व बॅच तपशीलासाठी आमच्याशी संपर्क साधा." : "Contact us for admission and batch details.")</p>
             </div>
             <div class="cta-actions">
                 <a asp-controller="Registration" asp-action="Index" class="btn-white-sk"><i class="fa-solid fa-user-plus"></i>@(isMr ? "प्रवेश अर्ज करा" : "Apply Now")</a>

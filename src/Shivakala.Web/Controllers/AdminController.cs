@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shivakala.Core.Interfaces;
 using Shivakala.Core.Services;
 using Shivakala.Core.ViewModels;
 using Shivakala.Infrastructure.Repositories;
@@ -12,11 +13,13 @@ namespace Shivakala.Web.Controllers;
 public sealed class AdminController(
     IAdminAuthenticationService authService,
     IAdminPortalService portalService,
+    ICourseRepository courseRepo,
     INoticeRepository noticeRepo,
     ITestResultRepository resultRepo,
     IStudyMaterialRepository materialRepo,
     IGalleryRepository galleryRepo,
     ITestimonialRepository testimonialRepo,
+    IWebHostEnvironment webHostEnvironment,
     ILogger<AdminController> logger) : Controller
 {
     // ===== AUTH =====
@@ -111,6 +114,103 @@ public sealed class AdminController(
     {
         var csv = await portalService.ExportEnquiriesCsvAsync(ct);
         return File(csv, "text/csv", $"enquiries_{DateTime.Now:yyyyMMdd}.csv");
+    }
+
+    // ===== COURSES =====
+    [Authorize, HttpGet]
+    public async Task<IActionResult> Courses(CancellationToken ct)
+        => View(await courseRepo.ListAsync(ct));
+
+    [Authorize, HttpGet]
+    public async Task<IActionResult> CreateCourse(CancellationToken ct)
+    {
+        var courses = await courseRepo.ListAsync(ct);
+        return View("CourseForm", new CourseFormViewModel { DisplayOrder = courses.Count + 1 });
+    }
+
+    [Authorize, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateCourse(CourseFormViewModel vm, CancellationToken ct)
+    {
+        NormalizeCourse(vm);
+        if (await courseRepo.GetBySlugAsync(vm.Slug, ct) != null)
+        {
+            ModelState.AddModelError(nameof(vm.Slug), "A course with this slug already exists.");
+        }
+        if (!ModelState.IsValid) return View("CourseForm", vm);
+
+        await courseRepo.AddAsync(new Core.Entities.Course
+        {
+            Slug = vm.Slug,
+            Title = vm.Title,
+            TitleMarathi = vm.TitleMarathi,
+            Description = vm.Description,
+            DescriptionMarathi = vm.DescriptionMarathi,
+            Standard = vm.Standard,
+            DurationMonths = vm.DurationMonths,
+            DisplayOrder = vm.DisplayOrder,
+            IsFeatured = vm.IsFeatured
+        }, ct);
+
+        TempData["SuccessMessage"] = "Course created successfully.";
+        return RedirectToAction(nameof(Courses));
+    }
+
+    [Authorize, HttpGet]
+    public async Task<IActionResult> EditCourse(int id, CancellationToken ct)
+    {
+        var course = await courseRepo.GetByIdAsync(id, ct);
+        if (course == null) return NotFound();
+
+        return View("CourseForm", new CourseFormViewModel
+        {
+            Id = course.Id,
+            Slug = course.Slug,
+            Title = course.Title,
+            TitleMarathi = course.TitleMarathi,
+            Description = course.Description,
+            DescriptionMarathi = course.DescriptionMarathi,
+            Standard = course.Standard,
+            DurationMonths = course.DurationMonths,
+            DisplayOrder = course.DisplayOrder,
+            IsFeatured = course.IsFeatured
+        });
+    }
+
+    [Authorize, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditCourse(CourseFormViewModel vm, CancellationToken ct)
+    {
+        NormalizeCourse(vm);
+        var slugOwner = await courseRepo.GetBySlugAsync(vm.Slug, ct);
+        if (slugOwner != null && slugOwner.Id != vm.Id)
+        {
+            ModelState.AddModelError(nameof(vm.Slug), "A course with this slug already exists.");
+        }
+        if (!ModelState.IsValid) return View("CourseForm", vm);
+
+        var course = await courseRepo.GetByIdAsync(vm.Id, ct);
+        if (course == null) return NotFound();
+
+        course.Slug = vm.Slug;
+        course.Title = vm.Title;
+        course.TitleMarathi = vm.TitleMarathi;
+        course.Description = vm.Description;
+        course.DescriptionMarathi = vm.DescriptionMarathi;
+        course.Standard = vm.Standard;
+        course.DurationMonths = vm.DurationMonths;
+        course.DisplayOrder = vm.DisplayOrder;
+        course.IsFeatured = vm.IsFeatured;
+
+        await courseRepo.UpdateAsync(course, ct);
+        TempData["SuccessMessage"] = "Course updated.";
+        return RedirectToAction(nameof(Courses));
+    }
+
+    [Authorize, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteCourse(int id, CancellationToken ct)
+    {
+        await courseRepo.DeleteAsync(id, ct);
+        TempData["SuccessMessage"] = "Course deleted.";
+        return RedirectToAction(nameof(Courses));
     }
 
     // ===== NOTICES =====
@@ -209,12 +309,12 @@ public sealed class AdminController(
     public IActionResult CreateMaterial() => View("MaterialForm", new StudyMaterialFormViewModel());
 
     [Authorize, HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> CreateMaterial(StudyMaterialFormViewModel vm, IWebHostEnvironment env, CancellationToken ct)
+    public async Task<IActionResult> CreateMaterial(StudyMaterialFormViewModel vm, CancellationToken ct)
     {
         if (vm.File == null || vm.File.Length == 0) ModelState.AddModelError("File","Please upload a file.");
         if (!ModelState.IsValid) return View("MaterialForm", vm);
 
-        var uploadDir = Path.Combine(env.WebRootPath, "uploads", "materials");
+        var uploadDir = Path.Combine(webHostEnvironment.WebRootPath, "uploads", "materials");
         Directory.CreateDirectory(uploadDir);
         var fileName = $"{Guid.NewGuid()}{Path.GetExtension(vm.File!.FileName)}";
         var filePath = Path.Combine(uploadDir, fileName);
@@ -231,12 +331,12 @@ public sealed class AdminController(
     }
 
     [Authorize, HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteMaterial(int id, IWebHostEnvironment env, CancellationToken ct)
+    public async Task<IActionResult> DeleteMaterial(int id, CancellationToken ct)
     {
         var m = await materialRepo.GetByIdAsync(id, ct);
         if (m != null)
         {
-            var physPath = Path.Combine(env.WebRootPath, m.FileUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+            var physPath = Path.Combine(webHostEnvironment.WebRootPath, m.FileUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
             if (System.IO.File.Exists(physPath)) System.IO.File.Delete(physPath);
             await materialRepo.DeleteAsync(id, ct);
         }
@@ -248,6 +348,73 @@ public sealed class AdminController(
     [Authorize, HttpGet]
     public async Task<IActionResult> Testimonials(CancellationToken ct)
         => View(await testimonialRepo.GetAllAdminAsync(ct));
+
+    [Authorize, HttpGet]
+    public IActionResult CreateTestimonial()
+        => View("TestimonialForm", new TestimonialFormViewModel());
+
+    [Authorize, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateTestimonial(TestimonialFormViewModel vm, CancellationToken ct)
+    {
+        NormalizeTestimonial(vm);
+        if (!ModelState.IsValid) return View("TestimonialForm", vm);
+
+        await testimonialRepo.AddAsync(new Core.Entities.Testimonial
+        {
+            Name = vm.Name,
+            Role = vm.Role,
+            Quote = vm.Quote,
+            QuoteMarathi = vm.QuoteMarathi,
+            Rating = vm.Rating,
+            IsApproved = vm.IsApproved,
+            IsFeatured = vm.IsFeatured,
+            CreatedDate = DateTime.UtcNow
+        }, ct);
+
+        TempData["SuccessMessage"] = "Testimonial created.";
+        return RedirectToAction(nameof(Testimonials));
+    }
+
+    [Authorize, HttpGet]
+    public async Task<IActionResult> EditTestimonial(int id, CancellationToken ct)
+    {
+        var testimonial = await testimonialRepo.GetByIdAsync(id, ct);
+        if (testimonial == null) return NotFound();
+
+        return View("TestimonialForm", new TestimonialFormViewModel
+        {
+            Id = testimonial.Id,
+            Name = testimonial.Name,
+            Role = testimonial.Role,
+            Quote = testimonial.Quote,
+            QuoteMarathi = testimonial.QuoteMarathi,
+            Rating = testimonial.Rating,
+            IsApproved = testimonial.IsApproved,
+            IsFeatured = testimonial.IsFeatured
+        });
+    }
+
+    [Authorize, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> EditTestimonial(TestimonialFormViewModel vm, CancellationToken ct)
+    {
+        NormalizeTestimonial(vm);
+        if (!ModelState.IsValid) return View("TestimonialForm", vm);
+
+        var testimonial = await testimonialRepo.GetByIdAsync(vm.Id, ct);
+        if (testimonial == null) return NotFound();
+
+        testimonial.Name = vm.Name;
+        testimonial.Role = vm.Role;
+        testimonial.Quote = vm.Quote;
+        testimonial.QuoteMarathi = vm.QuoteMarathi;
+        testimonial.Rating = vm.Rating;
+        testimonial.IsApproved = vm.IsApproved;
+        testimonial.IsFeatured = vm.IsFeatured;
+        await testimonialRepo.UpdateAsync(testimonial, ct);
+
+        TempData["SuccessMessage"] = "Testimonial updated.";
+        return RedirectToAction(nameof(Testimonials));
+    }
 
     [Authorize, HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> ApproveTestimonial(int id, bool featured, CancellationToken ct)
@@ -272,11 +439,11 @@ public sealed class AdminController(
         => View("AdminGallery", await galleryRepo.GetAllAdminAsync(ct));
 
     [Authorize, HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> UploadGalleryItem(string title, string category, string? caption, IFormFile image, IWebHostEnvironment env, CancellationToken ct)
+    public async Task<IActionResult> UploadGalleryItem(string title, string category, string? caption, IFormFile image, CancellationToken ct)
     {
         if (image != null && image.Length > 0)
         {
-            var dir = Path.Combine(env.WebRootPath, "uploads", "gallery");
+            var dir = Path.Combine(webHostEnvironment.WebRootPath, "uploads", "gallery");
             Directory.CreateDirectory(dir);
             var fileName = $"{Guid.NewGuid()}{Path.GetExtension(image.FileName)}";
             await using var s = System.IO.File.Create(Path.Combine(dir, fileName));
@@ -292,17 +459,38 @@ public sealed class AdminController(
     }
 
     [Authorize, HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteGalleryItem(int id, IWebHostEnvironment env, CancellationToken ct)
+    public async Task<IActionResult> DeleteGalleryItem(int id, CancellationToken ct)
     {
         var g = await galleryRepo.GetAllAdminAsync(ct);
         var item = g.FirstOrDefault(x => x.Id == id);
         if (item != null)
         {
-            var ph = Path.Combine(env.WebRootPath, item.ImageUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+            var ph = Path.Combine(webHostEnvironment.WebRootPath, item.ImageUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
             if (System.IO.File.Exists(ph)) System.IO.File.Delete(ph);
             await galleryRepo.DeleteAsync(id, ct);
         }
         TempData["SuccessMessage"] = "Gallery item deleted.";
         return RedirectToAction(nameof(Gallery));
+    }
+
+    private static void NormalizeCourse(CourseFormViewModel vm)
+    {
+        vm.Title = vm.Title.Trim();
+        vm.TitleMarathi = string.IsNullOrWhiteSpace(vm.TitleMarathi) ? vm.Title : vm.TitleMarathi.Trim();
+        vm.Description = vm.Description.Trim();
+        vm.DescriptionMarathi = string.IsNullOrWhiteSpace(vm.DescriptionMarathi) ? vm.Description : vm.DescriptionMarathi.Trim();
+        vm.Standard = vm.Standard.Trim();
+        vm.Slug = string.IsNullOrWhiteSpace(vm.Slug)
+            ? vm.Title.Trim().ToLowerInvariant().Replace(" ", "-")
+            : vm.Slug.Trim().ToLowerInvariant().Replace(" ", "-");
+    }
+
+    private static void NormalizeTestimonial(TestimonialFormViewModel vm)
+    {
+        vm.Name = vm.Name.Trim();
+        vm.Role = string.IsNullOrWhiteSpace(vm.Role) ? "Parent / Student" : vm.Role.Trim();
+        vm.Quote = vm.Quote.Trim();
+        vm.QuoteMarathi = string.IsNullOrWhiteSpace(vm.QuoteMarathi) ? null : vm.QuoteMarathi.Trim();
+        vm.Rating = Math.Clamp(vm.Rating, 1, 5);
     }
 }

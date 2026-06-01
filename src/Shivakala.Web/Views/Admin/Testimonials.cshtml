@@ -3,7 +3,10 @@
 <section class="page-hero" style="background:linear-gradient(135deg,var(--gold),var(--orange))">
     <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div><span class="badge-soft">Admin</span><h1>Testimonials</h1><p>Approve and manage reviews</p></div>
-        <a asp-action="Index" class="toolbar-btn"><i class="fa-solid fa-gauge"></i>Dashboard</a>
+        <div class="d-flex gap-2">
+            <a asp-action="CreateTestimonial" class="btn-green-sk"><i class="fa-solid fa-plus"></i>New Testimonial</a>
+            <a asp-action="Index" class="toolbar-btn"><i class="fa-solid fa-gauge"></i>Dashboard</a>
+        </div>
     </div>
 </section>
 <section class="section-shell pt-0">
@@ -26,6 +29,7 @@
                         <p style="font-size:0.87rem;color:var(--text-mid);font-style:italic;margin-bottom:12px">"@t.Quote"</p>
                         <div style="color:var(--gold);font-size:0.82rem;margin-bottom:12px">@string.Concat(Enumerable.Repeat("★", t.Rating))</div>
                         <div class="d-flex gap-2 flex-wrap">
+                            <a asp-action="EditTestimonial" asp-route-id="@t.Id" class="toolbar-btn" style="font-size:0.75rem"><i class="fa-solid fa-pen"></i>Edit</a>
                             @if (!t.IsApproved)
                             {
                                 <form asp-action="ApproveTestimonial" method="post" class="d-inline">
