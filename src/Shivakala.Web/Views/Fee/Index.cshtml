@@ -1,0 +1,83 @@
+@{ ViewData["Title"] = "Fees | Admin"; }
+
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid))">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="badge-soft"><i class="fa-solid fa-indian-rupee-sign me-1"></i>Admin</span>
+            <h1>Fees Management</h1><p>Collect fees, generate receipts, track dues</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-action="Collect" class="btn-primary-sk"><i class="fa-solid fa-plus"></i>Collect Fee</a>
+            <a asp-action="Structure" class="btn-outline-sk"><i class="fa-solid fa-list"></i>Fee Structure</a>
+        </div>
+    </div>
+</section>
+
+<section class="section-shell pt-0">
+    <div class="container">
+        @if (TempData["SuccessMessage"] is string msg)
+        { <div class="alert alert-success">@msg</div> }
+
+        <!-- Summary Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="admin-stat-card" style="border-left-color:var(--green)">
+                    <strong>₹@ViewBag.TotalCollected?.ToString("N0")</strong>
+                    <span>Collected (@ViewBag.Month)</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="admin-stat-card" style="border-left-color:var(--red)">
+                    <strong>₹@ViewBag.TotalPending?.ToString("N0")</strong>
+                    <span>Total Pending</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter -->
+        <form method="get" class="glass-card mb-3 d-flex gap-2 flex-wrap align-items-end">
+            <div>
+                <label class="form-label small mb-1">Month</label>
+                <input type="month" name="month" value="@ViewBag.Month" class="form-control" />
+            </div>
+            <div>
+                <label class="form-label small mb-1">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All</option>
+                    @foreach (var s in new[]{"Paid","Pending","Partial","Waived"})
+                    { <option value="@s" selected="@(ViewBag.Status?.ToString()==s)">@s</option> }
+                </select>
+            </div>
+            <button type="submit" class="btn-primary-sk align-self-end"><i class="fa-solid fa-filter"></i>Filter</button>
+        </form>
+
+        <div class="glass-card">
+            <div class="table-responsive">
+                <table class="table admin-table align-middle">
+                    <thead><tr><th>Receipt</th><th>Student</th><th>Type</th><th>Amount</th><th>Discount</th><th>Paid</th><th>Mode</th><th>Date</th><th>Status</th><th></th></tr></thead>
+                    <tbody>
+                        @foreach (var p in (IReadOnlyList<Shivakala.Core.Entities.FeePayment>)ViewBag.Payments)
+                        {
+                            <tr>
+                                <td><small class="text-muted">@p.ReceiptNumber</small></td>
+                                <td style="font-weight:600">@p.Student?.FullName</td>
+                                <td>@p.FeeType</td>
+                                <td>₹@p.Amount.ToString("N0")</td>
+                                <td>@(p.Discount > 0 ? "₹"+p.Discount.ToString("N0") : "—")</td>
+                                <td>₹@p.PaidAmount.ToString("N0")</td>
+                                <td><span class="badge-soft dark" style="font-size:0.68rem">@p.PaymentMode</span></td>
+                                <td style="font-size:0.78rem">@p.PaidDate.ToLocalTime().ToString("dd MMM yy")</td>
+                                <td><span class="badge @(p.Status=="Paid"?"bg-success":p.Status=="Pending"?"bg-warning text-dark":"bg-secondary")">@p.Status</span></td>
+                                <td>
+                                    <a asp-action="Receipt" asp-route-id="@p.Id" class="toolbar-btn" style="font-size:0.7rem;padding:4px 8px">
+                                        <i class="fa-solid fa-receipt"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
