@@ -7,7 +7,7 @@ using Shivakala.Infrastructure.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(x => {
-    x.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10 MB
+    x.MultipartBodyLengthLimit = 20 * 1024 * 1024; // 20 MB (raised for photo/PDF uploads)
 });
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -15,11 +15,13 @@ builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/admin/login";
-        options.AccessDeniedPath = "/admin/login";
-        options.Cookie.Name = "Shivakala.AdminAuth";
-        options.ExpireTimeSpan = TimeSpan.FromHours(8);
-        options.SlidingExpiration = true;
+        options.LoginPath          = "/admin/login";
+        options.AccessDeniedPath   = "/admin/login";
+        options.Cookie.Name        = "Shivakala.AdminAuth";
+        options.Cookie.HttpOnly    = true;
+        options.Cookie.SameSite    = Microsoft.AspNetCore.Http.SameSiteMode.Strict;
+        options.ExpireTimeSpan     = TimeSpan.FromHours(8);
+        options.SlidingExpiration  = true;
     });
 builder.Services
     .AddControllersWithViews()
@@ -34,15 +36,29 @@ var supportedCultures = new[]
 
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
-    options.DefaultRequestCulture = new RequestCulture("mr");
-    options.SupportedCultures = supportedCultures;
-    options.SupportedUICultures = supportedCultures;
+    options.DefaultRequestCulture  = new RequestCulture("mr");
+    options.SupportedCultures      = supportedCultures;
+    options.SupportedUICultures    = supportedCultures;
 });
 
 var app = builder.Build();
 
-Directory.CreateDirectory(Path.Combine(app.Environment.ContentRootPath, "App_Data"));
+// ── Ensure required directories exist ────────────────────────────────────────
+var wwwroot = app.Environment.WebRootPath;
+foreach (var dir in new[]
+{
+    "App_Data",
+    Path.Combine(wwwroot, "uploads", "students"),
+    Path.Combine(wwwroot, "uploads", "teachers"),
+    Path.Combine(wwwroot, "uploads", "homework"),
+    Path.Combine(wwwroot, "uploads", "materials"),
+    Path.Combine(wwwroot, "uploads", "gallery"),
+})
+{
+    Directory.CreateDirectory(dir);
+}
 
+// ── Middleware pipeline ───────────────────────────────────────────────────────
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -52,7 +68,8 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/Home/StatusCodePage", "?code={0}");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-app.UseRequestLocalization(app.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<RequestLocalizationOptions>>().Value);
+app.UseRequestLocalization(
+    app.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<RequestLocalizationOptions>>().Value);
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -61,5 +78,7 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+// ── Database initialisation (runs all pending migrations on startup) ──────────
 await DatabaseInitializer.InitializeAsync(app.Services);
+
 await app.RunAsync();
