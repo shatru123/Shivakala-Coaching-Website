@@ -1,168 +1,227 @@
+@using System.Security.Claims
+@{
+    var userName = User.Identity?.Name ?? "Admin";
+    var userRole = User.FindFirst(ClaimTypes.Role)?.Value ?? "Admin";
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"]</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
-    <link rel="stylesheet" href="~/css/admin-extended.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
+    <title>@ViewData["Title"] | SK Classes Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-extended.css" asp-append-version="true" />
     <style>
-        body { display:flex; min-height:100vh; background:#f0f2f5; font-family:'Segoe UI',Arial,sans-serif; }
+        :root{--sb-w:248px;--sb-bg:#0d1b3e;--sb-gold:#c8a84b;--sb-gold-lt:#f0d98a;--sb-border:rgba(255,255,255,.1)}
+        *,*::before,*::after{box-sizing:border-box}
+        body{margin:0;font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;min-height:100vh;display:flex}
 
-        /* Sidebar */
-        .sk-sidebar {
-            width: 240px;
-            min-height: 100vh;
-            background: linear-gradient(180deg,#0d1b3e,#1a3a6b);
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            top: 0; left: 0; bottom: 0;
-            z-index: 1000;
-            transition: transform .25s;
-        }
-        .sk-sidebar .brand {
-            padding: 20px 18px 16px;
-            border-bottom: 1px solid rgba(255,255,255,.12);
-        }
-        .sk-sidebar .brand h2 { font-size: 1rem; font-weight: 800; margin:0; color:#c8a84b; }
-        .sk-sidebar .brand small { font-size: .72rem; opacity: .6; }
-        .sk-nav { flex: 1; overflow-y: auto; padding: 12px 0; scrollbar-width: thin; }
-        .sk-nav::-webkit-scrollbar { width: 4px; }
-        .sk-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,.2); border-radius: 4px; }
-        .sk-nav a {
-            display: flex; align-items: center; gap: 10px;
-            padding: 9px 18px;
-            color: rgba(255,255,255,.78);
-            text-decoration: none;
-            font-size: .82rem;
-            font-weight: 500;
-            transition: all .15s;
-            border-left: 3px solid transparent;
-        }
-        .sk-nav a:hover, .sk-nav a.active {
-            background: rgba(255,255,255,.1);
-            color: #fff;
-            border-left-color: #c8a84b;
-        }
-        .sk-nav a i { width: 16px; text-align: center; font-size: .85rem; }
-        .sk-nav .nav-section {
-            font-size: .65rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: .08em;
-            color: rgba(255,255,255,.35);
-            padding: 14px 18px 4px;
-        }
-        .sk-sidebar .sk-user {
-            padding: 12px 18px;
-            border-top: 1px solid rgba(255,255,255,.12);
-            font-size: .78rem;
-            color: rgba(255,255,255,.6);
+        /* ── Sidebar ── */
+        .sk-sidebar{width:var(--sb-w);min-height:100vh;background:var(--sb-bg);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:1000;transition:transform .25s;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(200,168,75,.25) transparent}
+        .sk-sidebar::-webkit-scrollbar{width:3px}.sk-sidebar::-webkit-scrollbar-thumb{background:rgba(200,168,75,.25);border-radius:3px}
+        .sk-brand{padding:18px 18px 14px;border-bottom:1px solid var(--sb-border);display:flex;align-items:center;gap:10px}
+        .sk-brand img{width:36px;height:36px;border-radius:8px;object-fit:cover}
+        .sk-brand-text .brand-name{display:block;font-size:.85rem;font-weight:800;color:var(--sb-gold);letter-spacing:.03em}
+        .sk-brand-text .brand-sub{display:block;font-size:.6rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.1em}
+        .sk-nav-section{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.25);padding:14px 18px 5px}
+        .sk-nav a{display:flex;align-items:center;gap:9px;padding:8px 18px;color:rgba(255,255,255,.6);text-decoration:none;font-size:.8rem;font-weight:500;transition:all .15s;border-left:3px solid transparent;white-space:nowrap}
+        .sk-nav a:hover,.sk-nav a.active{background:rgba(200,168,75,.1);color:var(--sb-gold-lt);border-left-color:var(--sb-gold)}
+        .sk-nav a i{width:16px;text-align:center;font-size:.82rem;opacity:.75;flex-shrink:0}
+        .sk-nav a:hover i,.sk-nav a.active i{opacity:1}
+        .sk-user{padding:12px 18px;border-top:1px solid var(--sb-border);display:flex;align-items:center;gap:10px;margin-top:auto}
+        .sk-user-avatar{width:32px;height:32px;border-radius:50%;background:var(--sb-gold);display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:800;color:#0d1b3e;flex-shrink:0}
+        .sk-user-info .name{font-size:.78rem;font-weight:600;color:#fff;display:block}
+        .sk-user-info .role{font-size:.65rem;color:rgba(255,255,255,.4);display:block}
+
+        /* ── Top bar ── */
+        .sk-topbar{background:#fff;border-bottom:1px solid rgba(0,0,0,.08);padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:900;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+        .sk-topbar .page-title{font-size:.88rem;font-weight:600;color:#333;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .topbar-actions{display:flex;align-items:center;gap:8px}
+        .topbar-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:7px;font-size:.75rem;font-weight:600;text-decoration:none;border:none;cursor:pointer;transition:all .15s}
+        .topbar-btn.primary{background:#1a3a6b;color:#fff}.topbar-btn.primary:hover{background:#0d1b3e;color:#fff}
+        .topbar-btn.outline{background:transparent;color:#555;border:1px solid #ddd}.topbar-btn.outline:hover{background:#f0f0f0}
+        .topbar-btn.danger{background:rgba(220,53,69,.1);color:#dc3545;border:1px solid rgba(220,53,69,.2)}.topbar-btn.danger:hover{background:#dc3545;color:#fff}
+        .burger-btn{background:none;border:none;font-size:1.1rem;cursor:pointer;color:#555;padding:4px 8px;display:none}
+
+        /* ── Main ── */
+        .sk-main{margin-left:var(--sb-w);flex:1;min-width:0;display:flex;flex-direction:column}
+        .sk-content{flex:1;padding:0}
+
+        /* ── Mobile ── */
+        @media(max-width:768px){
+            .sk-sidebar{transform:translateX(-100%)}.sk-sidebar.open{transform:none}
+            .sk-main{margin-left:0}.burger-btn{display:block}
         }
 
-        /* Main area */
-        .sk-main {
-            margin-left: 240px;
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-        }
-        .sk-topbar {
-            background: #fff;
-            border-bottom: 1px solid var(--border);
-            padding: 10px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: sticky; top: 0; z-index: 900;
-            box-shadow: 0 1px 8px rgba(0,0,0,.06);
-        }
-        .sk-topbar .burger {
-            display: none;
-            background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #333;
-        }
-        .sk-content { flex: 1; }
-
-        @media (max-width: 767px) {
-            .sk-sidebar { transform: translateX(-100%); }
-            .sk-sidebar.open { transform: none; }
-            .sk-main { margin-left: 0; }
-            .sk-topbar .burger { display: block; }
-        }
+        /* ── Success banner ── */
+        .admin-flash{position:fixed;top:64px;right:20px;z-index:9999;min-width:280px;max-width:420px;animation:slideIn .3s ease}
+        @keyframes slideIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
     </style>
 </head>
 <body>
 
-<!-- Sidebar -->
-<aside class="sk-sidebar" id="sidebar">
-    <div class="brand">
-        <h2>🎓 SK Classes</h2>
-        <small>Shivakala Coaching</small>
+<!-- ══ SIDEBAR ═══════════════════════════════════════════════════════════════ -->
+<aside class="sk-sidebar" id="skSidebar">
+    <div class="sk-brand">
+        <img src="~/img/ShivKalaLogo.jpeg" asp-append-version="true" alt="SK" />
+        <div class="sk-brand-text">
+            <span class="brand-name">SK Classes</span>
+            <span class="brand-sub">Admin Portal</span>
+        </div>
     </div>
+
     <nav class="sk-nav">
-        <div class="nav-section">Overview</div>
-        <a asp-controller="Admin" asp-action="Index"><i class="fa-solid fa-house-chimney"></i> Dashboard</a>
+        <div class="sk-nav-section">Overview</div>
+        <a asp-controller="Admin" asp-action="Index">
+            <i class="fa-solid fa-gauge-high"></i> Dashboard
+        </a>
 
-        <div class="nav-section">Academics</div>
-        <a asp-controller="Registration" asp-action="Index"><i class="fa-solid fa-users"></i> Students</a>
-        <a asp-controller="Teacher" asp-action="Index"><i class="fa-solid fa-chalkboard-teacher"></i> Teachers</a>
-        <a asp-controller="Batch" asp-action="Index"><i class="fa-solid fa-layer-group"></i> Batches</a>
-        <a asp-controller="Attendance" asp-action="Index"><i class="fa-solid fa-calendar-check"></i> Attendance</a>
-        <a asp-controller="Timetable" asp-action="Index"><i class="fa-solid fa-calendar-week"></i> Timetable</a>
+        <div class="sk-nav-section">Students & Staff</div>
+        <a asp-controller="Admin" asp-action="Registrations">
+            <i class="fa-solid fa-users"></i> Students
+        </a>
+        <a asp-controller="Teacher" asp-action="Index">
+            <i class="fa-solid fa-chalkboard-teacher"></i> Teachers
+        </a>
+        <a asp-controller="Batch" asp-action="Index">
+            <i class="fa-solid fa-layer-group"></i> Batches
+        </a>
 
-        <div class="nav-section">Academics</div>
-        <a asp-controller="Exam" asp-action="Index"><i class="fa-solid fa-file-pen"></i> Exams & Results</a>
-        <a asp-controller="Homework" asp-action="Index"><i class="fa-solid fa-book-open"></i> Homework</a>
-        <a asp-controller="StudyMaterial" asp-action="Index"><i class="fa-solid fa-folder-open"></i> Study Materials</a>
+        <div class="sk-nav-section">Academic</div>
+        <a asp-controller="Attendance" asp-action="Index">
+            <i class="fa-solid fa-calendar-check"></i> Attendance
+        </a>
+        <a asp-controller="Timetable" asp-action="Index">
+            <i class="fa-solid fa-calendar-week"></i> Timetable
+        </a>
+        <a asp-controller="Exam" asp-action="Index">
+            <i class="fa-solid fa-file-pen"></i> Exams & Results
+        </a>
+        <a asp-controller="Homework" asp-action="Index">
+            <i class="fa-solid fa-book-open"></i> Homework
+        </a>
+        <a asp-controller="Admin" asp-action="Materials">
+            <i class="fa-solid fa-folder-open"></i> Study Materials
+        </a>
 
-        <div class="nav-section">Finance</div>
-        <a asp-controller="Fee" asp-action="Index"><i class="fa-solid fa-indian-rupee-sign"></i> Fees</a>
-        <a asp-controller="Fee" asp-action="Structure"><i class="fa-solid fa-list-ol"></i> Fee Structure</a>
+        <div class="sk-nav-section">Finance</div>
+        <a asp-controller="Fee" asp-action="Index">
+            <i class="fa-solid fa-indian-rupee-sign"></i> Fee Payments
+        </a>
+        <a asp-controller="Fee" asp-action="Structure">
+            <i class="fa-solid fa-list-ol"></i> Fee Structure
+        </a>
 
-        <div class="nav-section">Communication</div>
-        <a asp-controller="WhatsApp" asp-action="Index"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
-        <a asp-controller="NoticeBoard" asp-action="Index"><i class="fa-solid fa-bell"></i> Notice Board</a>
-        <a asp-controller="Enquiry" asp-action="Index"><i class="fa-solid fa-question-circle"></i> Enquiries</a>
+        <div class="sk-nav-section">Communication</div>
+        <a asp-controller="WhatsApp" asp-action="Index">
+            <i class="fa-brands fa-whatsapp"></i> WhatsApp Broadcast
+        </a>
+        <a asp-controller="Admin" asp-action="Notices">
+            <i class="fa-solid fa-bell"></i> Notice Board
+        </a>
+        <a asp-controller="Admin" asp-action="Enquiries">
+            <i class="fa-solid fa-envelope"></i> Enquiries
+        </a>
 
-        <div class="nav-section">Website</div>
-        <a asp-controller="Gallery" asp-action="Index"><i class="fa-solid fa-image"></i> Gallery</a>
-        <a asp-controller="Testimonials" asp-action="Index"><i class="fa-solid fa-star"></i> Testimonials</a>
-        <a asp-controller="Courses" asp-action="Index"><i class="fa-solid fa-graduation-cap"></i> Courses</a>
+        <div class="sk-nav-section">Website</div>
+        <a asp-controller="Admin" asp-action="Courses">
+            <i class="fa-solid fa-graduation-cap"></i> Courses
+        </a>
+        <a asp-controller="Admin" asp-action="Gallery">
+            <i class="fa-solid fa-images"></i> Gallery
+        </a>
+        <a asp-controller="Admin" asp-action="Testimonials">
+            <i class="fa-solid fa-star"></i> Testimonials
+        </a>
+        <a asp-controller="Admin" asp-action="Results">
+            <i class="fa-solid fa-trophy"></i> Test Results
+        </a>
 
-        <div class="nav-section">Account</div>
-        <a asp-controller="Admin" asp-action="Logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        <div class="sk-nav-section">System</div>
+        <a asp-controller="Admin" asp-action="AuditLog">
+            <i class="fa-solid fa-shield-halved"></i> Audit Log
+        </a>
+        <a asp-controller="Home" asp-action="Index" target="_blank">
+            <i class="fa-solid fa-globe"></i> View Website
+        </a>
+        <a asp-controller="Admin" asp-action="Logout" style="color:rgba(255,100,100,.7)">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
     </nav>
+
     <div class="sk-user">
-        <i class="fa-solid fa-user-shield me-1"></i> Admin
+        <div class="sk-user-avatar">@userName[0].ToString().ToUpper()</div>
+        <div class="sk-user-info">
+            <span class="name">@userName</span>
+            <span class="role">@userRole</span>
+        </div>
     </div>
 </aside>
 
-<!-- Main -->
+<!-- ══ MAIN ═══════════════════════════════════════════════════════════════════ -->
 <div class="sk-main">
+
+    <!-- Top bar -->
     <header class="sk-topbar">
-        <button class="burger" id="burgerBtn" onclick="document.getElementById('sidebar').classList.toggle('open')">
-            <i class="fa-solid fa-bars"></i>
-        </button>
-        <span style="font-size:.82rem;color:#666">@ViewData["Title"]</span>
-        <div class="d-flex gap-2">
-            <a asp-controller="Admin" asp-action="Index" class="toolbar-btn" style="font-size:.72rem;padding:4px 10px">
-                <i class="fa-solid fa-house"></i>
+        <div class="d-flex align-items-center gap-3">
+            <button class="burger-btn" id="burgerBtn" onclick="document.getElementById('skSidebar').classList.toggle('open')">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <span class="page-title">@(ViewData["Title"] ?? "Admin")</span>
+        </div>
+        <div class="topbar-actions">
+            <a asp-controller="Admin" asp-action="Index" class="topbar-btn primary">
+                <i class="fa-solid fa-gauge-high"></i>
+                <span class="d-none d-sm-inline">Dashboard</span>
+            </a>
+            <a asp-controller="Home" asp-action="Index" class="topbar-btn outline" target="_blank">
+                <i class="fa-solid fa-globe"></i>
+                <span class="d-none d-sm-inline">Website</span>
+            </a>
+            <a asp-controller="Admin" asp-action="Logout" class="topbar-btn danger">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="d-none d-sm-inline">Logout</span>
             </a>
         </div>
     </header>
+
+    <!-- Flash message -->
+    @if (TempData["SuccessMessage"] is string msg)
+    {
+        <div class="admin-flash alert alert-success d-flex align-items-center gap-2 shadow" role="alert">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>@msg</span>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+    }
 
     <main class="sk-content" role="main">
         @RenderBody()
     </main>
 </div>
 
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script>
+// Active sidebar link
+(function(){
+    var p = window.location.pathname.toLowerCase();
+    document.querySelectorAll('.sk-nav a').forEach(a=>{
+        var href = a.getAttribute('href');
+        if(href && href !== '/' && p.startsWith(href.toLowerCase())){
+            a.classList.add('active');
+        }
+    });
+})();
+// Close sidebar on outside click (mobile)
+document.addEventListener('click', function(e){
+    var sb=document.getElementById('skSidebar');
+    if(sb && !sb.contains(e.target) && !document.getElementById('burgerBtn')?.contains(e.target)){
+        sb.classList.remove('open');
+    }
+});
+</script>
 @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
