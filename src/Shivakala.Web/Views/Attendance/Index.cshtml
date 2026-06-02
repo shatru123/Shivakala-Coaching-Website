@@ -1,0 +1,35 @@
+@{ ViewData["Title"] = "Attendance | Admin"; }
+
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid))">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div><span class="badge-soft"><i class="fa-solid fa-calendar-check me-1"></i>Admin</span><h1>Attendance</h1></div>
+        <div class="d-flex gap-2">
+            <a asp-action="Report" class="btn-outline-sk"><i class="fa-solid fa-chart-bar"></i>Reports</a>
+        </div>
+    </div>
+</section>
+
+<section class="section-shell pt-0">
+    <div class="container" style="max-width:640px">
+        <div class="glass-card">
+            <h5 class="mb-3">Mark Attendance</h5>
+            <form asp-action="Mark" method="get">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Batch *</label>
+                        <select name="batchId" class="form-select" required>
+                            <option value="">— Select Batch —</option>
+                            @foreach (var b in (IReadOnlyList<Shivakala.Core.Entities.Batch>)ViewBag.Batches)
+                            { <option value="@b.Id">@b.Name (@b.Standard)</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Date</label>
+                        <input type="date" name="date" class="form-control" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary-sk mt-3"><i class="fa-solid fa-list-check"></i>Open Attendance Sheet</button>
+            </form>
+        </div>
+    </div>
+</section>
