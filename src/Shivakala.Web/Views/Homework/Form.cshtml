@@ -1,0 +1,67 @@
+@model Shivakala.Core.Entities.Homework
+@{ ViewData["Title"] = "Assign Homework"; }
+
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid))">
+    <div class="container"><span class="badge-soft">Admin</span><h1>Assign Homework</h1></div>
+</section>
+
+<section class="section-shell pt-0">
+    <div class="container" style="max-width:720px">
+        <div class="glass-card">
+            <form asp-action="Create" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label fw-600">Title *</label>
+                        <input asp-for="Title" class="form-control" required placeholder="e.g. Ch.3 Exercise – Algebra" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Subject *</label>
+                        <input asp-for="Subject" class="form-control" required placeholder="Mathematics" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Standard *</label>
+                        <select asp-for="Standard" class="form-select" required>
+                            <option value="">— Select —</option>
+                            @foreach (var s in new[]{"KG1","KG2","1st","2nd","3rd","4th","5th","6th","7th","8th","9th","10th"})
+                            { <option value="@s">@s</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Teacher *</label>
+                        <select asp-for="AssignedByTeacherId" class="form-select" required>
+                            <option value="">— Select Teacher —</option>
+                            @foreach (var t in (IReadOnlyList<Shivakala.Core.Entities.Teacher>)ViewBag.Teachers)
+                            { <option value="@t.Id">@t.FullName</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Batch (optional)</label>
+                        <select asp-for="BatchId" class="form-select">
+                            <option value="">— All Batches —</option>
+                            @foreach (var b in (IReadOnlyList<Shivakala.Core.Entities.Batch>)ViewBag.Batches)
+                            { <option value="@b.Id">@b.Name (@b.Standard)</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Due Date *</label>
+                        <input asp-for="DueDate" type="datetime-local" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Attachment (PDF/Image)</label>
+                        <input name="attachment" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-600">Description</label>
+                        <textarea asp-for="Description" class="form-control" rows="3" placeholder="Add details or instructions..."></textarea>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-paper-plane"></i> Assign</button>
+                    <a asp-action="Index" class="btn-outline-sk">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
