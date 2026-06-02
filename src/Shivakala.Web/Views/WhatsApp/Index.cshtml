@@ -1,0 +1,160 @@
+@{ ViewData["Title"] = "WhatsApp Broadcast | Admin"; }
+
+<section class="page-hero" style="background:linear-gradient(135deg,#075e54,#128c7e)">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="badge-soft"><i class="fa-brands fa-whatsapp me-1"></i>Admin</span>
+            <h1>WhatsApp Broadcast</h1>
+            <p>Send messages to parents &amp; students instantly</p>
+        </div>
+        <div>
+            <span id="statusBadge"
+                  class="badge @(ViewBag.IsAuthenticated?"bg-success":"bg-warning text-dark")"
+                  style="font-size:.9rem;padding:8px 18px">
+                @(ViewBag.IsAuthenticated ? "✓ Connected" : "⚠ Scan QR to Connect")
+            </span>
+        </div>
+    </div>
+</section>
+
+<section class="section-shell pt-0">
+    <div class="container">
+        @if (TempData["SuccessMessage"] is string m){ <div class="alert alert-success">@m</div> }
+
+        <div class="row g-4">
+            <!-- QR Panel -->
+            @if (!((bool)ViewBag.IsAuthenticated))
+            {
+                <div class="col-md-4">
+                    <div class="glass-card text-center">
+                        <h5 class="mb-3">Step 1: Scan QR Code</h5>
+                        <p class="text-muted small mb-3">Open WhatsApp → Settings → Linked Devices → Link a Device</p>
+                        <div id="qrContainer" style="min-height:240px;display:flex;align-items:center;justify-content:center">
+                            <img id="qrImg" src="/admin/whatsapp/qr.png" alt="QR Code"
+                                 style="max-width:220px;border-radius:12px;border:4px solid #128c7e"
+                                 onerror="this.style.display='none';document.getElementById('qrError').style.display='block'" />
+                            <div id="qrError" style="display:none" class="text-muted">
+                                <i class="fa-solid fa-triangle-exclamation fa-2x mb-2" style="color:var(--gold)"></i>
+                                <p>WhatsApp sidecar not running.<br/><small>Run <code>cd whatsapp-sidecar && npm start</code></small></p>
+                            </div>
+                        </div>
+                        <button onclick="refreshQr()" class="btn-outline-sk mt-3 w-100">
+                            <i class="fa-solid fa-rotate"></i> Refresh QR
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-8">
+            }
+            else
+            {
+                <div class="col-12">
+            }
+
+                <!-- Broadcast Form -->
+                <div class="glass-card">
+                    <h5 class="mb-3">📢 Send Broadcast Message</h5>
+                    <form asp-action="Broadcast" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-600">Audience</label>
+                                <select name="audience" class="form-select" id="audienceSelect" onchange="toggleBatch(this.value)">
+                                    <option value="all">All Parents / Guardians</option>
+                                    <option value="batch">Specific Batch</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6" id="batchPicker" style="display:none">
+                                <label class="form-label fw-600">Select Batch</label>
+                                <select name="batchId" class="form-select">
+                                    @foreach (var b in (IReadOnlyList<Shivakala.Core.Entities.Batch>)ViewBag.Batches)
+                                    { <option value="@b.Id">@b.Name (@b.Standard)</option> }
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-600">Message *</label>
+                                <textarea name="message" class="form-control" rows="5" required
+                                          placeholder="Type your message here... e.g. Dear Parent, Fees for June are due. Kindly pay at earliest. – SK Classes"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Templates -->
+                        <div class="mt-3">
+                            <span class="form-label fw-600 d-block mb-2">Quick Templates</span>
+                            <div class="d-flex gap-2 flex-wrap">
+                                @foreach (var tmpl in new[]{"Fee Reminder","Attendance Alert","Exam Notice","Holiday Notice","Homework Assigned"})
+                                {
+                                    <button type="button" class="toolbar-btn" style="font-size:.72rem" onclick="applyTemplate('@tmpl')">@tmpl</button>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn-primary-sk" style="background:#075e54"
+                                    onclick="return confirm('Send broadcast to selected audience?')">
+                                <i class="fa-brands fa-whatsapp"></i> Send Now
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Broadcast Log -->
+            <div class="col-12">
+                <div class="glass-card">
+                    <h5 class="mb-3">Recent Broadcasts</h5>
+                    <div class="table-responsive">
+                        <table class="table admin-table table-sm">
+                            <thead><tr><th>Date</th><th>Message</th><th>Audience</th><th>Sent</th><th>Failed</th><th>Status</th></tr></thead>
+                            <tbody>
+                                @foreach (var n in (IReadOnlyList<Shivakala.Core.Entities.Notification>)ViewBag.RecentNotifs)
+                                {
+                                    <tr>
+                                        <td style="font-size:.78rem">@n.CreatedDate.ToLocalTime().ToString("dd MMM HH:mm")</td>
+                                        <td style="font-size:.8rem;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@n.Message</td>
+                                        <td>@n.Audience</td>
+                                        <td><span class="badge bg-success">@n.DeliveredCount</span></td>
+                                        <td><span class="badge bg-danger">@n.FailedCount</span></td>
+                                        <td><span class="badge @(n.Status=="Sent"?"bg-success":n.Status=="Failed"?"bg-danger":"bg-warning text-dark")">@n.Status</span></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+var templates = {
+    'Fee Reminder': 'Dear Parent,\n\nThis is a reminder that the monthly fee for __Month__ is due. Kindly pay at the earliest to avoid a late fine.\n\nThank you,\nSK Classes',
+    'Attendance Alert': 'Dear Parent,\n\nYour ward\'s attendance has dropped below 75%. Please ensure regular attendance.\n\nRegards,\nSK Classes',
+    'Exam Notice': 'Dear Parent,\n\nPlease note that exams are scheduled as per the timetable. Ensure your ward is well-prepared.\n\nBest,\nSK Classes',
+    'Holiday Notice': 'Dear Parent,\n\nSK Classes will remain closed on __Date__ due to __Reason__. Classes will resume on __ResumeDate__.\n\nThank you.',
+    'Homework Assigned': 'Dear Parent,\n\nHomework has been assigned for __Subject__. Due date: __DueDate__. Please ensure timely submission.\n\nSK Classes'
+};
+function applyTemplate(t){ document.querySelector('textarea[name=message]').value = templates[t]||''; }
+function toggleBatch(v){ document.getElementById('batchPicker').style.display = v==='batch'?'':'none'; }
+
+// Poll QR status every 5s
+@if (!((bool)ViewBag.IsAuthenticated))
+{
+    <text>
+    setInterval(function(){
+        fetch('/admin/whatsapp/status').then(r=>r.json()).then(d=>{
+            if(d.authenticated){
+                document.getElementById('statusBadge').textContent='✓ Connected';
+                document.getElementById('statusBadge').className='badge bg-success';
+                document.getElementById('qrContainer').innerHTML='<div class="text-success"><i class="fa-solid fa-circle-check fa-3x"></i><p class="mt-2 fw-600">Connected!</p></div>';
+            } else {
+                refreshQr();
+            }
+        });
+    }, 5000);
+    function refreshQr(){ document.getElementById('qrImg').src='/admin/whatsapp/qr.png?t='+Date.now(); }
+    </text>
+}
+</script>
+}
