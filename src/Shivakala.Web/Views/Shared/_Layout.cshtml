@@ -5,6 +5,9 @@
     var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
     var isMr = currentCulture == "mr";
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
+    var isAdminLoggedIn = User.Identity?.IsAuthenticated == true && User.IsInRole("Admin");
+    var isTeacherLoggedIn = User.Identity?.IsAuthenticated == true && User.IsInRole("Teacher");
+    var isParentLoggedIn = User.Identity?.IsAuthenticated == true && User.IsInRole("Parent");
 }
 <!DOCTYPE html>
 <html lang="@currentCulture" data-theme="light">
@@ -23,8 +26,62 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        /* Admin bar shown when logged in */
+        .admin-bar{background:#0d1b3e;padding:6px 0;border-bottom:2px solid #c8a84b}
+        .admin-bar .container{display:flex;align-items:center;justify-content:space-between;gap:10px}
+        .admin-bar span{color:rgba(255,255,255,.6);font-size:.73rem}
+        .admin-bar a{color:#c8a84b;font-size:.73rem;font-weight:600;text-decoration:none;padding:3px 10px;border-radius:4px;border:1px solid rgba(200,168,75,.3);transition:all .15s}
+        .admin-bar a:hover{background:rgba(200,168,75,.15);color:#f0d98a}
+        /* Portal dropdown */
+        .portal-dropdown .dropdown-menu{min-width:200px;padding:8px;border:1px solid rgba(0,0,0,.1);box-shadow:0 8px 32px rgba(0,0,0,.12);border-radius:12px}
+        .portal-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;text-decoration:none;color:#333;transition:all .15s}
+        .portal-item:hover{background:#f5f5ff;color:#1a3a6b}
+        .portal-item .portal-ico{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+        .portal-item .portal-label{font-weight:600;font-size:.82rem;display:block}
+        .portal-item .portal-sub{font-size:.7rem;color:#888;display:block}
+        .portal-divider{border-top:1px solid #f0f0f0;margin:4px 0}
+    </style>
 </head>
 <body>
+
+    <!-- ADMIN BAR (shown when any portal user is logged in) -->
+    @if (isAdminLoggedIn)
+    {
+        <div class="admin-bar">
+            <div class="container">
+                <span><i class="fa-solid fa-shield-halved me-1"></i>Logged in as <strong style="color:#fff">@User.Identity?.Name</strong> (Admin)</span>
+                <div class="d-flex gap-2">
+                    <a asp-controller="Admin" asp-action="Index"><i class="fa-solid fa-gauge-high me-1"></i>Dashboard</a>
+                    <a asp-controller="Admin" asp-action="Logout" style="border-color:rgba(255,100,100,.4);color:#f87171"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a>
+                </div>
+            </div>
+        </div>
+    }
+    else if (isTeacherLoggedIn)
+    {
+        <div class="admin-bar" style="background:#0d3b2e">
+            <div class="container">
+                <span><i class="fa-solid fa-chalkboard-teacher me-1"></i>Teacher Portal — <strong style="color:#fff">@User.Identity?.Name</strong></span>
+                <div class="d-flex gap-2">
+                    <a asp-controller="TeacherPortal" asp-action="Index"><i class="fa-solid fa-gauge-high me-1"></i>My Dashboard</a>
+                    <a asp-controller="TeacherPortal" asp-action="Logout" style="border-color:rgba(255,100,100,.4);color:#f87171"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a>
+                </div>
+            </div>
+        </div>
+    }
+    else if (isParentLoggedIn)
+    {
+        <div class="admin-bar" style="background:#2d1b6b">
+            <div class="container">
+                <span><i class="fa-solid fa-user-group me-1"></i>Parent Portal — <strong style="color:#fff">@User.Identity?.Name</strong></span>
+                <div class="d-flex gap-2">
+                    <a asp-controller="ParentPortal" asp-action="Index"><i class="fa-solid fa-gauge-high me-1"></i>My Dashboard</a>
+                    <a asp-controller="ParentPortal" asp-action="Logout" style="border-color:rgba(255,100,100,.4);color:#f87171"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a>
+                </div>
+            </div>
+        </div>
+    }
 
     <!-- TOP STRIP -->
     <div class="top-strip">
@@ -38,7 +95,6 @@
     <header class="sk-navbar">
         <nav class="navbar navbar-expand-lg py-0">
             <div class="container">
-                <!-- BRAND LOGO -->
                 <a class="navbar-brand" asp-controller="Home" asp-action="Index">
                     <img class="brand-logo-img" src="~/img/ShivKalaLogo.jpeg" asp-append-version="true" alt="Shivakala Classes logo" />
                     <div class="brand-text-block">
@@ -64,6 +120,7 @@
                         <li class="nav-item"><a class="nav-link" asp-controller="Enquiry" asp-action="Index">@T["NavEnquiry"]</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Contact" asp-action="Index">@T["NavContact"]</a></li>
                     </ul>
+
                     <div class="d-flex align-items-center gap-2 ms-lg-2">
                         <!-- Language switcher -->
                         <form asp-controller="Home" asp-action="SetLanguage" method="post" class="d-inline">
@@ -73,13 +130,66 @@
                             <button type="submit" class="btn-lang">@T["LanguageSwitcher"]</button>
                         </form>
                         <!-- Dark mode -->
-                        <button type="button" id="themeToggle" aria-label="Toggle theme">
-                            <i class="fa-solid fa-moon"></i>
-                        </button>
-                        <!-- Admin / Login -->
-                        <a class="btn-login nav-link" asp-controller="Admin" asp-action="Login">
-                            <i class="fa-solid fa-user me-1"></i>@(isMr ? "लॉगिन / नोंदणी" : "Login / Register")
-                        </a>
+                        <button type="button" id="themeToggle" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
+
+                        <!-- Portal button — dropdown if not logged in, dashboard if logged in -->
+                        @if (!User.Identity!.IsAuthenticated)
+                        {
+                            <div class="dropdown portal-dropdown">
+                                <button class="btn-login nav-link dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-solid fa-user me-1"></i>@(isMr ? "पोर्टल" : "Portal Login")
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="portal-item" asp-controller="Admin" asp-action="Login">
+                                            <div class="portal-ico" style="background:rgba(26,58,107,.12);color:#1a3a6b"><i class="fa-solid fa-shield-halved"></i></div>
+                                            <div>
+                                                <span class="portal-label">Admin Portal</span>
+                                                <span class="portal-sub">Institute management</span>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li><div class="portal-divider"></div></li>
+                                    <li>
+                                        <a class="portal-item" asp-controller="TeacherPortal" asp-action="Login">
+                                            <div class="portal-ico" style="background:rgba(26,107,58,.12);color:#1a6b3a"><i class="fa-solid fa-chalkboard-teacher"></i></div>
+                                            <div>
+                                                <span class="portal-label">Teacher Portal</span>
+                                                <span class="portal-sub">Attendance · Marks · Homework</span>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li><div class="portal-divider"></div></li>
+                                    <li>
+                                        <a class="portal-item" asp-controller="ParentPortal" asp-action="Login">
+                                            <div class="portal-ico" style="background:rgba(90,78,142,.12);color:#5a4e8e"><i class="fa-solid fa-user-group"></i></div>
+                                            <div>
+                                                <span class="portal-label">Parent Portal</span>
+                                                <span class="portal-sub">Attendance · Fees · Results</span>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                        else if (isAdminLoggedIn)
+                        {
+                            <a class="btn-login nav-link" asp-controller="Admin" asp-action="Index" style="background:rgba(26,58,107,.1)">
+                                <i class="fa-solid fa-gauge-high me-1"></i>Dashboard
+                            </a>
+                        }
+                        else if (isTeacherLoggedIn)
+                        {
+                            <a class="btn-login nav-link" asp-controller="TeacherPortal" asp-action="Index" style="background:rgba(26,107,58,.1)">
+                                <i class="fa-solid fa-gauge-high me-1"></i>My Portal
+                            </a>
+                        }
+                        else if (isParentLoggedIn)
+                        {
+                            <a class="btn-login nav-link" asp-controller="ParentPortal" asp-action="Index" style="background:rgba(90,78,142,.1)">
+                                <i class="fa-solid fa-gauge-high me-1"></i>My Portal
+                            </a>
+                        }
                     </div>
                 </div>
             </div>
@@ -97,7 +207,7 @@
             <div class="row g-4">
                 <div class="col-lg-4">
                     <div class="d-flex align-items-center gap-3 mb-3">
-                        <img class="footer-logo-img" src="~/img/ShivKalaLogo.jpeg" asp-append-version="true" alt="Shivakala Classes logo" />
+                        <img class="footer-logo-img" src="~/img/ShivKalaLogo.jpeg" asp-append-version="true" alt="SK" />
                         <div>
                             <div style="color:#fff;font-family:'Marcellus',serif;font-size:1.1rem;font-weight:700;">SHIVKALA CLASSES</div>
                             <div style="color:var(--gold-light);font-size:0.7rem;letter-spacing:2px;">SK LEARNING FOR LIFE</div>
@@ -109,15 +219,12 @@
                     <h6>@T["QuickLinks"]</h6>
                     <ul class="footer-links">
                         <li><a asp-controller="Home" asp-action="Index">@T["NavHome"]</a></li>
-                        <li><a asp-controller="About" asp-action="Index">@T["NavAbout"]</a></li>
                         <li><a asp-controller="Courses" asp-action="Index">@T["NavCourses"]</a></li>
                         <li><a asp-controller="Results" asp-action="Index">@(isMr ? "साप्ताहिक निकाल" : "Weekly Results")</a></li>
                         <li><a asp-controller="StudyMaterial" asp-action="Index">@(isMr ? "अभ्यास साहित्य" : "Study Materials")</a></li>
                         <li><a asp-controller="NoticeBoard" asp-action="Index">@(isMr ? "सूचना फलक" : "Notice Board")</a></li>
-                        <li><a asp-controller="Gallery" asp-action="Index">@(isMr ? "गॅलरी" : "Gallery")</a></li>
+                        <li><a asp-controller="Gallery" asp-action="Index">Gallery</a></li>
                         <li><a asp-controller="Registration" asp-action="Index">@T["AdmissionNow"]</a></li>
-                        <li><a asp-controller="Enquiry" asp-action="Index">@T["NavEnquiry"]</a></li>
-                        <li><a asp-controller="Contact" asp-action="Index">@T["NavContact"]</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-4 col-md-6">
@@ -127,38 +234,30 @@
                     <p class="mb-2"><i class="fa-solid fa-phone me-2" style="color:var(--gold-light)"></i>+91 88309 07011</p>
                     <p class="mb-2"><i class="fa-solid fa-envelope me-2" style="color:var(--gold-light)"></i>info@shivkalaclasses.com</p>
                     <p class="mb-0"><i class="fa-solid fa-globe me-2" style="color:var(--gold-light)"></i>www.shivkalaclasses.com</p>
+                    <div class="mt-3">
+                        <h6 style="font-size:.78rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px">Portals</h6>
+                        <div class="d-flex gap-2 flex-wrap mt-1">
+                            <a asp-controller="Admin" asp-action="Login" style="font-size:.72rem;color:var(--gold-light);text-decoration:none"><i class="fa-solid fa-shield-halved me-1"></i>Admin</a>
+                            <a asp-controller="TeacherPortal" asp-action="Login" style="font-size:.72rem;color:var(--gold-light);text-decoration:none"><i class="fa-solid fa-chalkboard-teacher me-1"></i>Teacher</a>
+                            <a asp-controller="ParentPortal" asp-action="Login" style="font-size:.72rem;color:var(--gold-light);text-decoration:none"><i class="fa-solid fa-user-group me-1"></i>Parent</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <!-- Contact Strip -->
         <div class="footer-contact-strip mt-4">
-            <div class="container">
-                <div class="contact-items">
-                    <div class="footer-contact-item">
-                        <i class="fa-solid fa-location-dot"></i>
-                        <div><strong>@(isMr ? "पत्ता" : "ADDRESS")</strong>@(isMr ? "शिवकला क्लासेस, चिखली" : "Shivakala Classes, Chikhali")</div>
-                    </div>
-                    <div class="footer-contact-item">
-                        <i class="fa-solid fa-phone"></i>
-                        <div><strong>@(isMr ? "फोन" : "PHONE")</strong>+91 80878 07011</div>
-                    </div>
-                    <div class="footer-contact-item">
-                        <i class="fa-solid fa-envelope"></i>
-                        <div><strong>EMAIL</strong>info@shivkalaclasses.com</div>
-                    </div>
-                    <div class="footer-contact-item">
-                        <i class="fa-solid fa-globe"></i>
-                        <div><strong>WEBSITE</strong>www.shivkalaclasses.com</div>
-                    </div>
-                </div>
-            </div>
+            <div class="container"><div class="contact-items">
+                <div class="footer-contact-item"><i class="fa-solid fa-location-dot"></i><div><strong>ADDRESS</strong>Shivakala Classes, Chikhali</div></div>
+                <div class="footer-contact-item"><i class="fa-solid fa-phone"></i><div><strong>PHONE</strong>+91 80878 07011</div></div>
+                <div class="footer-contact-item"><i class="fa-solid fa-envelope"></i><div><strong>EMAIL</strong>info@shivkalaclasses.com</div></div>
+                <div class="footer-contact-item"><i class="fa-solid fa-globe"></i><div><strong>WEBSITE</strong>www.shivkalaclasses.com</div></div>
+            </div></div>
         </div>
         <div class="footer-bottom">
             <p>&copy; @DateTime.UtcNow.Year Shivakala Coaching Classes, Chikhali &nbsp;|&nbsp; @T["FooterRights"] &nbsp;|&nbsp; SK Learning For Life</p>
         </div>
     </footer>
 
-    <!-- WhatsApp Float -->
     <a class="whatsapp-float" href="https://wa.me/918087807011?text=Hello%20Shivakala%20Coaching%20Classes" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
         <i class="fa-brands fa-whatsapp"></i>
     </a>
