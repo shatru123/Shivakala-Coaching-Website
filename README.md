@@ -1,141 +1,170 @@
-# Shivakala Coaching Classes
+# 🎓 Shivakala Coaching Classes — Management System
 
-Production-ready ASP.NET Core MVC `.NET 8` website for `Shivakala Coaching Classes` with clean architecture, SQLite, Entity Framework Core, Bootstrap 5, Razor views, Marathi and English localization, student registration, and enquiry management.
+> **Enterprise-grade coaching institute management platform** built with ASP.NET Core 8 MVC · EF Core · SQLite · Bootstrap 5 · whatsapp-web.js
 
-## Tech Stack
+---
 
-- ASP.NET Core MVC (.NET 8)
-- Entity Framework Core 8
-- SQLite
-- Razor Views
-- Bootstrap 5
-- Font Awesome
-- `.resx` localization
+## ✨ Features
 
-## Solution Structure
+| Module | Features |
+|--------|----------|
+| **Students** | Admission, profiles, photo upload, ID card, CSV export |
+| **Teachers** | CRUD, photo, salary, subject allocation |
+| **Batches** | Create classes, allocate students/subjects/teachers |
+| **Attendance** | Daily mark sheet, subject-wise, monthly reports, % tracking |
+| **Fees** | Collect fees, receipts (print), fee structure, pending dues |
+| **Exams** | Schedule, enter marks, auto-rank, grade, publish results |
+| **Homework** | Assign with attachment, view submissions |
+| **Timetable** | Weekly grid, conflict detection, printable |
+| **WhatsApp** | Free broadcast via QR scan — no paid API |
+| **Notice Board** | Announcements, circulars |
+| **Study Materials** | PDFs, notes, previous papers |
+| **Audit Logs** | Every admin action logged |
+| **Gallery / Testimonials** | Website content management |
 
-```text
+---
+
+## 🏗 Architecture
+
+```
 ShivakalaCoaching.sln
-
-src/
- ├── Shivakala.Web
- ├── Shivakala.Core
- └── Shivakala.Infrastructure
+├── src/
+│   ├── Shivakala.Core/           # Entities, Interfaces, Services (Domain)
+│   ├── Shivakala.Infrastructure/ # EF Core, Repositories, Services (Data)
+│   └── Shivakala.Web/            # ASP.NET Core MVC, Controllers, Views
+└── whatsapp-sidecar/             # Node.js whatsapp-web.js HTTP bridge
 ```
 
-## Features
+---
 
-- Responsive home page with hero banner, stats, courses, faculty, testimonials, and CTA
-- About, Courses, Registration, Enquiry, and Contact pages
-- Marathi and English language switcher
-- Dark and light theme toggle
-- SQLite database with EF Core migrations
-- Registration and enquiry forms with client-side and server-side validation
-- Sticky navigation, glassmorphism cards, gradients, and smooth reveal animations
-- WhatsApp floating action button
-- Error handling and logging
-- Admin dashboard for registrations and enquiries
-
-## Database
-
-SQLite database file:
-
-```text
-src/Shivakala.Web/App_Data/shivakala.db
-```
-
-Current tables:
-
-- `Students`
-- `Enquiries`
-- `Courses`
-
-## Getting Started
+## 🚀 Quick Start (Local)
 
 ### Prerequisites
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8)
+- [Node.js 18+](https://nodejs.org/) (for WhatsApp sidecar)
 
-- .NET SDK `8.0.421` or compatible .NET 8 SDK
-
-### Run Locally
+### 1. Clone & Restore
 
 ```bash
-dotnet restore ShivakalaCoaching.sln
-dotnet build ShivakalaCoaching.sln
+git clone https://github.com/shatru123/Shivakala-Coaching-Website
+cd Shivakala-Coaching-Website
+dotnet restore
+```
+
+### 2. Apply Migrations
+
+```bash
+cd src/Shivakala.Web
+dotnet ef database update --project ../Shivakala.Infrastructure
+```
+
+### 3. Run the App
+
+```bash
 dotnet run --project src/Shivakala.Web
 ```
 
-Open:
+Open → `http://localhost:5000`  
+Admin → `http://localhost:5000/admin`
 
-```text
-https://localhost:5001
-or
-http://localhost:5000
-```
-
-## Migrations
-
-Local EF Core tool is configured through `.config/dotnet-tools.json`.
-
-Create a migration:
+### 4. Start WhatsApp Sidecar (optional)
 
 ```bash
-dotnet dotnet-ef migrations add MigrationName --project src/Shivakala.Infrastructure --startup-project src/Shivakala.Web --context ShivakalaDbContext --output-dir Data/Migrations
+cd whatsapp-sidecar
+npm install
+npm start
 ```
 
-Apply migrations:
+Then go to **Admin → WhatsApp** and scan the QR code.
+
+---
+
+## 🐳 Docker Deployment
 
 ```bash
-dotnet dotnet-ef database update --project src/Shivakala.Infrastructure --startup-project src/Shivakala.Web --context ShivakalaDbContext
+# Copy and edit environment config
+cp docker-compose.yml docker-compose.prod.yml
+# Edit credentials in docker-compose.prod.yml
+
+docker compose -f docker-compose.prod.yml up -d --build
 ```
 
-## Localization
+---
 
-Shared resources are stored in:
+## ⚙️ Configuration
 
-```text
-src/Shivakala.Web/Resources/
+`appsettings.json` / environment variables:
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=App_Data/shivakala.db"
+  },
+  "AdminCredentials": {
+    "Username": "admin",
+    "Password": "changeme123"
+  }
+}
 ```
 
-Supported cultures:
+---
 
-- `en`
-- `mr`
+## 🔐 Security
 
-## Admin Access
+- CSRF tokens on every form
+- Parameterized EF Core queries (SQL injection–safe)
+- BCrypt password hashing (AppUser)
+- Role-based authorization attributes
+- Audit log for every admin action
+- Helmet headers via ASP.NET Core security middleware
 
-Admin pages:
+---
 
-- `/Admin/Login`
-- `/Admin`
-- `/Admin/Registrations`
-- `/Admin/Enquiries`
+## 📁 Folder Structure (new additions)
 
-Default credentials:
+```
+src/Shivakala.Core/Entities/
+  AppUser.cs · Teacher.cs · Batch.cs · BatchSubject.cs
+  StudentBatch.cs · Attendance.cs · TeacherAttendance.cs
+  FeeStructure.cs · FeePayment.cs · Exam.cs · ExamResult.cs
+  Homework.cs · HomeworkSubmission.cs · TimetableSlot.cs
+  Notification.cs · AuditLog.cs · SyllabusItem.cs
 
-```text
-Username: admin
-Password: P@$$w0rd
+src/Shivakala.Infrastructure/
+  Repositories/ → all new repo implementations
+  Services/     → AuditService · WhatsAppService
+
+src/Shivakala.Web/Controllers/
+  TeacherController · BatchController · AttendanceController
+  FeeController · ExamController · HomeworkController
+  TimetableController · WhatsAppController
+
+src/Shivakala.Web/Views/
+  Teacher/ · Batch/ · Attendance/ · Fee/ · Exam/
+  Homework/ · Timetable/ · WhatsApp/
+
+whatsapp-sidecar/
+  server.js · package.json · Dockerfile · README.md
 ```
 
-## Production Notes
+---
 
-- Update institute contact details, map query, and WhatsApp number in the web layer before deployment if needed.
-- Replace placeholder admissions email and phone number with final production values.
-- Configure reverse proxy, HTTPS certificate, and environment-specific logging in your hosting environment.
+## 🗺 Roadmap
 
-## Default Pages
+- [ ] Parent portal login
+- [ ] SMS integration (free Textbelt/MSG91 trial)
+- [ ] Online fee payment (Razorpay free tier)
+- [ ] Student ID card PDF generation
+- [ ] Progressive Web App (PWA)
+- [ ] Dark mode
 
-- `/`
-- `/about`
-- `/courses`
-- `/registration`
-- `/enquiry`
-- `/contact`
+---
 
-## Commit
+## 🧑‍💻 Developer
 
-Target commit message:
+**Shatrughna** · Senior Engineer @ Ticketmaster  
+GitHub: [@shatru123](https://github.com/shatru123)
 
-```text
-Initial production-ready Shivakala Coaching website
-```
+---
+
+*Built with ❤️ for SK Classes, Chikhali, Maharashtra*
