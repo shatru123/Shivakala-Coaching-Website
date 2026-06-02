@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Shivakala.Core.Interfaces;
 using Shivakala.Core.Services;
 using Shivakala.Core.ViewModels;
+using Shivakala.Infrastructure.Data;
 using Shivakala.Infrastructure.Repositories;
 
 namespace Shivakala.Web.Controllers;
@@ -19,10 +21,11 @@ public sealed class AdminController(
     IStudyMaterialRepository materialRepo,
     IGalleryRepository galleryRepo,
     ITestimonialRepository testimonialRepo,
+    ShivakalaDbContext db,
     IWebHostEnvironment webHostEnvironment,
     ILogger<AdminController> logger) : Controller
 {
-    // ===== AUTH =====
+    // ═══ AUTH ═════════════════════════════════════════════════════════════════
     [HttpGet, AllowAnonymous]
     public IActionResult Login(string? returnUrl = null)
     {
@@ -39,7 +42,11 @@ public sealed class AdminController(
             ModelState.AddModelError(string.Empty, "Invalid username or password.");
             return View("Login", model);
         }
-        var claims = new List<Claim> { new(ClaimTypes.Name, model.Username.Trim()), new(ClaimTypes.Role, "Admin") };
+        var claims = new List<Claim>
+        {
+            new(ClaimTypes.Name, model.Username.Trim()),
+            new(ClaimTypes.Role, "Admin")
+        };
         var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
             new AuthenticationProperties { IsPersistent = true, ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8) });
@@ -48,19 +55,43 @@ public sealed class AdminController(
             ? LocalRedirect(model.ReturnUrl) : RedirectToAction(nameof(Index));
     }
 
-    [HttpPost, Authorize, ValidateAntiForgeryToken]
+    // GET logout — safe to call from a plain <a> link in sidebar
+    [HttpGet, Authorize]
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        logger.LogInformation("Admin signed out.");
         return RedirectToAction(nameof(Login));
     }
 
-    // ===== DASHBOARD =====
+    // ═══ DASHBOARD ════════════════════════════════════════════════════════════
     [Authorize, HttpGet]
     public async Task<IActionResult> Index(CancellationToken ct)
-        => View(await portalService.GetDashboardAsync(ct));
+    {
+        var dashboard = await portalService.GetDashboardAsync(ct);
 
-    // ===== REGISTRATIONS =====
+        // Live stats injected into ViewBag
+        ViewBag.TotalStudents    = await db.Students.CountAsync(ct);
+        ViewBag.TotalTeachers    = await db.Teachers.CountAsync(s => s.IsActive, ct);
+        ViewBag.TotalBatches     = await db.Batches.CountAsync(b => b.IsActive, ct);
+        ViewBag.TotalEnquiries   = await db.Enquiries.CountAsync(e => !e.IsRead, ct);
+        ViewBag.FeeThisMonth     = await db.FeePayments
+            .Where(f => f.Month == DateTime.UtcNow.ToString("yyyy-MM") && f.Status == "Paid")
+            .SumAsync(f => (decimal?)f.PaidAmount, ct) ?? 0;
+        ViewBag.PendingFees      = await db.FeePayments
+            .Where(f => f.Status == "Pending")
+            .SumAsync(f => (decimal?)(f.Amount - f.PaidAmount), ct) ?? 0;
+        ViewBag.UpcomingExams    = await db.Exams
+            .Where(e => e.ExamDate >= DateTime.Today && !e.IsPublished)
+            .CountAsync(ct);
+        ViewBag.PendingHomework  = await db.Homeworks
+            .Where(h => h.IsActive && h.DueDate >= DateTime.Today)
+            .CountAsync(ct);
+
+        return View(dashboard);
+    }
+
+    // ═══ REGISTRATIONS ════════════════════════════════════════════════════════
     [Authorize, HttpGet]
     public async Task<IActionResult> Registrations(string? status, string? search, CancellationToken ct)
     {
@@ -88,7 +119,7 @@ public sealed class AdminController(
         return File(csv, "text/csv", $"registrations_{DateTime.Now:yyyyMMdd}.csv");
     }
 
-    // ===== ENQUIRIES =====
+    // ═══ ENQUIRIES ════════════════════════════════════════════════════════════
     [Authorize, HttpGet]
     public async Task<IActionResult> Enquiries(bool? unread, string? search, CancellationToken ct)
     {
@@ -116,10 +147,9 @@ public sealed class AdminController(
         return File(csv, "text/csv", $"enquiries_{DateTime.Now:yyyyMMdd}.csv");
     }
 
-    // ===== COURSES =====
+    // ═══ COURSES ══════════════════════════════════════════════════════════════
     [Authorize, HttpGet]
-    public async Task<IActionResult> Courses(CancellationToken ct)
-        => View(await courseRepo.ListAsync(ct));
+    public async Task<IActionResult> Courses(CancellationToken ct) => View(await courseRepo.ListAsync(ct));
 
     [Authorize, HttpGet]
     public async Task<IActionResult> CreateCourse(CancellationToken ct)
@@ -133,74 +163,44 @@ public sealed class AdminController(
     {
         NormalizeCourse(vm);
         if (await courseRepo.GetBySlugAsync(vm.Slug, ct) != null)
-        {
             ModelState.AddModelError(nameof(vm.Slug), "A course with this slug already exists.");
-        }
         if (!ModelState.IsValid) return View("CourseForm", vm);
-
-        await courseRepo.AddAsync(new Core.Entities.Course
-        {
-            Slug = vm.Slug,
-            Title = vm.Title,
-            TitleMarathi = vm.TitleMarathi,
-            Description = vm.Description,
-            DescriptionMarathi = vm.DescriptionMarathi,
-            Standard = vm.Standard,
-            DurationMonths = vm.DurationMonths,
-            DisplayOrder = vm.DisplayOrder,
-            IsFeatured = vm.IsFeatured
-        }, ct);
-
-        TempData["SuccessMessage"] = "Course created successfully.";
+        await courseRepo.AddAsync(new Core.Entities.Course {
+            Slug=vm.Slug,Title=vm.Title,TitleMarathi=vm.TitleMarathi,
+            Description=vm.Description,DescriptionMarathi=vm.DescriptionMarathi,
+            Standard=vm.Standard,DurationMonths=vm.DurationMonths,
+            DisplayOrder=vm.DisplayOrder,IsFeatured=vm.IsFeatured }, ct);
+        TempData["SuccessMessage"] = "Course created.";
         return RedirectToAction(nameof(Courses));
     }
 
     [Authorize, HttpGet]
     public async Task<IActionResult> EditCourse(int id, CancellationToken ct)
     {
-        var course = await courseRepo.GetByIdAsync(id, ct);
-        if (course == null) return NotFound();
-
-        return View("CourseForm", new CourseFormViewModel
-        {
-            Id = course.Id,
-            Slug = course.Slug,
-            Title = course.Title,
-            TitleMarathi = course.TitleMarathi,
-            Description = course.Description,
-            DescriptionMarathi = course.DescriptionMarathi,
-            Standard = course.Standard,
-            DurationMonths = course.DurationMonths,
-            DisplayOrder = course.DisplayOrder,
-            IsFeatured = course.IsFeatured
-        });
+        var c = await courseRepo.GetByIdAsync(id, ct);
+        if (c == null) return NotFound();
+        return View("CourseForm", new CourseFormViewModel {
+            Id=c.Id,Slug=c.Slug,Title=c.Title,TitleMarathi=c.TitleMarathi,
+            Description=c.Description,DescriptionMarathi=c.DescriptionMarathi,
+            Standard=c.Standard,DurationMonths=c.DurationMonths,
+            DisplayOrder=c.DisplayOrder,IsFeatured=c.IsFeatured });
     }
 
     [Authorize, HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> EditCourse(CourseFormViewModel vm, CancellationToken ct)
     {
         NormalizeCourse(vm);
-        var slugOwner = await courseRepo.GetBySlugAsync(vm.Slug, ct);
-        if (slugOwner != null && slugOwner.Id != vm.Id)
-        {
-            ModelState.AddModelError(nameof(vm.Slug), "A course with this slug already exists.");
-        }
+        var owner = await courseRepo.GetBySlugAsync(vm.Slug, ct);
+        if (owner != null && owner.Id != vm.Id)
+            ModelState.AddModelError(nameof(vm.Slug), "Slug already exists.");
         if (!ModelState.IsValid) return View("CourseForm", vm);
-
-        var course = await courseRepo.GetByIdAsync(vm.Id, ct);
-        if (course == null) return NotFound();
-
-        course.Slug = vm.Slug;
-        course.Title = vm.Title;
-        course.TitleMarathi = vm.TitleMarathi;
-        course.Description = vm.Description;
-        course.DescriptionMarathi = vm.DescriptionMarathi;
-        course.Standard = vm.Standard;
-        course.DurationMonths = vm.DurationMonths;
-        course.DisplayOrder = vm.DisplayOrder;
-        course.IsFeatured = vm.IsFeatured;
-
-        await courseRepo.UpdateAsync(course, ct);
+        var c = await courseRepo.GetByIdAsync(vm.Id, ct);
+        if (c == null) return NotFound();
+        c.Slug=vm.Slug;c.Title=vm.Title;c.TitleMarathi=vm.TitleMarathi;
+        c.Description=vm.Description;c.DescriptionMarathi=vm.DescriptionMarathi;
+        c.Standard=vm.Standard;c.DurationMonths=vm.DurationMonths;
+        c.DisplayOrder=vm.DisplayOrder;c.IsFeatured=vm.IsFeatured;
+        await courseRepo.UpdateAsync(c, ct);
         TempData["SuccessMessage"] = "Course updated.";
         return RedirectToAction(nameof(Courses));
     }
@@ -213,10 +213,9 @@ public sealed class AdminController(
         return RedirectToAction(nameof(Courses));
     }
 
-    // ===== NOTICES =====
+    // ═══ NOTICES ══════════════════════════════════════════════════════════════
     [Authorize, HttpGet]
-    public async Task<IActionResult> Notices(CancellationToken ct)
-        => View(await noticeRepo.GetAllAdminAsync(ct));
+    public async Task<IActionResult> Notices(CancellationToken ct) => View(await noticeRepo.GetAllAdminAsync(ct));
 
     [Authorize, HttpGet]
     public IActionResult CreateNotice() => View("NoticeForm", new NoticeFormViewModel { PublishedDate = DateTime.Today });
@@ -226,11 +225,10 @@ public sealed class AdminController(
     {
         if (!ModelState.IsValid) return View("NoticeForm", vm);
         await noticeRepo.AddAsync(new Core.Entities.Notice {
-            Title=vm.Title, TitleMarathi=vm.TitleMarathi, Body=vm.Body,
-            BodyMarathi=vm.BodyMarathi, Category=vm.Category, IsPinned=vm.IsPinned,
-            IsActive=vm.IsActive, PublishedDate=vm.PublishedDate, CreatedDate=DateTime.UtcNow
-        }, ct);
-        TempData["SuccessMessage"] = "Notice created successfully.";
+            Title=vm.Title,TitleMarathi=vm.TitleMarathi,Body=vm.Body,
+            BodyMarathi=vm.BodyMarathi,Category=vm.Category,IsPinned=vm.IsPinned,
+            IsActive=vm.IsActive,PublishedDate=vm.PublishedDate,CreatedDate=DateTime.UtcNow }, ct);
+        TempData["SuccessMessage"] = "Notice created.";
         return RedirectToAction(nameof(Notices));
     }
 
@@ -240,10 +238,9 @@ public sealed class AdminController(
         var n = await noticeRepo.GetByIdAsync(id, ct);
         if (n == null) return NotFound();
         return View("NoticeForm", new NoticeFormViewModel {
-            Id=n.Id, Title=n.Title, TitleMarathi=n.TitleMarathi, Body=n.Body,
-            BodyMarathi=n.BodyMarathi, Category=n.Category, IsPinned=n.IsPinned,
-            IsActive=n.IsActive, PublishedDate=n.PublishedDate
-        });
+            Id=n.Id,Title=n.Title,TitleMarathi=n.TitleMarathi,Body=n.Body,
+            BodyMarathi=n.BodyMarathi,Category=n.Category,IsPinned=n.IsPinned,
+            IsActive=n.IsActive,PublishedDate=n.PublishedDate });
     }
 
     [Authorize, HttpPost, ValidateAntiForgeryToken]
@@ -252,9 +249,9 @@ public sealed class AdminController(
         if (!ModelState.IsValid) return View("NoticeForm", vm);
         var n = await noticeRepo.GetByIdAsync(vm.Id, ct);
         if (n == null) return NotFound();
-        n.Title=vm.Title; n.TitleMarathi=vm.TitleMarathi; n.Body=vm.Body;
-        n.BodyMarathi=vm.BodyMarathi; n.Category=vm.Category; n.IsPinned=vm.IsPinned;
-        n.IsActive=vm.IsActive; n.PublishedDate=vm.PublishedDate;
+        n.Title=vm.Title;n.TitleMarathi=vm.TitleMarathi;n.Body=vm.Body;
+        n.BodyMarathi=vm.BodyMarathi;n.Category=vm.Category;n.IsPinned=vm.IsPinned;
+        n.IsActive=vm.IsActive;n.PublishedDate=vm.PublishedDate;
         await noticeRepo.UpdateAsync(n, ct);
         TempData["SuccessMessage"] = "Notice updated.";
         return RedirectToAction(nameof(Notices));
@@ -268,10 +265,9 @@ public sealed class AdminController(
         return RedirectToAction(nameof(Notices));
     }
 
-    // ===== RESULTS =====
+    // ═══ RESULTS ══════════════════════════════════════════════════════════════
     [Authorize, HttpGet]
-    public async Task<IActionResult> Results(CancellationToken ct)
-        => View(await resultRepo.GetAllAdminAsync(ct));
+    public async Task<IActionResult> Results(CancellationToken ct) => View(await resultRepo.GetAllAdminAsync(ct));
 
     [Authorize, HttpGet]
     public IActionResult CreateResult() => View("ResultForm", new TestResultFormViewModel { TestDate = DateTime.Today, TotalMarks = 100 });
@@ -284,10 +280,9 @@ public sealed class AdminController(
             >= 90 => "A+", >= 80 => "A", >= 70 => "B+", >= 60 => "B", >= 50 => "C", _ => "D"
         } : null;
         await resultRepo.AddAsync(new Core.Entities.TestResult {
-            StudentName=vm.StudentName, Standard=vm.Standard, Subject=vm.Subject,
-            Score=vm.Score, TotalMarks=vm.TotalMarks, Rank=vm.Rank, Grade=grade,
-            Remarks=vm.Remarks, TestDate=vm.TestDate, TestTitle=vm.TestTitle, CreatedDate=DateTime.UtcNow
-        }, ct);
+            StudentName=vm.StudentName,Standard=vm.Standard,Subject=vm.Subject,
+            Score=vm.Score,TotalMarks=vm.TotalMarks,Rank=vm.Rank,Grade=grade,
+            Remarks=vm.Remarks,TestDate=vm.TestDate,TestTitle=vm.TestTitle,CreatedDate=DateTime.UtcNow }, ct);
         TempData["SuccessMessage"] = "Result added.";
         return RedirectToAction(nameof(Results));
     }
@@ -300,10 +295,9 @@ public sealed class AdminController(
         return RedirectToAction(nameof(Results));
     }
 
-    // ===== STUDY MATERIALS =====
+    // ═══ STUDY MATERIALS ══════════════════════════════════════════════════════
     [Authorize, HttpGet]
-    public async Task<IActionResult> Materials(CancellationToken ct)
-        => View(await materialRepo.GetAllAdminAsync(ct));
+    public async Task<IActionResult> Materials(CancellationToken ct) => View(await materialRepo.GetAllAdminAsync(ct));
 
     [Authorize, HttpGet]
     public IActionResult CreateMaterial() => View("MaterialForm", new StudyMaterialFormViewModel());
@@ -311,22 +305,18 @@ public sealed class AdminController(
     [Authorize, HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateMaterial(StudyMaterialFormViewModel vm, CancellationToken ct)
     {
-        if (vm.File == null || vm.File.Length == 0) ModelState.AddModelError("File","Please upload a file.");
+        if (vm.File == null || vm.File.Length == 0) ModelState.AddModelError("File", "Please upload a file.");
         if (!ModelState.IsValid) return View("MaterialForm", vm);
-
-        var uploadDir = Path.Combine(webHostEnvironment.WebRootPath, "uploads", "materials");
-        Directory.CreateDirectory(uploadDir);
+        var dir = Path.Combine(webHostEnvironment.WebRootPath, "uploads", "materials");
+        Directory.CreateDirectory(dir);
         var fileName = $"{Guid.NewGuid()}{Path.GetExtension(vm.File!.FileName)}";
-        var filePath = Path.Combine(uploadDir, fileName);
-        await using var stream = System.IO.File.Create(filePath);
-        await vm.File.CopyToAsync(stream, ct);
-
+        await using var s = System.IO.File.Create(Path.Combine(dir, fileName));
+        await vm.File.CopyToAsync(s, ct);
         await materialRepo.AddAsync(new Core.Entities.StudyMaterial {
-            Title=vm.Title, TitleMarathi=vm.TitleMarathi, FileUrl=$"/uploads/materials/{fileName}",
-            Standard=vm.Standard, Subject=vm.Subject, MaterialType=vm.MaterialType,
-            FileSizeBytes=vm.File.Length, IsActive=vm.IsActive, UploadedDate=DateTime.UtcNow
-        }, ct);
-        TempData["SuccessMessage"] = "Study material uploaded.";
+            Title=vm.Title,TitleMarathi=vm.TitleMarathi,FileUrl=$"/uploads/materials/{fileName}",
+            Standard=vm.Standard,Subject=vm.Subject,MaterialType=vm.MaterialType,
+            FileSizeBytes=vm.File.Length,IsActive=vm.IsActive,UploadedDate=DateTime.UtcNow }, ct);
+        TempData["SuccessMessage"] = "Material uploaded.";
         return RedirectToAction(nameof(Materials));
     }
 
@@ -334,43 +324,29 @@ public sealed class AdminController(
     public async Task<IActionResult> DeleteMaterial(int id, CancellationToken ct)
     {
         var m = await materialRepo.GetByIdAsync(id, ct);
-        if (m != null)
-        {
-            var physPath = Path.Combine(webHostEnvironment.WebRootPath, m.FileUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
-            if (System.IO.File.Exists(physPath)) System.IO.File.Delete(physPath);
+        if (m != null) {
+            var p = Path.Combine(webHostEnvironment.WebRootPath, m.FileUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+            if (System.IO.File.Exists(p)) System.IO.File.Delete(p);
             await materialRepo.DeleteAsync(id, ct);
         }
         TempData["SuccessMessage"] = "Material deleted.";
         return RedirectToAction(nameof(Materials));
     }
 
-    // ===== TESTIMONIALS =====
+    // ═══ TESTIMONIALS ═════════════════════════════════════════════════════════
     [Authorize, HttpGet]
-    public async Task<IActionResult> Testimonials(CancellationToken ct)
-        => View(await testimonialRepo.GetAllAdminAsync(ct));
-
+    public async Task<IActionResult> Testimonials(CancellationToken ct) => View(await testimonialRepo.GetAllAdminAsync(ct));
     [Authorize, HttpGet]
-    public IActionResult CreateTestimonial()
-        => View("TestimonialForm", new TestimonialFormViewModel());
+    public IActionResult CreateTestimonial() => View("TestimonialForm", new TestimonialFormViewModel());
 
     [Authorize, HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateTestimonial(TestimonialFormViewModel vm, CancellationToken ct)
     {
         NormalizeTestimonial(vm);
         if (!ModelState.IsValid) return View("TestimonialForm", vm);
-
-        await testimonialRepo.AddAsync(new Core.Entities.Testimonial
-        {
-            Name = vm.Name,
-            Role = vm.Role,
-            Quote = vm.Quote,
-            QuoteMarathi = vm.QuoteMarathi,
-            Rating = vm.Rating,
-            IsApproved = vm.IsApproved,
-            IsFeatured = vm.IsFeatured,
-            CreatedDate = DateTime.UtcNow
-        }, ct);
-
+        await testimonialRepo.AddAsync(new Core.Entities.Testimonial {
+            Name=vm.Name,Role=vm.Role,Quote=vm.Quote,QuoteMarathi=vm.QuoteMarathi,
+            Rating=vm.Rating,IsApproved=vm.IsApproved,IsFeatured=vm.IsFeatured,CreatedDate=DateTime.UtcNow }, ct);
         TempData["SuccessMessage"] = "Testimonial created.";
         return RedirectToAction(nameof(Testimonials));
     }
@@ -378,20 +354,11 @@ public sealed class AdminController(
     [Authorize, HttpGet]
     public async Task<IActionResult> EditTestimonial(int id, CancellationToken ct)
     {
-        var testimonial = await testimonialRepo.GetByIdAsync(id, ct);
-        if (testimonial == null) return NotFound();
-
-        return View("TestimonialForm", new TestimonialFormViewModel
-        {
-            Id = testimonial.Id,
-            Name = testimonial.Name,
-            Role = testimonial.Role,
-            Quote = testimonial.Quote,
-            QuoteMarathi = testimonial.QuoteMarathi,
-            Rating = testimonial.Rating,
-            IsApproved = testimonial.IsApproved,
-            IsFeatured = testimonial.IsFeatured
-        });
+        var t = await testimonialRepo.GetByIdAsync(id, ct);
+        if (t == null) return NotFound();
+        return View("TestimonialForm", new TestimonialFormViewModel {
+            Id=t.Id,Name=t.Name,Role=t.Role,Quote=t.Quote,QuoteMarathi=t.QuoteMarathi,
+            Rating=t.Rating,IsApproved=t.IsApproved,IsFeatured=t.IsFeatured });
     }
 
     [Authorize, HttpPost, ValidateAntiForgeryToken]
@@ -399,29 +366,12 @@ public sealed class AdminController(
     {
         NormalizeTestimonial(vm);
         if (!ModelState.IsValid) return View("TestimonialForm", vm);
-
-        var testimonial = await testimonialRepo.GetByIdAsync(vm.Id, ct);
-        if (testimonial == null) return NotFound();
-
-        testimonial.Name = vm.Name;
-        testimonial.Role = vm.Role;
-        testimonial.Quote = vm.Quote;
-        testimonial.QuoteMarathi = vm.QuoteMarathi;
-        testimonial.Rating = vm.Rating;
-        testimonial.IsApproved = vm.IsApproved;
-        testimonial.IsFeatured = vm.IsFeatured;
-        await testimonialRepo.UpdateAsync(testimonial, ct);
-
+        var t = await testimonialRepo.GetByIdAsync(vm.Id, ct);
+        if (t == null) return NotFound();
+        t.Name=vm.Name;t.Role=vm.Role;t.Quote=vm.Quote;t.QuoteMarathi=vm.QuoteMarathi;
+        t.Rating=vm.Rating;t.IsApproved=vm.IsApproved;t.IsFeatured=vm.IsFeatured;
+        await testimonialRepo.UpdateAsync(t, ct);
         TempData["SuccessMessage"] = "Testimonial updated.";
-        return RedirectToAction(nameof(Testimonials));
-    }
-
-    [Authorize, HttpPost, ValidateAntiForgeryToken]
-    public async Task<IActionResult> ApproveTestimonial(int id, bool featured, CancellationToken ct)
-    {
-        var t = await testimonialRepo.GetByIdAsync(id, ct);
-        if (t != null) { t.IsApproved = true; t.IsFeatured = featured; await testimonialRepo.UpdateAsync(t, ct); }
-        TempData["SuccessMessage"] = "Testimonial approved.";
         return RedirectToAction(nameof(Testimonials));
     }
 
@@ -433,10 +383,9 @@ public sealed class AdminController(
         return RedirectToAction(nameof(Testimonials));
     }
 
-    // ===== GALLERY =====
+    // ═══ GALLERY ══════════════════════════════════════════════════════════════
     [Authorize, HttpGet]
-    public async Task<IActionResult> Gallery(CancellationToken ct)
-        => View("AdminGallery", await galleryRepo.GetAllAdminAsync(ct));
+    public async Task<IActionResult> Gallery(CancellationToken ct) => View("AdminGallery", await galleryRepo.GetAllAdminAsync(ct));
 
     [Authorize, HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> UploadGalleryItem(string title, string category, string? caption, IFormFile image, CancellationToken ct)
@@ -445,14 +394,13 @@ public sealed class AdminController(
         {
             var dir = Path.Combine(webHostEnvironment.WebRootPath, "uploads", "gallery");
             Directory.CreateDirectory(dir);
-            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(image.FileName)}";
-            await using var s = System.IO.File.Create(Path.Combine(dir, fileName));
+            var fn = $"{Guid.NewGuid()}{Path.GetExtension(image.FileName)}";
+            await using var s = System.IO.File.Create(Path.Combine(dir, fn));
             await image.CopyToAsync(s, ct);
             await galleryRepo.AddAsync(new Core.Entities.GalleryItem {
-                Title=title, ImageUrl=$"/uploads/gallery/{fileName}", Caption=caption,
+                Title=title,ImageUrl=$"/uploads/gallery/{fn}",Caption=caption,
                 Category=string.IsNullOrWhiteSpace(category)?"General":category,
-                DisplayOrder=99, IsActive=true, CreatedDate=DateTime.UtcNow
-            }, ct);
+                DisplayOrder=99,IsActive=true,CreatedDate=DateTime.UtcNow }, ct);
         }
         TempData["SuccessMessage"] = "Image uploaded.";
         return RedirectToAction(nameof(Gallery));
@@ -461,18 +409,30 @@ public sealed class AdminController(
     [Authorize, HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteGalleryItem(int id, CancellationToken ct)
     {
-        var g = await galleryRepo.GetAllAdminAsync(ct);
-        var item = g.FirstOrDefault(x => x.Id == id);
-        if (item != null)
-        {
-            var ph = Path.Combine(webHostEnvironment.WebRootPath, item.ImageUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
-            if (System.IO.File.Exists(ph)) System.IO.File.Delete(ph);
+        var items = await galleryRepo.GetAllAdminAsync(ct);
+        var item = items.FirstOrDefault(x => x.Id == id);
+        if (item != null) {
+            var p = Path.Combine(webHostEnvironment.WebRootPath, item.ImageUrl.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+            if (System.IO.File.Exists(p)) System.IO.File.Delete(p);
             await galleryRepo.DeleteAsync(id, ct);
         }
         TempData["SuccessMessage"] = "Gallery item deleted.";
         return RedirectToAction(nameof(Gallery));
     }
 
+    // ═══ AUDIT LOG ════════════════════════════════════════════════════════════
+    [Authorize, HttpGet]
+    public async Task<IActionResult> AuditLog(int page = 1, CancellationToken ct = default)
+    {
+        const int size = 50;
+        var total = await db.AuditLogs.CountAsync(ct);
+        var items = await db.AuditLogs.OrderByDescending(a => a.CreatedDate)
+            .Skip((page - 1) * size).Take(size).ToListAsync(ct);
+        ViewBag.Page = page; ViewBag.TotalPages = (int)Math.Ceiling((double)total / size);
+        return View(items);
+    }
+
+    // ═══ HELPERS ══════════════════════════════════════════════════════════════
     private static void NormalizeCourse(CourseFormViewModel vm)
     {
         vm.Title = vm.Title.Trim();
