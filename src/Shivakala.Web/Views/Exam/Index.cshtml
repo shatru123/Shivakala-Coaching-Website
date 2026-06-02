@@ -1,0 +1,58 @@
+@model IReadOnlyList<Shivakala.Core.Entities.Exam>
+@{ ViewData["Title"] = "Exams | Admin"; }
+
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid))">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div><span class="badge-soft"><i class="fa-solid fa-file-pen me-1"></i>Admin</span><h1>Exams & Tests</h1></div>
+        <a asp-action="Create" class="btn-primary-sk"><i class="fa-solid fa-plus"></i>Schedule Exam</a>
+    </div>
+</section>
+
+<section class="section-shell pt-0">
+    <div class="container">
+        @if (TempData["SuccessMessage"] is string m){ <div class="alert alert-success">@m</div> }
+        <div class="glass-card">
+            <div class="table-responsive">
+                <table class="table admin-table align-middle">
+                    <thead><tr><th>Title</th><th>Standard</th><th>Subject</th><th>Type</th><th>Date</th><th>Marks</th><th>Published</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        @foreach (var e in Model)
+                        {
+                            <tr>
+                                <td style="font-weight:600">@e.Title</td>
+                                <td>@e.Standard</td>
+                                <td>@e.Subject</td>
+                                <td><span class="badge-soft dark" style="font-size:.7rem">@e.ExamType</span></td>
+                                <td style="font-size:.82rem">@e.ExamDate.ToString("dd MMM yyyy")</td>
+                                <td>@e.PassingMarks / @e.TotalMarks</td>
+                                <td>
+                                    <span class="badge @(e.IsPublished?"bg-success":"bg-warning text-dark")">@(e.IsPublished?"Published":"Draft")</span>
+                                </td>
+                                <td class="d-flex gap-1">
+                                    <a asp-action="Marks" asp-route-id="@e.Id" class="toolbar-btn" style="font-size:.7rem;padding:4px 8px">
+                                        <i class="fa-solid fa-pen-to-square"></i> Marks
+                                    </a>
+                                    @if (!e.IsPublished)
+                                    {
+                                        <form asp-action="Publish" asp-route-id="@e.Id" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <button class="toolbar-btn" style="font-size:.7rem;padding:4px 8px;background:var(--green)">
+                                                <i class="fa-solid fa-paper-plane"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    <form asp-action="Delete" asp-route-id="@e.Id" method="post" onsubmit="return confirm('Delete exam?')">
+                                        @Html.AntiForgeryToken()
+                                        <button class="toolbar-btn" style="font-size:.7rem;padding:4px 8px;background:var(--red)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
