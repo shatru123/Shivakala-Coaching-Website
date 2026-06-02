@@ -1,0 +1,98 @@
+@model IReadOnlyList<Shivakala.Core.Entities.Student>
+@{
+    var batch = (Shivakala.Core.Entities.Batch)ViewBag.Batch;
+    var date  = (DateOnly)ViewBag.Date;
+    var existing = (Dictionary<int,Shivakala.Core.Entities.Attendance>)ViewBag.Existing;
+    ViewData["Title"] = $"Attendance — {batch.Name} — {date:dd MMM yyyy}";
+}
+
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid))">
+    <div class="container">
+        <span class="badge-soft">Admin</span>
+        <h1>Mark Attendance</h1>
+        <p>@batch.Name &nbsp;·&nbsp; @date.ToString("dddd, dd MMMM yyyy")</p>
+    </div>
+</section>
+
+<section class="section-shell pt-0">
+    <div class="container" style="max-width:820px">
+        @if (TempData["SuccessMessage"] is string m){ <div class="alert alert-success">@m</div> }
+
+        <!-- Date navigator -->
+        <div class="d-flex gap-2 mb-3 align-items-center">
+            <a asp-action="Mark" asp-route-batchId="@batch.Id"
+               asp-route-date="@date.AddDays(-1).ToString("yyyy-MM-dd")"
+               class="btn-outline-sk" style="padding:6px 14px">← Prev</a>
+            <span class="fw-600">@date.ToString("dd MMM yyyy")</span>
+            <a asp-action="Mark" asp-route-batchId="@batch.Id"
+               asp-route-date="@date.AddDays(1).ToString("yyyy-MM-dd")"
+               class="btn-outline-sk" style="padding:6px 14px">Next →</a>
+        </div>
+
+        <div class="glass-card">
+            <!-- Quick mark all -->
+            <div class="d-flex gap-2 mb-3 flex-wrap">
+                <button type="button" onclick="markAll('Present')" class="toolbar-btn" style="background:var(--green)">
+                    ✓ All Present
+                </button>
+                <button type="button" onclick="markAll('Absent')" class="toolbar-btn" style="background:var(--red)">
+                    ✗ All Absent
+                </button>
+            </div>
+
+            <form asp-action="Mark" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="batchId" value="@batch.Id" />
+                <input type="hidden" name="date" value="@date.ToString("yyyy-MM-dd")" />
+
+                <div class="table-responsive">
+                    <table class="table admin-table align-middle">
+                        <thead><tr><th>#</th><th>Student</th><th>Status</th></tr></thead>
+                        <tbody>
+                            @{ int i = 1; }
+                            @foreach (var s in Model)
+                            {
+                                var cur = existing.GetValueOrDefault(s.Id)?.Status ?? "Present";
+                                <tr>
+                                    <td>@(i++)</td>
+                                    <td style="font-weight:600">@s.FullName</td>
+                                    <td>
+                                        <div class="d-flex gap-2 att-row" data-sid="@s.Id">
+                                            @foreach (var status in new[]{"Present","Late","Absent","Holiday"})
+                                            {
+                                                var col = status switch { "Present"=>"var(--green)","Late"=>"#e0a800","Absent"=>"var(--red)", _=>"#6c757d" };
+                                                <label class="att-btn" style="--col:@col">
+                                                    <input type="radio" name="statuses[@s.Id]" value="@status"
+                                                           @(cur==status?"checked":"") class="d-none" />
+                                                    @status
+                                                </label>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-floppy-disk"></i>Save Attendance</button>
+                    <a asp-action="Index" class="btn-outline-sk">← Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+.att-btn{padding:5px 12px;border-radius:20px;border:1.5px solid var(--col);color:var(--col);font-size:.78rem;cursor:pointer;transition:all .15s;user-select:none}
+.att-btn:has(input:checked){background:var(--col);color:#fff;font-weight:700}
+</style>
+
+@section Scripts {
+<script>
+function markAll(status){
+    document.querySelectorAll('input[type=radio][value="'+status+'"]').forEach(r=>r.checked=true);
+}
+</script>
+}
