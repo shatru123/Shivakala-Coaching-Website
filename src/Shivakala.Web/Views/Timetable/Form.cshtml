@@ -1,0 +1,57 @@
+@model Shivakala.Core.Entities.TimetableSlot
+@{ ViewData["Title"] = "Add Timetable Slot | Admin"; var days = (string[])ViewBag.Days; }
+
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid))">
+    <div class="container"><span class="badge-soft">Admin</span><h1>Add Timetable Slot</h1></div>
+</section>
+
+<section class="section-shell pt-0">
+    <div class="container" style="max-width:600px">
+        <div class="glass-card">
+            @if (TempData["ErrorMessage"] is string err)
+            { <div class="alert alert-danger">@err</div> }
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                <input type="hidden" asp-for="BatchId" />
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Subject *</label>
+                        <input asp-for="Subject" class="form-control" required placeholder="Mathematics" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Teacher</label>
+                        <select asp-for="TeacherId" class="form-select">
+                            <option value="">— Select —</option>
+                            @foreach (var t in (IReadOnlyList<Shivakala.Core.Entities.Teacher>)ViewBag.Teachers)
+                            { <option value="@t.Id">@t.FullName</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-600">Day *</label>
+                        <select asp-for="DayOfWeek" class="form-select" required>
+                            @for (int d = 1; d <= 7; d++)
+                            { <option value="@d">@days[d-1]</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-600">Start Time *</label>
+                        <input asp-for="StartTime" type="time" class="form-control" required />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-600">End Time *</label>
+                        <input asp-for="EndTime" type="time" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Room</label>
+                        <input asp-for="Room" class="form-control" placeholder="Room A" />
+                    </div>
+                </div>
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-plus"></i>Add Slot</button>
+                    <a asp-action="Index" asp-route-batchId="@Model.BatchId" class="btn-outline-sk">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
