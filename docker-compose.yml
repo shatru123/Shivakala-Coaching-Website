@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sk_web
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/App_Data          # SQLite DB persistence
+      - ./uploads:/app/wwwroot/uploads # File uploads
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Data Source=/app/App_Data/shivakala.db
+      - AdminCredentials__Username=admin
+      - AdminCredentials__Password=changeme123
+    depends_on:
+      - whatsapp
+
+  whatsapp:
+    build:
+      context: ./whatsapp-sidecar
+      dockerfile: Dockerfile
+    container_name: sk_whatsapp
+    restart: unless-stopped
+    ports:
+      - "3500:3500"
+    volumes:
+      - ./whatsapp-sidecar/.wwebjs_auth:/app/.wwebjs_auth
+
+volumes: {}
