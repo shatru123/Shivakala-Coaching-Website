@@ -1,17 +1,14 @@
 using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Shivakala.Infrastructure.Data;
 
 #nullable disable
 
 namespace Shivakala.Infrastructure.Data.Migrations
 {
-    [DbContext(typeof(ShivakalaDbContext))]
-    [Migration("20260602000000_AddManagementSystem")]
+    /// <inheritdoc />
     public partial class AddManagementSystem : Migration
     {
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // ── Extend Students table ─────────────────────────────────────────
@@ -375,27 +372,24 @@ namespace Shivakala.Infrastructure.Data.Migrations
             migrationBuilder.CreateIndex("IX_AppUsers_Username", "AppUsers", "Username", unique: true);
             migrationBuilder.CreateIndex("IX_AppUsers_Email",    "AppUsers", "Email",    unique: true);
             migrationBuilder.CreateIndex("IX_FeePayments_StudentId", "FeePayments", "StudentId");
-
-            // SQLite-compatible partial unique index (null values allowed):
             migrationBuilder.CreateIndex(
-                name: "IX_FeePayments_ReceiptNumber",
-                table: "FeePayments",
+                name:   "IX_FeePayments_ReceiptNumber",
+                table:  "FeePayments",
                 column: "ReceiptNumber",
                 unique: true,
                 filter: "\"ReceiptNumber\" IS NOT NULL");
-
             migrationBuilder.CreateIndex(
-                name: "IX_Attendances_StudentBatchDate",
-                table: "Attendances",
+                name:    "IX_Attendances_StudentBatchDate",
+                table:   "Attendances",
                 columns: new[] { "StudentId", "BatchId", "Date" });
-
             migrationBuilder.CreateIndex(
-                name: "IX_ExamResults_ExamStudent",
-                table: "ExamResults",
+                name:    "IX_ExamResults_ExamStudent",
+                table:   "ExamResults",
                 columns: new[] { "ExamId", "StudentId" },
-                unique: true);
+                unique:  true);
         }
 
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable("SyllabusItems");
