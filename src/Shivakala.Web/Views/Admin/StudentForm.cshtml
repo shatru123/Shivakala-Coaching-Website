@@ -1,0 +1,114 @@
+@model Shivakala.Core.ViewModels.AdminStudentFormViewModel
+@{ ViewData["Title"] = "Add Student | Admin"; ViewData["MetaDescription"] = "Admin add student form."; }
+<section class="page-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="badge-soft">Admin</span>
+            <h1>Add Student</h1>
+            <p>Register a student directly from the admin panel</p>
+        </div>
+        <a asp-action="Registrations" class="toolbar-btn"><i class="fa-solid fa-arrow-left"></i>Back to Students</a>
+    </div>
+</section>
+<section class="section-shell pt-0">
+    <div class="container" style="max-width:760px">
+        <div class="glass-card">
+            <form asp-action="CreateStudent" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="All" class="text-danger small mb-2"></div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="FullName" class="form-label">Student's Full Name *</label>
+                        <input asp-for="FullName" class="form-control" required />
+                        <span asp-validation-for="FullName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ParentName" class="form-label">Parent / Guardian Name</label>
+                        <input asp-for="ParentName" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Mobile" class="form-label">Mobile Number *</label>
+                        <input asp-for="Mobile" class="form-control" type="tel" maxlength="10" required />
+                        <span asp-validation-for="Mobile" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Email" class="form-label">Email</label>
+                        <input asp-for="Email" class="form-control" type="email" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="ParentMobile" class="form-label">Parent Mobile (for portal login)</label>
+                        <input asp-for="ParentMobile" class="form-control" type="tel" maxlength="10" placeholder="10-digit number" />
+                        <span asp-validation-for="ParentMobile" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Standard" class="form-label">Standard *</label>
+                        <select asp-for="Standard" class="form-select" required>
+                            <option value="">-- Select --</option>
+                            <option value="KG1">KG1</option>
+                            <option value="KG2">KG2</option>
+                            @for (int i = 1; i <= 10; i++)
+                            {
+                                var label = i switch { 1 => "1st", 2 => "2nd", 3 => "3rd", _ => $"{i}th" };
+                                <option value="@label">@label Standard</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Standard" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Subject" class="form-label">Subject *</label>
+                        <select asp-for="Subject" class="form-select" required>
+                            <option value="">-- Select --</option>
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="English">English</option>
+                            <option value="Science">Science</option>
+                            <option value="All Subjects">All Subjects</option>
+                        </select>
+                        <span asp-validation-for="Subject" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Board" class="form-label">Board</label>
+                        <select asp-for="Board" class="form-select">
+                            <option value="">-- Select --</option>
+                            <option value="SSC">SSC (Maharashtra)</option>
+                            <option value="CBSE">CBSE</option>
+                            <option value="ICSE">ICSE</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Medium" class="form-label">Medium</label>
+                        <select asp-for="Medium" class="form-select">
+                            <option value="">-- Select --</option>
+                            <option value="English">English</option>
+                            <option value="Marathi">Marathi</option>
+                            <option value="Semi-English">Semi-English</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="Status" class="form-label">Status *</label>
+                        <select asp-for="Status" class="form-select">
+                            @foreach (var s in new[] { "Admitted", "Pending", "Waitlisted", "Rejected" })
+                            { <option value="@s">@s</option> }
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="Address" class="form-label">Address *</label>
+                        <textarea asp-for="Address" class="form-control" rows="2" required></textarea>
+                        <span asp-validation-for="Address" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12">
+                        <label asp-for="AdminNotes" class="form-label">Admin Notes (optional)</label>
+                        <textarea asp-for="AdminNotes" class="form-control" rows="2" placeholder="Internal notes..."></textarea>
+                    </div>
+                    <div class="col-12 d-flex gap-2 pt-2">
+                        <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-user-plus"></i>Add Student</button>
+                        <a asp-action="Registrations" class="btn-outline-sk">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

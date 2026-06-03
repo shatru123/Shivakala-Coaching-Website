@@ -1,0 +1,81 @@
+@{
+    ViewData["Title"] = "Parent Login | SK Classes";
+    Layout = "_Layout";
+}
+
+<section style="min-height:70vh;display:flex;align-items:center;background:linear-gradient(135deg,#3d2f6b,#5a4e8e)">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5 col-lg-4">
+                <div style="background:#fff;border-radius:20px;padding:40px;box-shadow:0 20px 60px rgba(0,0,0,.25)">
+                    <div class="text-center mb-4">
+                        <div style="width:64px;height:64px;background:linear-gradient(135deg,#5a4e8e,#7c6bc4);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 16px">
+                            👨‍👩‍👧
+                        </div>
+                        <h4 style="font-weight:800;color:#3d2f6b;margin-bottom:4px">Parent Portal</h4>
+                        <p style="color:#666;font-size:.85rem">View attendance, fees &amp; results</p>
+                    </div>
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger py-2 small" role="alert">
+                            <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                            Invalid mobile number or password.
+                        </div>
+                    }
+
+                    <form action="/parent/login" method="post">
+                        @Html.AntiForgeryToken()
+                        @if (!string.IsNullOrWhiteSpace(ViewBag.ReturnUrl as string))
+                        {
+                            <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+                        }
+                        <div class="mb-3">
+                            <label class="form-label" style="font-weight:600;color:#333;font-size:.85rem">Parent Mobile (10 digits)</label>
+                            <div class="input-group">
+                                <span class="input-group-text" style="background:#f3f0fa;border-color:#d8d0f0">
+                                    <i class="fa-solid fa-mobile-screen" style="color:#5a4e8e;font-size:.85rem"></i>
+                                </span>
+                                <input type="text" name="username" class="form-control" maxlength="10"
+                                       placeholder="9876543210" required autocomplete="username"
+                                       style="border-color:#d8d0f0" />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" style="font-weight:600;color:#333;font-size:.85rem">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text" style="background:#f3f0fa;border-color:#d8d0f0">
+                                    <i class="fa-solid fa-lock" style="color:#5a4e8e;font-size:.85rem"></i>
+                                </span>
+                                <input type="password" name="password" class="form-control"
+                                       placeholder="Your password" required autocomplete="current-password"
+                                       style="border-color:#d8d0f0" />
+                            </div>
+                            <div class="form-text" style="font-size:.72rem">Default password is usually the last 4 digits of your registered mobile.</div>
+                        </div>
+                        <button type="submit" class="btn w-100"
+                                style="background:linear-gradient(135deg,#5a4e8e,#7c6bc4);color:#fff;font-weight:700;padding:12px;border-radius:10px;font-size:.92rem">
+                            <i class="fa-solid fa-right-to-bracket me-2"></i>Login to Portal
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4 pt-3" style="border-top:1px solid #f0f0f0">
+                        <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+                            <a asp-controller="TeacherPortal" asp-action="Login" style="font-size:.75rem;color:#666;text-decoration:none">
+                                <i class="fa-solid fa-chalkboard-teacher me-1"></i>Teacher Login
+                            </a>
+                            <span style="color:#ddd">|</span>
+                            <a asp-controller="Admin" asp-action="Login" style="font-size:.75rem;color:#666;text-decoration:none">
+                                <i class="fa-solid fa-shield-halved me-1"></i>Admin
+                            </a>
+                            <span style="color:#ddd">|</span>
+                            <a asp-controller="Home" asp-action="Index" style="font-size:.75rem;color:#666;text-decoration:none">
+                                <i class="fa-solid fa-house me-1"></i>Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

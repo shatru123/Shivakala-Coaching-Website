@@ -1,0 +1,67 @@
+@model Shivakala.Core.ViewModels.CourseFormViewModel
+@{ ViewData["Title"] = (Model.Id == 0 ? "Create" : "Edit") + " Course | Admin"; ViewData["MetaDescription"] = "Admin course form.";
+   bool isEdit = Model.Id != 0; }
+<section class="page-hero">
+    <div class="container">
+        <span class="badge-soft">Admin</span>
+        <h1>@(isEdit ? "Edit Course" : "Create Course")</h1>
+    </div>
+</section>
+<section class="section-shell pt-0">
+    <div class="container" style="max-width:760px">
+        <div class="glass-card">
+            <form asp-action="@(isEdit ? "EditCourse" : "CreateCourse")" method="post">
+                @Html.AntiForgeryToken()
+                @if (isEdit) { <input type="hidden" asp-for="Id" /> }
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label">Title (English) *</label>
+                        <input asp-for="Title" class="form-control" required />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Slug</label>
+                        <input asp-for="Slug" class="form-control" placeholder="auto-generated if empty" />
+                        <span asp-validation-for="Slug" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Title (मराठी) *</label>
+                        <input asp-for="TitleMarathi" class="form-control" required />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Description (English) *</label>
+                        <textarea asp-for="Description" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Description (मराठी) *</label>
+                        <textarea asp-for="DescriptionMarathi" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Standard *</label>
+                        <select asp-for="Standard" class="form-select">
+                            @foreach (var s in new[] { "KG1", "KG2", "1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "All" })
+                            { <option value="@s">@s</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Duration (months)</label>
+                        <input asp-for="DurationMonths" type="number" class="form-control" min="1" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Display Order</label>
+                        <input asp-for="DisplayOrder" type="number" class="form-control" min="1" />
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input asp-for="IsFeatured" type="checkbox" class="form-check-input" id="featured" />
+                            <label class="form-check-label" for="featured">⭐ Featured on homepage</label>
+                        </div>
+                    </div>
+                    <div class="col-12 d-flex gap-2 pt-2">
+                        <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-save"></i>@(isEdit ? "Update" : "Create")</button>
+                        <a asp-action="Courses" class="btn-outline-sk">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
