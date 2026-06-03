@@ -50,14 +50,14 @@
         .sk-content{flex:1;padding:0}
 
         /* ── Mobile ── */
-        @media(max-width:768px){
+        @@media(max-width:768px){
             .sk-sidebar{transform:translateX(-100%)}.sk-sidebar.open{transform:none}
             .sk-main{margin-left:0}.burger-btn{display:block}
         }
 
         /* ── Success banner ── */
         .admin-flash{position:fixed;top:64px;right:20px;z-index:9999;min-width:280px;max-width:420px;animation:slideIn .3s ease}
-        @keyframes slideIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+        @@keyframes slideIn{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
     </style>
 </head>
 <body>

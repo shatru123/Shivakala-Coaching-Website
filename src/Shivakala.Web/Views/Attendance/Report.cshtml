@@ -15,8 +15,8 @@
                 <div class="col-md-3">
                     <label class="form-label fw-600">Report Type</label>
                     <select name="mode" id="modeSelect" class="form-select" onchange="toggleMode(this.value)">
-                        <option value="student" @(ViewBag.StudentId!=null?"selected":"")>By Student</option>
-                        <option value="batch" @(ViewBag.BatchId!=null?"selected":"")>By Batch</option>
+                        <option value="student" selected="@(ViewBag.StudentId != null)">By Student</option>
+                        <option value="batch" selected="@(ViewBag.BatchId != null)">By Batch</option>
                     </select>
                 </div>
                 <div class="col-md-3" id="studentDiv">

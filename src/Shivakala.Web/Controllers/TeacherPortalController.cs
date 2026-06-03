@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shivakala.Core.ViewModels;
 using Shivakala.Infrastructure.Data;
+using BCrypt.Net;
 
 namespace Shivakala.Web.Controllers;
 
@@ -119,7 +120,7 @@ public sealed class TeacherPortalController(
                 .Select(sb => sb.Student!).ToListAsync(ct);
 
             var existing = await db.Attendances
-                .Where(a => a.BatchId == batchId && a.Date == d.ToString("yyyy-MM-dd"))
+                .Where(a => a.BatchId == batchId && Equals(a.Date, d.ToString("yyyy-MM-dd")))
                 .ToDictionaryAsync(a => a.StudentId, ct);
 
             ViewBag.Students = students;
@@ -136,7 +137,7 @@ public sealed class TeacherPortalController(
         foreach (var (studentId, status) in statuses)
         {
             var existing = await db.Attendances.FirstOrDefaultAsync(
-                a => a.StudentId == studentId && a.BatchId == batchId && a.Date == date, ct);
+                a => a.StudentId == studentId && a.BatchId == batchId && a.Date.Equals(date), ct);
             if (existing is null)
                 db.Attendances.Add(new Core.Entities.Attendance {
                     StudentId = studentId, BatchId = batchId, Date = DateOnly.Parse(date),

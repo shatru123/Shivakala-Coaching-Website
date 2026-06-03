@@ -32,7 +32,7 @@ public sealed class FeeController(
         ViewBag.SelectedStudentId = studentId;
         if (studentId.HasValue)
             ViewBag.History = await feeRepo.GetByStudentAsync(studentId.Value, ct);
-        return View(new FeePayment { StudentId = studentId ?? 0, PaidDate = DateTime.Today, Month = DateTime.Today.ToString("yyyy-MM") });
+        return View(new FeePayment { StudentId = studentId ?? 0, PaidDate = DateTime.Today, Month = DateTime.Today.ToString("yyyy-MM"), FeeType = "Monthly"});
     }
 
     [HttpPost("collect"), ValidateAntiForgeryToken]
