@@ -52,6 +52,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICourseService, CourseService>();
         services.AddScoped<IHomePageService, HomePageService>();
         services.AddScoped<IAdminPortalService, AdminPortalService>();
+        services.AddScoped<IPortalUserService, PortalUserService>();
         services.AddSingleton<IAdminAuthenticationService, AdminAuthenticationService>();
 
         // ── New Services ───────────────────────────────────────────────────

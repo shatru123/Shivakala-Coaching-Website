@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Shivakala.Core.Services;
 
 namespace Shivakala.Infrastructure.Data.Seed;
 
@@ -37,6 +38,11 @@ public static class DatabaseInitializer
             {
                 logger?.LogInformation("✅  Database schema is already up to date.");
             }
+
+            // ── Step 3: ensure teacher/parent portal accounts exist ───────────────
+            var portalUsers = scope.ServiceProvider.GetRequiredService<IPortalUserService>();
+            await portalUsers.SyncMissingPortalAccountsAsync();
+            logger?.LogInformation("✅  Portal user accounts synced.");
         }
         catch (Exception ex)
         {

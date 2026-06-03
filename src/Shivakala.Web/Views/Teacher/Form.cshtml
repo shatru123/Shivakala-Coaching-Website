@@ -63,6 +63,15 @@
                         <label class="form-label fw-600">Admin Notes</label>
                         <textarea asp-for="AdminNotes" class="form-control" rows="2"></textarea>
                     </div>
+                    <div class="col-12"><hr /><h6 style="color:var(--navy);font-weight:700">Portal Login (optional)</h6></div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Portal Username</label>
+                        <input name="portalUsername" class="form-control" placeholder="Leave blank to auto-generate" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Portal Password</label>
+                        <input name="portalPassword" type="password" class="form-control" placeholder="Leave blank = last 4 digits of mobile" />
+                    </div>
                     <div class="col-md-6">
                         <div class="form-check mt-2">
                             <input asp-for="IsActive" class="form-check-input" type="checkbox" />

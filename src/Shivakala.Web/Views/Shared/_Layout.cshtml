@@ -64,7 +64,7 @@
             <div class="container">
                 <span><i class="fa-solid fa-chalkboard-teacher me-1"></i>Teacher Portal — <strong style="color:#fff">@User.Identity?.Name</strong></span>
                 <div class="d-flex gap-2">
-                    <a asp-controller="TeacherPortal" asp-action="Index"><i class="fa-solid fa-gauge-high me-1"></i>My Dashboard</a>
+                    <a href="/teacher"><i class="fa-solid fa-gauge-high me-1"></i>My Dashboard</a>
                     <a asp-controller="TeacherPortal" asp-action="Logout" style="border-color:rgba(255,100,100,.4);color:#f87171"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a>
                 </div>
             </div>
@@ -76,7 +76,7 @@
             <div class="container">
                 <span><i class="fa-solid fa-user-group me-1"></i>Parent Portal — <strong style="color:#fff">@User.Identity?.Name</strong></span>
                 <div class="d-flex gap-2">
-                    <a asp-controller="ParentPortal" asp-action="Index"><i class="fa-solid fa-gauge-high me-1"></i>My Dashboard</a>
+                    <a href="/parent"><i class="fa-solid fa-gauge-high me-1"></i>My Dashboard</a>
                     <a asp-controller="ParentPortal" asp-action="Logout" style="border-color:rgba(255,100,100,.4);color:#f87171"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a>
                 </div>
             </div>
@@ -180,7 +180,7 @@
                         }
                         else if (isTeacherLoggedIn)
                         {
-                            <a class="btn-login nav-link" asp-controller="TeacherPortal" asp-action="Index" style="background:rgba(26,107,58,.1)">
+                            <a class="btn-login nav-link" href="/teacher" style="background:rgba(26,107,58,.1)">
                                 <i class="fa-solid fa-gauge-high me-1"></i>My Portal
                             </a>
                         }

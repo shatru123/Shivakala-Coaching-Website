@@ -75,12 +75,13 @@ public sealed class AdminController(
         ViewBag.TotalTeachers    = await db.Teachers.CountAsync(s => s.IsActive, ct);
         ViewBag.TotalBatches     = await db.Batches.CountAsync(b => b.IsActive, ct);
         ViewBag.TotalEnquiries   = await db.Enquiries.CountAsync(e => !e.IsRead, ct);
-        ViewBag.FeeThisMonth     = await db.FeePayments
-            .Where(f => f.Month == DateTime.UtcNow.ToString("yyyy-MM") && f.Status == "Paid")
-            .SumAsync(f => (decimal?)f.PaidAmount, ct) ?? 0;
-        ViewBag.PendingFees      = await db.FeePayments
+        var currentMonth = DateTime.UtcNow.ToString("yyyy-MM");
+        ViewBag.FeeThisMonth     = (decimal)(await db.FeePayments
+            .Where(f => f.Month == currentMonth && f.Status == "Paid")
+            .SumAsync(f => (double?)f.PaidAmount, ct) ?? 0);
+        ViewBag.PendingFees      = (decimal)(await db.FeePayments
             .Where(f => f.Status == "Pending")
-            .SumAsync(f => (decimal?)(f.Amount - f.PaidAmount), ct) ?? 0;
+            .SumAsync(f => (double?)f.Amount - (double?)f.PaidAmount, ct) ?? 0);
         ViewBag.UpcomingExams    = await db.Exams
             .Where(e => e.ExamDate >= DateTime.Today && !e.IsPublished)
             .CountAsync(ct);
@@ -102,6 +103,18 @@ public sealed class AdminController(
                               || r.Mobile.Contains(search)).ToList();
         ViewData["Status"] = status; ViewData["Search"] = search;
         return View(new AdminListPageViewModel<StudentAdminViewModel> { Title = "Registrations", Items = all });
+    }
+
+    [Authorize, HttpGet]
+    public IActionResult CreateStudent() => View("StudentForm", new AdminStudentFormViewModel());
+
+    [Authorize, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateStudent(AdminStudentFormViewModel vm, CancellationToken ct)
+    {
+        if (!ModelState.IsValid) return View("StudentForm", vm);
+        var id = await portalService.CreateStudentAsync(vm, ct);
+        TempData["SuccessMessage"] = $"Student {vm.FullName} added successfully (ID #{id}).";
+        return RedirectToAction(nameof(Registrations));
     }
 
     [Authorize, HttpPost, ValidateAntiForgeryToken]
@@ -372,6 +385,18 @@ public sealed class AdminController(
         t.Rating=vm.Rating;t.IsApproved=vm.IsApproved;t.IsFeatured=vm.IsFeatured;
         await testimonialRepo.UpdateAsync(t, ct);
         TempData["SuccessMessage"] = "Testimonial updated.";
+        return RedirectToAction(nameof(Testimonials));
+    }
+
+    [Authorize, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> ApproveTestimonial(int id, bool featured, CancellationToken ct)
+    {
+        var t = await testimonialRepo.GetByIdAsync(id, ct);
+        if (t == null) return NotFound();
+        t.IsApproved = true;
+        if (featured) t.IsFeatured = true;
+        await testimonialRepo.UpdateAsync(t, ct);
+        TempData["SuccessMessage"] = featured ? "Testimonial approved and featured." : "Testimonial approved.";
         return RedirectToAction(nameof(Testimonials));
     }
 

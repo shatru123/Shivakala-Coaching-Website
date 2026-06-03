@@ -17,11 +17,48 @@ builder.Services
     {
         options.LoginPath          = "/admin/login";
         options.AccessDeniedPath   = "/admin/login";
-        options.Cookie.Name        = "Shivakala.AdminAuth";
+        options.Cookie.Name        = "Shivakala.Auth";
         options.Cookie.HttpOnly    = true;
         options.Cookie.SameSite    = Microsoft.AspNetCore.Http.SameSiteMode.Strict;
         options.ExpireTimeSpan     = TimeSpan.FromHours(8);
         options.SlidingExpiration  = true;
+        options.Events = new CookieAuthenticationEvents
+        {
+            OnRedirectToLogin = ctx =>
+            {
+                var path = ctx.Request.Path.Value ?? "";
+                if (path.StartsWith("/teacher", StringComparison.OrdinalIgnoreCase))
+                {
+                    var returnUrl = Uri.EscapeDataString(ctx.Request.Path + ctx.Request.QueryString);
+                    ctx.Response.Redirect($"/teacher/login?returnUrl={returnUrl}");
+                    return Task.CompletedTask;
+                }
+                if (path.StartsWith("/parent", StringComparison.OrdinalIgnoreCase))
+                {
+                    var returnUrl = Uri.EscapeDataString(ctx.Request.Path + ctx.Request.QueryString);
+                    ctx.Response.Redirect($"/parent/login?returnUrl={returnUrl}");
+                    return Task.CompletedTask;
+                }
+                ctx.Response.Redirect(ctx.RedirectUri);
+                return Task.CompletedTask;
+            },
+            OnRedirectToAccessDenied = ctx =>
+            {
+                var path = ctx.Request.Path.Value ?? "";
+                if (path.StartsWith("/teacher", StringComparison.OrdinalIgnoreCase))
+                {
+                    ctx.Response.Redirect("/teacher/login");
+                    return Task.CompletedTask;
+                }
+                if (path.StartsWith("/parent", StringComparison.OrdinalIgnoreCase))
+                {
+                    ctx.Response.Redirect("/parent/login");
+                    return Task.CompletedTask;
+                }
+                ctx.Response.Redirect("/admin/login");
+                return Task.CompletedTask;
+            }
+        };
     });
 builder.Services
     .AddControllersWithViews()
@@ -74,6 +111,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapControllers();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

@@ -12,6 +12,7 @@ public sealed class AdminPortalService(
     IEnquiryRepository enquiryRepository,
     INoticeRepository noticeRepository,
     IStudyMaterialRepository materialRepository,
+    IPortalUserService portalUsers,
     ShivakalaDbContext db) : IAdminPortalService
 {
     public async Task<AdminDashboardViewModel> GetDashboardAsync(CancellationToken ct = default)
@@ -59,6 +60,34 @@ public sealed class AdminPortalService(
         }).ToList();
     }
 
+    public async Task<int> CreateStudentAsync(AdminStudentFormViewModel model, CancellationToken ct = default)
+    {
+        var student = new Core.Entities.Student
+        {
+            FullName    = model.FullName.Trim(),
+            ParentName  = string.IsNullOrWhiteSpace(model.ParentName) ? null : model.ParentName.Trim(),
+            Mobile      = model.Mobile.Trim(),
+            Email       = string.IsNullOrWhiteSpace(model.Email) ? null : model.Email.Trim(),
+            Standard    = model.Standard.Trim(),
+            Subject     = model.Subject.Trim(),
+            Address     = model.Address.Trim(),
+            Board       = string.IsNullOrWhiteSpace(model.Board) ? null : model.Board.Trim(),
+            Medium      = string.IsNullOrWhiteSpace(model.Medium) ? null : model.Medium.Trim(),
+            ParentMobile = string.IsNullOrWhiteSpace(model.ParentMobile) ? null : model.ParentMobile.Trim(),
+            Status      = model.Status.Trim(),
+            AdminNotes  = string.IsNullOrWhiteSpace(model.AdminNotes) ? null : model.AdminNotes.Trim(),
+            CreatedDate = DateTime.UtcNow
+        };
+        await studentRepository.AddAsync(student, ct);
+        student.AdmissionNumber = $"SK{DateTime.UtcNow:yyyy}{student.Id:D4}";
+        await db.SaveChangesAsync(ct);
+
+        if (model.Status == "Admitted")
+            await portalUsers.EnsureParentAccountForStudentAsync(student.Id, ct: ct);
+
+        return student.Id;
+    }
+
     public async Task UpdateStudentStatusAsync(int id, string status, string? notes, CancellationToken ct = default)
     {
         var student = await db.Students.FindAsync([id], ct);
@@ -67,6 +96,8 @@ public sealed class AdminPortalService(
             student.Status = status;
             if (notes != null) student.AdminNotes = notes;
             await db.SaveChangesAsync(ct);
+            if (status == "Admitted")
+                await portalUsers.EnsureParentAccountForStudentAsync(id, ct: ct);
         }
     }
 

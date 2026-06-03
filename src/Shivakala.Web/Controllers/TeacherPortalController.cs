@@ -4,15 +4,15 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Shivakala.Core.ViewModels;
+using Shivakala.Core.Services;
 using Shivakala.Infrastructure.Data;
-using BCrypt.Net;
 
 namespace Shivakala.Web.Controllers;
 
 [Route("teacher")]
 public sealed class TeacherPortalController(
     ShivakalaDbContext db,
+    IPortalUserService portalUsers,
     ILogger<TeacherPortalController> logger) : Controller
 {
     private const string Scheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -28,12 +28,10 @@ public sealed class TeacherPortalController(
     }
 
     [HttpPost("login"), AllowAnonymous, ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(string username, string password, string? returnUrl, CancellationToken ct)
+    public async Task<IActionResult> Authenticate(string username, string password, string? returnUrl, CancellationToken ct)
     {
-        var user = await db.AppUsers.FirstOrDefaultAsync(
-            u => u.Username == username && u.Role == "Teacher" && u.IsActive, ct);
-
-        if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+        var user = await portalUsers.ValidateCredentialsAsync(username, password, "Teacher", ct);
+        if (user is null)
         {
             ModelState.AddModelError("", "Invalid username or password.");
             ViewBag.ReturnUrl = returnUrl;
@@ -61,7 +59,7 @@ public sealed class TeacherPortalController(
         logger.LogInformation("Teacher logged in: {User}", user.Username);
 
         return !string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl)
-            ? LocalRedirect(returnUrl) : RedirectToAction(nameof(Index));
+            ? LocalRedirect(returnUrl) : Redirect("/teacher");
     }
 
     [HttpGet("logout")]

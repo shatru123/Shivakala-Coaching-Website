@@ -42,13 +42,13 @@ public sealed class FeeRepository(ShivakalaDbContext db) : IFeeRepository
         if (p is not null) { db.FeePayments.Remove(p); await db.SaveChangesAsync(ct); }
     }
 
-    public Task<decimal> GetTotalCollectedAsync(string month, CancellationToken ct)
-        => db.FeePayments.Where(f => f.Month == month && f.Status == "Paid")
-             .SumAsync(f => f.PaidAmount, ct);
+    public async Task<decimal> GetTotalCollectedAsync(string month, CancellationToken ct)
+        => (decimal)(await db.FeePayments.Where(f => f.Month == month && f.Status == "Paid")
+             .SumAsync(f => (double?)f.PaidAmount, ct) ?? 0);
 
-    public Task<decimal> GetTotalPendingAsync(CancellationToken ct)
-        => db.FeePayments.Where(f => f.Status == "Pending")
-             .SumAsync(f => f.Amount - f.PaidAmount, ct);
+    public async Task<decimal> GetTotalPendingAsync(CancellationToken ct)
+        => (decimal)(await db.FeePayments.Where(f => f.Status == "Pending")
+             .SumAsync(f => (double?)f.Amount - (double?)f.PaidAmount, ct) ?? 0);
 
     public async Task<string> GenerateReceiptNumberAsync(CancellationToken ct)
     {

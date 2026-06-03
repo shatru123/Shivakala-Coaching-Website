@@ -1,34 +1,44 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Shivakala.Core.Entities;
 using Shivakala.Core.Interfaces;
 using Shivakala.Core.Services;
+using Shivakala.Infrastructure.Data;
 
 namespace Shivakala.Web.Controllers;
 
 [Authorize, Route("admin/teachers")]
 public sealed class TeacherController(
     ITeacherRepository repo,
+    IPortalUserService portalUsers,
+    ShivakalaDbContext db,
     IAuditService audit,
     IWebHostEnvironment env,
     ILogger<TeacherController> logger) : Controller
 {
     [HttpGet("")]
     public async Task<IActionResult> Index(CancellationToken ct)
-        => View(await repo.GetAllAsync(ct));
+    {
+        ViewBag.PortalUsernames = await db.AppUsers
+            .Where(u => u.Role == "Teacher" && u.TeacherId != null)
+            .ToDictionaryAsync(u => u.TeacherId!.Value, u => u.Username, ct);
+        return View(await repo.GetAllAsync(ct));
+    }
 
     [HttpGet("create")]
     public IActionResult Create() => View("Form", new Teacher { FullName = "", Mobile = "" });
 
     [HttpPost("create"), ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(Teacher model, IFormFile? photo, CancellationToken ct)
+    public async Task<IActionResult> Create(Teacher model, IFormFile? photo, string? portalUsername, string? portalPassword, CancellationToken ct)
     {
         if (!ModelState.IsValid) return View("Form", model);
         model.PhotoUrl = await SavePhotoAsync(photo);
         await repo.AddAsync(model, ct);
+        var portalUser = await portalUsers.EnsureTeacherAccountAsync(model.Id, portalUsername, portalPassword, ct);
         await audit.LogAsync("Created", "Teacher", model.Id, null,
             $"{{Name:{model.FullName}}}", User.Identity?.Name, HttpContext.Connection.RemoteIpAddress?.ToString(), ct);
-        TempData["SuccessMessage"] = "Teacher added successfully.";
+        TempData["SuccessMessage"] = $"Teacher added. Portal login — username: {portalUser.Username}, password: {(string.IsNullOrWhiteSpace(portalPassword) ? "last 4 digits of mobile" : "(as set)")}.";
         return RedirectToAction(nameof(Index));
     }
 
