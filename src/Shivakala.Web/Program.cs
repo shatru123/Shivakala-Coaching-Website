@@ -6,81 +6,98 @@ using Shivakala.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(x => {
-    x.MultipartBodyLengthLimit = 20 * 1024 * 1024; // 20 MB (raised for photo/PDF uploads)
-});
+builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(x =>
+    x.MultipartBodyLengthLimit = 20 * 1024 * 1024);   // 20 MB uploads
+
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 builder.Services.AddInfrastructure(builder.Configuration);
+
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath          = "/admin/login";
-        options.AccessDeniedPath   = "/admin/login";
-        options.Cookie.Name        = "Shivakala.Auth";
-        options.Cookie.HttpOnly    = true;
-        options.Cookie.SameSite    = Microsoft.AspNetCore.Http.SameSiteMode.Strict;
-        options.ExpireTimeSpan     = TimeSpan.FromHours(8);
-        options.SlidingExpiration  = true;
+        options.Cookie.Name       = "Shivakala.Auth";
+        options.Cookie.HttpOnly   = true;
+        options.Cookie.SameSite   = Microsoft.AspNetCore.Http.SameSiteMode.Strict;
+        options.ExpireTimeSpan    = TimeSpan.FromHours(8);
+        options.SlidingExpiration = true;
+        options.LoginPath         = "/admin/login";   // default fallback
+        options.AccessDeniedPath  = "/access-denied"; // fallback (events override first)
+
         options.Events = new CookieAuthenticationEvents
         {
+            // ── OnRedirectToLogin ─────────────────────────────────────────────
+            // Fires when an UNAUTHENTICATED user hits a protected route.
+            // Send each portal's visitor to the correct login page.
             OnRedirectToLogin = ctx =>
             {
                 var path = ctx.Request.Path.Value ?? "";
+
                 if (path.StartsWith("/teacher", StringComparison.OrdinalIgnoreCase))
                 {
-                    var returnUrl = Uri.EscapeDataString(ctx.Request.Path + ctx.Request.QueryString);
-                    ctx.Response.Redirect($"/teacher/login?returnUrl={returnUrl}");
-                    return Task.CompletedTask;
+                    var ret = Uri.EscapeDataString(ctx.Request.Path + ctx.Request.QueryString);
+                    ctx.Response.Redirect($"/teacher/login?returnUrl={ret}");
                 }
-                if (path.StartsWith("/parent", StringComparison.OrdinalIgnoreCase))
+                else if (path.StartsWith("/parent", StringComparison.OrdinalIgnoreCase))
                 {
-                    var returnUrl = Uri.EscapeDataString(ctx.Request.Path + ctx.Request.QueryString);
-                    ctx.Response.Redirect($"/parent/login?returnUrl={returnUrl}");
-                    return Task.CompletedTask;
+                    var ret = Uri.EscapeDataString(ctx.Request.Path + ctx.Request.QueryString);
+                    ctx.Response.Redirect($"/parent/login?returnUrl={ret}");
                 }
-                ctx.Response.Redirect(ctx.RedirectUri);
+                else
+                {
+                    ctx.Response.Redirect(ctx.RedirectUri); // → /admin/login
+                }
                 return Task.CompletedTask;
             },
+
+            // ── OnRedirectToAccessDenied ──────────────────────────────────────
+            // Fires when an AUTHENTICATED user lacks the required ROLE (HTTP 403).
+            // IMPORTANT: redirect based on the USER'S ROLE, NOT the URL path.
+            //
+            //   Teacher visits /admin → role check fails → here we check who they
+            //   ARE, not where they tried to go → send them to /teacher (their home).
+            //
             OnRedirectToAccessDenied = ctx =>
             {
-                var path = ctx.Request.Path.Value ?? "";
-                if (path.StartsWith("/teacher", StringComparison.OrdinalIgnoreCase))
+                var user = ctx.HttpContext.User;
+
+                if (user.IsInRole("Teacher"))
                 {
-                    ctx.Response.Redirect("/teacher/login");
+                    // Authenticated teacher tried to access a page outside their role
+                    ctx.Response.Redirect("/teacher");
                     return Task.CompletedTask;
                 }
-                if (path.StartsWith("/parent", StringComparison.OrdinalIgnoreCase))
+
+                if (user.IsInRole("Parent"))
                 {
-                    ctx.Response.Redirect("/parent/login");
+                    // Authenticated parent tried to access a page outside their role
+                    ctx.Response.Redirect("/parent");
                     return Task.CompletedTask;
                 }
-                ctx.Response.Redirect("/admin/login");
+
+                // Unknown role or admin trying to access something they can't
+                ctx.Response.Redirect("/access-denied");
                 return Task.CompletedTask;
             }
         };
     });
+
 builder.Services
     .AddControllersWithViews()
     .AddViewLocalization()
     .AddDataAnnotationsLocalization();
 
-var supportedCultures = new[]
-{
-    new CultureInfo("en"),
-    new CultureInfo("mr")
-};
-
+var supportedCultures = new[] { new CultureInfo("en"), new CultureInfo("mr") };
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
-    options.DefaultRequestCulture  = new RequestCulture("mr");
-    options.SupportedCultures      = supportedCultures;
-    options.SupportedUICultures    = supportedCultures;
+    options.DefaultRequestCulture = new RequestCulture("mr");
+    options.SupportedCultures     = supportedCultures;
+    options.SupportedUICultures   = supportedCultures;
 });
 
 var app = builder.Build();
 
-// ── Ensure required directories exist ────────────────────────────────────────
+// Ensure upload directories exist on startup
 var wwwroot = app.Environment.WebRootPath;
 foreach (var dir in new[]
 {
@@ -91,11 +108,8 @@ foreach (var dir in new[]
     Path.Combine(wwwroot, "uploads", "materials"),
     Path.Combine(wwwroot, "uploads", "gallery"),
 })
-{
     Directory.CreateDirectory(dir);
-}
 
-// ── Middleware pipeline ───────────────────────────────────────────────────────
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -112,11 +126,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// ── Database initialisation (runs all pending migrations on startup) ──────────
 await DatabaseInitializer.InitializeAsync(app.Services);
-
 await app.RunAsync();
