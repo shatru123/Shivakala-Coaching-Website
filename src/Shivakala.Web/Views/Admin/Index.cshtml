@@ -5,7 +5,7 @@
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div>
                 <h1 style="font-size:1.8rem;font-weight:800">👋 Welcome, Admin</h1>
-                <p style="opacity:.8">Shivakala Coaching Classes · @DateTime.Today.ToString("dddd, dd MMMM yyyy")</p>
+                <p style="opacity:.8">Shivakala Coaching Classes · @UtcDateTime.NowInAppTimeZone().ToString("dddd, dd MMMM yyyy")</p>
             </div>
             <div class="d-flex gap-2 flex-wrap">
                 <a asp-controller="WhatsApp" asp-action="Index" class="btn-primary-sk" style="background:#075e54">

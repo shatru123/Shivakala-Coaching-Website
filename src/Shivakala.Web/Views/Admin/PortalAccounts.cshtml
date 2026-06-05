@@ -1,0 +1,47 @@
+@model IReadOnlyList<Shivakala.Core.ViewModels.PortalAccountAdminViewModel>
+@{ ViewData["Title"] = "Portal Accounts"; }
+
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid))">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="badge-soft"><i class="fa-solid fa-key me-1"></i>Admin</span>
+            <h1>Portal Accounts</h1>
+            <p>Reset passwords for teacher and parent logins.</p>
+        </div>
+        <a asp-action="ChangePassword" class="btn-outline-sk"><i class="fa-solid fa-lock"></i>My Password</a>
+    </div>
+</section>
+
+<section class="section-shell pt-0">
+    <div class="container">
+        <div class="glass-card">
+            <div class="table-responsive">
+                <table class="table admin-table align-middle">
+                    <thead>
+                        <tr><th>Role</th><th>Name</th><th>Username</th><th>Mobile</th><th>Linked To</th><th>Status</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in Model)
+                        {
+                            <tr>
+                                <td><span class="badge-soft dark">@user.Role</span></td>
+                                <td style="font-weight:600">@user.FullName</td>
+                                <td>@user.Username</td>
+                                <td>@(user.Mobile ?? "—")</td>
+                                <td>@user.LinkedTo</td>
+                                <td>
+                                    <span class="badge @(user.IsActive ? "bg-success" : "bg-secondary")">@(user.IsActive ? "Active" : "Inactive")</span>
+                                </td>
+                                <td>
+                                    <a asp-action="ResetPortalPassword" asp-route-id="@user.UserId" class="toolbar-btn" style="font-size:.74rem;padding:6px 10px;background:var(--navy-mid)">
+                                        <i class="fa-solid fa-key"></i> Reset Password
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shivakala.Core.Common;
 using Shivakala.Core.Services;
+using Shivakala.Core.ViewModels;
 using Shivakala.Infrastructure.Data;
 
 namespace Shivakala.Web.Controllers;
@@ -65,11 +67,34 @@ public sealed class TeacherPortalController(
         return RedirectToAction(nameof(Login));
     }
 
+    [HttpGet("change-password"), Authorize(Roles = "Teacher")]
+    public IActionResult ChangePassword() => View("ChangePassword", new ChangePasswordViewModel());
+
+    [HttpPost("change-password"), Authorize(Roles = "Teacher"), ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel vm, CancellationToken ct)
+    {
+        if (!ModelState.IsValid) return View("ChangePassword", vm);
+
+        if (!int.TryParse(User.FindFirst("UserId")?.Value, out var userId) || userId <= 0)
+            return Forbid();
+
+        var result = await portalUsers.ChangePasswordAsync(userId, vm.CurrentPassword, vm.NewPassword, ct);
+        if (!result.Success)
+        {
+            ModelState.AddModelError(string.Empty, result.ErrorMessage);
+            return View("ChangePassword", vm);
+        }
+
+        TempData["SuccessMessage"] = "Your password has been updated.";
+        return RedirectToAction(nameof(ChangePassword));
+    }
+
     // ── DASHBOARD ─────────────────────────────────────────────────────────────
     [HttpGet(""), HttpGet("dashboard"), Authorize(Roles = "Teacher")]
     public async Task<IActionResult> Index(CancellationToken ct)
     {
         var tid = GetTeacherId();
+        var todayUtc = UtcDateTime.StartOfToday();
         ViewBag.Teacher = tid > 0 ? await db.Teachers.FindAsync([tid], ct) : null;
 
         ViewBag.MyBatches = await db.BatchSubjects
@@ -80,12 +105,12 @@ public sealed class TeacherPortalController(
             .ToListAsync(ct);
 
         ViewBag.TodayHomework = await db.Homeworks
-            .Where(h => h.AssignedByTeacherId == tid && h.IsActive && h.DueDate >= DateTime.Today)
+            .Where(h => h.AssignedByTeacherId == tid && h.IsActive && h.DueDate >= todayUtc)
             .CountAsync(ct);
         ViewBag.TotalHomework = await db.Homeworks
             .CountAsync(h => h.AssignedByTeacherId == tid, ct);
         ViewBag.UpcomingExams = await db.Exams
-            .CountAsync(e => e.ExamDate >= DateTime.Today && !e.IsPublished, ct);
+            .CountAsync(e => e.ExamDate >= todayUtc && !e.IsPublished, ct);
         ViewBag.TotalStudents = await db.StudentBatches
             .Where(sb => sb.IsActive && db.BatchSubjects
                 .Any(bs => bs.BatchId == sb.BatchId && bs.TeacherId == tid))
@@ -114,7 +139,7 @@ public sealed class TeacherPortalController(
         {
             // ── Fix: DateOnly comparison — do NOT use Equals(DateOnly, string) ──
             var d = string.IsNullOrWhiteSpace(date)
-                ? DateOnly.FromDateTime(DateTime.Today)
+                ? UtcDateTime.Today()
                 : DateOnly.Parse(date);
             ViewBag.Date = d;
 
@@ -197,6 +222,7 @@ public sealed class TeacherPortalController(
     {
         var tid = GetTeacherId();
         if (tid == 0) return Forbid();
+        dueDate = UtcDateTime.EnsureUtc(dueDate);
 
         string? attachmentUrl = null;
         if (attachment is { Length: > 0 })

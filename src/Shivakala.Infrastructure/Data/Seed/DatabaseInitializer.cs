@@ -1,7 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Npgsql;
 using Shivakala.Core.Services;
+using Shivakala.Infrastructure.Configuration;
+using Shivakala.Infrastructure.Services;
 
 namespace Shivakala.Infrastructure.Data.Seed;
 
@@ -17,13 +21,14 @@ public static class DatabaseInitializer
 
         // Ensure App_Data directory exists (SQLite file goes here)
         var cs = db.Database.GetConnectionString() ?? "";
-        if (cs.Contains("App_Data", StringComparison.OrdinalIgnoreCase))
+        if (db.Database.IsSqlite() && cs.Contains("App_Data", StringComparison.OrdinalIgnoreCase))
             Directory.CreateDirectory("App_Data");
 
         try
         {
             // ── Step 1: detect broken migration (marked applied but column missing) ──
-            await FixSchemaDriftAsync(db, logger);
+            if (db.Database.IsSqlite())
+                await FixSchemaDriftAsync(db, logger);
 
             // ── Step 2: apply any pending migrations ─────────────────────────────
             var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
@@ -48,16 +53,39 @@ public static class DatabaseInitializer
 
             // ── Step 3: ensure teacher/parent portal accounts exist ───────────────
             var portalUsers = scope.ServiceProvider.GetRequiredService<IPortalUserService>();
+            var adminCredentials = scope.ServiceProvider
+                .GetRequiredService<IOptions<AdminCredentialsOptions>>()
+                .Value;
+            await portalUsers.EnsureAdminAccountAsync(adminCredentials.Username, adminCredentials.Password);
             await portalUsers.SyncMissingPortalAccountsAsync();
             logger?.LogInformation("✅  Portal user accounts synced.");
         }
         catch (Exception ex)
         {
-            logger?.LogError(ex,
-                "❌  Database initialization failed: {Msg}. " +
-                "If you keep seeing this, delete App_Data/shivakala.db and restart.", ex.Message);
+            logger?.LogError(ex, "❌  Database initialization failed: {Msg}", BuildFriendlyErrorMessage(db, ex));
             throw;
         }
+    }
+
+    private static string BuildFriendlyErrorMessage(ShivakalaDbContext db, Exception ex)
+    {
+        if (db.Database.IsSqlite())
+            return $"{ex.Message}. If the SQLite file is corrupted, delete App_Data/shivakala.db and restart.";
+
+        if (db.Database.IsNpgsql())
+        {
+            if (ex is NpgsqlException or System.Net.Sockets.SocketException)
+            {
+                var connectionString = db.Database.GetConnectionString() ?? "";
+                var builder = new NpgsqlConnectionStringBuilder(connectionString);
+                return $"Could not connect to PostgreSQL at {builder.Host}:{builder.Port}/{builder.Database}. " +
+                       $"Start PostgreSQL, verify the connection string, or switch `Database:Provider` back to `Sqlite` for local development.";
+            }
+
+            return $"{ex.Message}. Verify PostgreSQL connection settings or switch `Database:Provider` to `Sqlite` for local development.";
+        }
+
+        return ex.Message;
     }
 
     // ─────────────────────────────────────────────────────────────────────────

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shivakala.Core.Common;
 using Shivakala.Core.Entities;
 using Shivakala.Core.Interfaces;
 
@@ -27,7 +28,7 @@ public sealed class HomeworkController(
         return View("Form", new Homework
         {
             Title = "", Subject = "", Standard = "",
-            AssignedByTeacherId = 0, DueDate = DateTime.Today.AddDays(2)
+            AssignedByTeacherId = 0, DueDate = UtcDateTime.StartOfToday().AddDays(2)
         });
     }
 
@@ -40,6 +41,7 @@ public sealed class HomeworkController(
             ViewBag.Teachers = await teacherRepo.GetAllAsync(ct);
             return View("Form", model);
         }
+        model.DueDate = UtcDateTime.EnsureUtc(model.DueDate);
         model.AttachmentUrl = await SaveAttachmentAsync(attachment);
         await hwRepo.AddAsync(model, ct);
         TempData["SuccessMessage"] = "Homework assigned.";

@@ -95,7 +95,7 @@
         }
     </div>
     <div class="footer">
-        Generated on @DateTime.Now.ToString("dd MMM yyyy HH:mm") &nbsp;|&nbsp; SK Classes Admin Portal<br/>
+        Generated on @UtcDateTime.NowInAppTimeZone().ToString("dd MMM yyyy HH:mm") &nbsp;|&nbsp; SK Classes Admin Portal<br/>
         <em>This is a computer-generated receipt.</em>
     </div>
 </div>

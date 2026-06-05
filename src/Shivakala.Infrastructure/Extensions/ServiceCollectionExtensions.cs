@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shivakala.Core.Interfaces;
 using Shivakala.Core.Services;
+using Shivakala.Infrastructure.Configuration;
 using Shivakala.Infrastructure.Data;
 using Shivakala.Infrastructure.Repositories;
 using Shivakala.Infrastructure.Services;
@@ -13,8 +14,10 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-                               ?? "Data Source=App_Data/shivakala.db";
+        services.Configure<DatabaseOptions>(configuration.GetSection(DatabaseOptions.SectionName));
+
+        var provider = DatabaseProviderResolver.Normalize(configuration[$"{DatabaseOptions.SectionName}:Provider"]);
+        var connectionString = GetConnectionString(configuration, provider);
 
         services.Configure<AdminCredentialsOptions>(options =>
         {
@@ -24,8 +27,17 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddDbContext<ShivakalaDbContext>(options =>
+        {
+            if (DatabaseProviderResolver.IsPostgreSql(provider))
+            {
+                options.UseNpgsql(connectionString,
+                    sql => sql.MigrationsAssembly("Shivakala.PostgresMigrations"));
+                return;
+            }
+
             options.UseSqlite(connectionString,
-                sql => sql.MigrationsAssembly("Shivakala.Infrastructure")));
+                sql => sql.MigrationsAssembly("Shivakala.Infrastructure"));
+        });
 
         // ── Existing Repositories ──────────────────────────────────────────
         services.AddScoped<IStudentRepository, StudentRepository>();
@@ -53,12 +65,62 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IHomePageService, HomePageService>();
         services.AddScoped<IAdminPortalService, AdminPortalService>();
         services.AddScoped<IPortalUserService, PortalUserService>();
-        services.AddSingleton<IAdminAuthenticationService, AdminAuthenticationService>();
+        services.AddScoped<IAdminAuthenticationService, AdminAuthenticationService>();
 
         // ── New Services ───────────────────────────────────────────────────
         services.AddScoped<IAuditService, AuditService>();
         services.AddSingleton<IWhatsAppService, WhatsAppService>();
 
         return services;
+    }
+
+    private static string GetConnectionString(IConfiguration configuration, string provider)
+    {
+        if (DatabaseProviderResolver.IsPostgreSql(provider))
+        {
+            var databaseUrl = configuration["DATABASE_URL"];
+            if (!string.IsNullOrWhiteSpace(databaseUrl))
+                return BuildPostgreSqlConnectionStringFromUrl(databaseUrl);
+
+            return configuration.GetConnectionString("PostgreSql")
+                ?? throw new InvalidOperationException(
+                    "Connection string 'PostgreSql' or environment variable 'DATABASE_URL' is required when Database:Provider is set to PostgreSql.");
+        }
+
+        return configuration.GetConnectionString("Sqlite")
+            ?? configuration.GetConnectionString("DefaultConnection")
+            ?? "Data Source=App_Data/shivakala.db";
+    }
+
+    private static string BuildPostgreSqlConnectionStringFromUrl(string databaseUrl)
+    {
+        if (!Uri.TryCreate(databaseUrl, UriKind.Absolute, out var uri))
+            throw new InvalidOperationException("Environment variable 'DATABASE_URL' is not a valid absolute URI.");
+
+        if (!string.Equals(uri.Scheme, "postgres", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(uri.Scheme, "postgresql", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Environment variable 'DATABASE_URL' must start with 'postgres://' or 'postgresql://'.");
+        }
+
+        var userInfo = uri.UserInfo.Split(':', 2);
+        var username = Uri.UnescapeDataString(userInfo[0]);
+        var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : string.Empty;
+        var database = uri.AbsolutePath.Trim('/');
+
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(database))
+            throw new InvalidOperationException("Environment variable 'DATABASE_URL' must include username and database name.");
+
+        var builder = new Npgsql.NpgsqlConnectionStringBuilder
+        {
+            Host = uri.Host,
+            Port = uri.Port > 0 ? uri.Port : 5432,
+            Username = username,
+            Password = password,
+            Database = database,
+            SslMode = Npgsql.SslMode.Prefer
+        };
+
+        return builder.ConnectionString;
     }
 }

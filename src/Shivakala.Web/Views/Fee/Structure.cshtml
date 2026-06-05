@@ -34,7 +34,7 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label fw-600">Academic Year</label>
-                        <input name="AcademicYear" class="form-control" value="@($"{DateTime.Now.Year}-{DateTime.Now.Year+1}")" />
+                        <input name="AcademicYear" class="form-control" value="@($"{UtcDateTime.NowInAppTimeZone().Year}-{UtcDateTime.NowInAppTimeZone().Year + 1}")" />
                     </div>
                 </div>
                 <button type="submit" class="btn-primary-sk mt-3"><i class="fa-solid fa-plus"></i>Add</button>

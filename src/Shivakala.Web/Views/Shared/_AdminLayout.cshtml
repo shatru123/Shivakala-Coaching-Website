@@ -143,6 +143,12 @@
         </a>
 
         <div class="sk-nav-section">System</div>
+        <a asp-controller="Admin" asp-action="PortalAccounts">
+            <i class="fa-solid fa-key"></i> Portal Accounts
+        </a>
+        <a asp-controller="Admin" asp-action="ChangePassword">
+            <i class="fa-solid fa-lock"></i> Change Password
+        </a>
         <a asp-controller="Admin" asp-action="AuditLog">
             <i class="fa-solid fa-shield-halved"></i> Audit Log
         </a>
@@ -182,6 +188,10 @@
             <a asp-controller="Home" asp-action="Index" class="topbar-btn outline" target="_blank">
                 <i class="fa-solid fa-globe"></i>
                 <span class="d-none d-sm-inline">Website</span>
+            </a>
+            <a asp-controller="Admin" asp-action="ChangePassword" class="topbar-btn outline">
+                <i class="fa-solid fa-lock"></i>
+                <span class="d-none d-sm-inline">Password</span>
             </a>
             <a asp-controller="Admin" asp-action="Logout" class="topbar-btn danger">
                 <i class="fa-solid fa-right-from-bracket"></i>

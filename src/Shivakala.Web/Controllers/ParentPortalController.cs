@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shivakala.Core.Services;
+using Shivakala.Core.ViewModels;
 using Shivakala.Infrastructure.Data;
 
 namespace Shivakala.Web.Controllers;
@@ -63,6 +64,28 @@ public sealed class ParentPortalController(
     {
         await HttpContext.SignOutAsync(Scheme);
         return RedirectToAction(nameof(Login));
+    }
+
+    [HttpGet("change-password"), Authorize(Roles = "Parent")]
+    public IActionResult ChangePassword() => View("ChangePassword", new ChangePasswordViewModel());
+
+    [HttpPost("change-password"), Authorize(Roles = "Parent"), ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel vm, CancellationToken ct)
+    {
+        if (!ModelState.IsValid) return View("ChangePassword", vm);
+
+        if (!int.TryParse(User.FindFirst("UserId")?.Value, out var userId) || userId <= 0)
+            return Forbid();
+
+        var result = await portalUsers.ChangePasswordAsync(userId, vm.CurrentPassword, vm.NewPassword, ct);
+        if (!result.Success)
+        {
+            ModelState.AddModelError(string.Empty, result.ErrorMessage);
+            return View("ChangePassword", vm);
+        }
+
+        TempData["SuccessMessage"] = "Your password has been updated.";
+        return RedirectToAction(nameof(ChangePassword));
     }
 
     [HttpGet(""), HttpGet("dashboard"), Authorize(Roles = "Parent")]

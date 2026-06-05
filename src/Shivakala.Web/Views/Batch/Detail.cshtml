@@ -80,7 +80,7 @@
                     <h5 class="mb-3">Quick Actions</h5>
                     <div class="d-grid gap-2">
                         <a asp-controller="Attendance" asp-action="Mark" asp-route-batchId="@Model.Id"
-                           asp-route-date="@DateTime.Today.ToString("yyyy-MM-dd")" class="btn-primary-sk text-center">
+                           asp-route-date="@UtcDateTime.Today().ToString("yyyy-MM-dd")" class="btn-primary-sk text-center">
                             <i class="fa-solid fa-list-check"></i> Mark Today's Attendance
                         </a>
                         <a asp-controller="Timetable" asp-action="Index" asp-route-batchId="@Model.Id"

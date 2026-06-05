@@ -27,6 +27,9 @@ public sealed class PortalUserService(
         return user;
     }
 
+    public Task<AppUser?> FindByIdAsync(int userId, CancellationToken ct = default)
+        => db.AppUsers.FirstOrDefaultAsync(u => u.Id == userId && u.IsActive, ct);
+
     public async Task<AppUser?> FindTeacherUserAsync(string login, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(login)) return null;
@@ -155,6 +158,78 @@ public sealed class PortalUserService(
         await db.SaveChangesAsync(ct);
         logger.LogInformation("Parent portal account created for student #{Id} (username: {Username})", studentId, mobile);
         return user;
+    }
+
+    public async Task<AppUser> EnsureAdminAccountAsync(string username, string password, CancellationToken ct = default)
+    {
+        var finalUsername = SanitizeUsername(username);
+        var existing = await db.AppUsers.FirstOrDefaultAsync(
+            u => u.Role == "Admin" && u.Username == finalUsername, ct);
+
+        if (existing is not null)
+        {
+            existing.IsActive = true;
+            if (string.IsNullOrWhiteSpace(existing.FullName))
+                existing.FullName = "Administrator";
+            await db.SaveChangesAsync(ct);
+            return existing;
+        }
+
+        var anyAdminExists = await db.AppUsers.AnyAsync(u => u.Role == "Admin", ct);
+        if (anyAdminExists)
+        {
+            var firstAdmin = await db.AppUsers.FirstAsync(u => u.Role == "Admin", ct);
+            return firstAdmin;
+        }
+
+        var admin = new AppUser
+        {
+            Username = finalUsername,
+            Email = PortalEmail(finalUsername),
+            PasswordHash = HashPassword(password),
+            Role = "Admin",
+            FullName = "Administrator",
+            IsActive = true,
+            CreatedDate = DateTime.UtcNow
+        };
+
+        db.AppUsers.Add(admin);
+        await db.SaveChangesAsync(ct);
+        logger.LogInformation("Admin portal account created for username: {Username}", admin.Username);
+        return admin;
+    }
+
+    public async Task<(bool Success, string ErrorMessage)> ChangePasswordAsync(
+        int userId,
+        string currentPassword,
+        string newPassword,
+        CancellationToken ct = default)
+    {
+        var user = await db.AppUsers.FirstOrDefaultAsync(u => u.Id == userId && u.IsActive, ct);
+        if (user is null)
+            return (false, "User account not found.");
+
+        if (!VerifyPassword(currentPassword, user.PasswordHash))
+            return (false, "Current password is incorrect.");
+
+        user.PasswordHash = HashPassword(newPassword);
+        user.PasswordResetToken = null;
+        user.PasswordResetExpiry = null;
+        await db.SaveChangesAsync(ct);
+        return (true, string.Empty);
+    }
+
+    public async Task<(bool Success, string ErrorMessage)> SetPasswordAsync(int userId, string newPassword, CancellationToken ct = default)
+    {
+        var user = await db.AppUsers.FirstOrDefaultAsync(u => u.Id == userId, ct);
+        if (user is null)
+            return (false, "User account not found.");
+
+        user.PasswordHash = HashPassword(newPassword);
+        user.PasswordResetToken = null;
+        user.PasswordResetExpiry = null;
+        await db.SaveChangesAsync(ct);
+        return (true, string.Empty);
     }
 
     public async Task SyncMissingPortalAccountsAsync(CancellationToken ct = default)

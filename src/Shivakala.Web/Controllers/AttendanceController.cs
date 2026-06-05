@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shivakala.Core.Common;
 using Shivakala.Core.Entities;
 using Shivakala.Core.Interfaces;
 
@@ -22,7 +23,7 @@ public sealed class AttendanceController(
     [HttpGet("mark")]
     public async Task<IActionResult> Mark(int batchId, string? date, CancellationToken ct)
     {
-        var d = string.IsNullOrWhiteSpace(date) ? DateOnly.FromDateTime(DateTime.Today) : DateOnly.Parse(date);
+        var d = string.IsNullOrWhiteSpace(date) ? UtcDateTime.Today() : DateOnly.Parse(date);
         var batch = await batchRepo.GetByIdWithDetailsAsync(batchId, ct);
         if (batch is null) return NotFound();
         var existing = await attendanceRepo.GetByBatchAndDateAsync(batchId, d, ct);
@@ -52,8 +53,9 @@ public sealed class AttendanceController(
     public async Task<IActionResult> Report(int? studentId, int? batchId,
         string? from, string? to, CancellationToken ct)
     {
-        var f = string.IsNullOrWhiteSpace(from) ? DateOnly.FromDateTime(DateTime.Today.AddDays(-30)) : DateOnly.Parse(from);
-        var t = string.IsNullOrWhiteSpace(to)   ? DateOnly.FromDateTime(DateTime.Today) : DateOnly.Parse(to);
+        var today = UtcDateTime.Today();
+        var f = string.IsNullOrWhiteSpace(from) ? today.AddDays(-30) : DateOnly.Parse(from);
+        var t = string.IsNullOrWhiteSpace(to)   ? today : DateOnly.Parse(to);
         ViewBag.Batches  = await batchRepo.GetAllAsync(ct);
         ViewBag.Students = await studentRepo.ListAsync(ct);
         ViewBag.From = f; ViewBag.To = t;

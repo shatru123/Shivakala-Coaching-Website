@@ -1,3 +1,5 @@
+using Shivakala.Core.Common;
+
 namespace Shivakala.Core.ViewModels;
 
 public sealed class TestResultViewModel
@@ -36,6 +38,6 @@ public sealed class TestResultFormViewModel
     public int Rank { get; set; }
     public string? Grade { get; set; }
     public string? Remarks { get; set; }
-    public DateTime TestDate { get; set; } = DateTime.Today;
+    public DateTime TestDate { get; set; } = UtcDateTime.StartOfToday();
     public string TestTitle { get; set; } = string.Empty;
 }

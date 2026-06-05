@@ -14,7 +14,7 @@
         <div class="row g-3">
             @foreach (var h in Model)
             {
-                var overdue = h.DueDate < DateTime.Today;
+                var overdue = DateOnly.FromDateTime(h.DueDate) < UtcDateTime.Today();
                 <div class="col-md-4">
                     <div class="glass-card h-100 @(overdue?"border-danger":"")" style="@(overdue?"border:1px solid var(--red)":"")">
                         <div class="d-flex justify-content-between align-items-start mb-2">

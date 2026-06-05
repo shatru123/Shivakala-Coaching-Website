@@ -3,6 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Shivakala.Core\Shivakala.Core.csproj" />
     <ProjectReference Include="..\Shivakala.Infrastructure\Shivakala.Infrastructure.csproj" />
+    <ProjectReference Include="..\Shivakala.PostgresMigrations\Shivakala.PostgresMigrations.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shivakala.Core.Common;
 using Shivakala.Core.Entities;
 using Shivakala.Core.Interfaces;
 using Shivakala.Core.Services;
@@ -20,13 +21,14 @@ public sealed class ExamController(
     public async Task<IActionResult> Create(CancellationToken ct)
     {
         ViewBag.Batches = await batchRepo.GetAllAsync(ct);
-        return View("Form", new Exam { Title = "", Standard = "", Subject = "", ExamDate = DateTime.Today });
+        return View("Form", new Exam { Title = "", Standard = "", Subject = "", ExamDate = UtcDateTime.StartOfToday() });
     }
 
     [HttpPost("create"), ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Exam model, CancellationToken ct)
     {
         if (!ModelState.IsValid) { ViewBag.Batches = await batchRepo.GetAllAsync(ct); return View("Form", model); }
+        model.ExamDate = UtcDateTime.EnsureUtc(model.ExamDate);
         await examRepo.AddAsync(model, ct);
         TempData["SuccessMessage"] = "Exam scheduled.";
         return RedirectToAction(nameof(Index));

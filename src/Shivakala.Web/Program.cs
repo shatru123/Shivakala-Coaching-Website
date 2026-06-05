@@ -1,6 +1,7 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Localization;
+using Shivakala.Infrastructure.Configuration;
 using Shivakala.Infrastructure.Data.Seed;
 using Shivakala.Infrastructure.Extensions;
 
@@ -99,15 +100,20 @@ var app = builder.Build();
 
 // Ensure upload directories exist on startup
 var wwwroot = app.Environment.WebRootPath;
-foreach (var dir in new[]
+var provider = DatabaseProviderResolver.Normalize(builder.Configuration[$"{DatabaseOptions.SectionName}:Provider"]);
+var directories = new List<string>
 {
-    "App_Data",
     Path.Combine(wwwroot, "uploads", "students"),
     Path.Combine(wwwroot, "uploads", "teachers"),
     Path.Combine(wwwroot, "uploads", "homework"),
     Path.Combine(wwwroot, "uploads", "materials"),
     Path.Combine(wwwroot, "uploads", "gallery"),
-})
+};
+
+if (DatabaseProviderResolver.IsSqlite(provider))
+    directories.Insert(0, "App_Data");
+
+foreach (var dir in directories)
     Directory.CreateDirectory(dir);
 
 if (!app.Environment.IsDevelopment())

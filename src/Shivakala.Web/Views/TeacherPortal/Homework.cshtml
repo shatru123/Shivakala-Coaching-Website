@@ -67,7 +67,7 @@
                 </div>
                 <div class="col-md-3">
                     <label class="form-label fw-semibold">Due Date</label>
-                    <input type="date" name="dueDate" class="form-control" value="@DateTime.Today.AddDays(2).ToString("yyyy-MM-dd")" required />
+                    <input type="date" name="dueDate" class="form-control" value="@UtcDateTime.Today().AddDays(2).ToString("yyyy-MM-dd")" required />
                 </div>
                 <div class="col-md-3">
                     <label class="form-label fw-semibold">Attachment</label>
@@ -97,7 +97,7 @@
             {
                 @foreach (var item in Model)
                 {
-                    var overdue = item.DueDate.Date < DateTime.Today;
+                    var overdue = DateOnly.FromDateTime(item.DueDate) < UtcDateTime.Today();
                     <div class="col-md-6 col-lg-4">
                         <div class="tp-card h-100" style="border-top:4px solid @(overdue ? "#dc3545" : "#1a6b3a")">
                             <div class="d-flex justify-content-between align-items-start gap-2 mb-2">

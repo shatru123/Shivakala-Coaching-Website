@@ -73,8 +73,8 @@
                 <div class="col-md-4">
                     <label class="form-label fw-600" style="font-size:.83rem">Date</label>
                     <input type="date" name="date" class="form-control"
-                           value="@(date?.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))"
-                           max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                           value="@(date?.ToString("yyyy-MM-dd") ?? UtcDateTime.Today().ToString("yyyy-MM-dd"))"
+                           max="@UtcDateTime.Today().ToString("yyyy-MM-dd")" />
                 </div>
                 @if (batchId.HasValue)
                 {
@@ -150,7 +150,7 @@
                         <a asp-action="Attendance" asp-route-batchId="@batchId"
                            asp-route-date="@date?.AddDays(-1).ToString("yyyy-MM-dd")"
                            class="tp-btn tp-btn-outline">← Prev Day</a>
-                        @if (date < DateOnly.FromDateTime(DateTime.Today))
+                        @if (date < UtcDateTime.Today())
                         {
                             <a asp-action="Attendance" asp-route-batchId="@batchId"
                                asp-route-date="@date?.AddDays(1).ToString("yyyy-MM-dd")"
