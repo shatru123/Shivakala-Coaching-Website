@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 
 const apiKey = readSetting('WHATSAPP_API_KEY');
-const authPath = readSetting('WHATSAPP_AUTH_PATH') || getDefaultAuthPath();
+const authPath = resolveAuthPath();
 const executablePath = resolveExecutablePath();
 
 let qrBase64 = null;
@@ -240,4 +240,25 @@ function findChromiumExecutable(rootPath) {
     }
 
     return '';
+}
+
+function resolveAuthPath() {
+    const candidatePaths = [
+        readSetting('WHATSAPP_AUTH_PATH'),
+        getDefaultAuthPath(),
+        path.join('/tmp', 'whatsapp-auth'),
+        path.join(__dirname, '.wwebjs_auth')
+    ].filter(Boolean);
+
+    for (const candidatePath of candidatePaths) {
+        try {
+            fs.mkdirSync(candidatePath, { recursive: true });
+            fs.accessSync(candidatePath, fs.constants.R_OK | fs.constants.W_OK);
+            return candidatePath;
+        } catch (error) {
+            console.warn(`[WA] Auth path unavailable ${candidatePath}: ${error.message}`);
+        }
+    }
+
+    throw new Error('No writable auth path available for WhatsApp session storage.');
 }
