@@ -1,0 +1,158 @@
+@{
+    ViewData["Title"] = "Mark Attendance | Teacher";
+    Layout = "_Layout";
+    var myBatches = ViewBag.MyBatches as List<Shivakala.Core.Entities.Batch> ?? [];
+    var students  = ViewBag.Students  as List<Shivakala.Core.Entities.Student> ?? [];
+    var existing  = ViewBag.Existing  as Dictionary<int, Shivakala.Core.Entities.Attendance> ?? [];
+    var date      = ViewBag.Date as DateOnly?;
+    var batchId   = ViewBag.SelectedBatchId as int?;
+}
+<style>
+.tp-hero{background:linear-gradient(135deg,#0d3b2e,#1a6b3a);color:#fff;padding:36px 0}
+.tp-card{background:#fff;border-radius:16px;padding:24px;box-shadow:0 2px 20px rgba(0,0,0,.07)}
+.tp-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:9px;font-size:.83rem;font-weight:600;text-decoration:none;transition:all .18s;border:none;cursor:pointer}
+.tp-btn-primary{background:#1a6b3a;color:#fff}.tp-btn-primary:hover{background:#0d3b2e;color:#fff}
+.tp-btn-outline{background:transparent;color:#1a6b3a;border:1.5px solid #1a6b3a}.tp-btn-outline:hover{background:#1a6b3a;color:#fff}
+.att-label{padding:6px 14px;border-radius:20px;border:1.5px solid;cursor:pointer;font-size:.75rem;font-weight:600;transition:all .15s;user-select:none;display:inline-block}
+.att-label.present{border-color:#1a6b3a;color:#1a6b3a}.att-label.present:has(input:checked){background:#1a6b3a;color:#fff}
+.att-label.late{border-color:#e0a800;color:#9c6b00}.att-label.late:has(input:checked){background:#e0a800;color:#fff}
+.att-label.absent{border-color:#dc3545;color:#dc3545}.att-label.absent:has(input:checked){background:#dc3545;color:#fff}
+.att-label.holiday{border-color:#6c757d;color:#6c757d}.att-label.holiday:has(input:checked){background:#6c757d;color:#fff}
+</style>
+
+<div class="tp-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <p style="opacity:.65;font-size:.78rem;margin-bottom:4px">Teacher Portal</p>
+            <h1 style="font-size:1.5rem;font-weight:800;margin-bottom:0">Mark Attendance</h1>
+        </div>
+        <a href="/teacher" class="tp-btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)">
+            ← Dashboard
+        </a>
+    </div>
+</div>
+
+<section style="padding:28px 0">
+    <div class="container">
+
+        @if (TempData["SuccessMessage"] is string msg)
+        { <div class="alert alert-success mb-3">@msg</div> }
+
+        <!-- Batch + Date selector -->
+        <div class="tp-card mb-4">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label fw-600" style="font-size:.83rem">Select Batch</label>
+                    <select name="batchId" class="form-select" required onchange="this.form.submit()">
+                        <option value="">— Select your batch —</option>
+                        @foreach (var b in myBatches)
+                        { <option value="@b.Id" @(batchId == b.Id ? "selected" : "")>@b.Name (@b.Standard · @(b.TimingSlot ?? ""))</option> }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-600" style="font-size:.83rem">Date</label>
+                    <input type="date" name="date" class="form-control"
+                           value="@(date?.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"))"
+                           max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                </div>
+                @if (batchId.HasValue)
+                {
+                    <div class="col-md-3">
+                        <button type="submit" class="tp-btn tp-btn-primary w-100">
+                            <i class="fa-solid fa-calendar-check"></i> Load Sheet
+                        </button>
+                    </div>
+                }
+            </form>
+        </div>
+
+        @if (batchId.HasValue && students.Any())
+        {
+            <!-- Quick bulk buttons -->
+            <div class="d-flex gap-2 mb-3 flex-wrap">
+                <button type="button" onclick="markAll('Present')" class="tp-btn" style="background:#1a6b3a;color:#fff;font-size:.78rem;padding:6px 14px">✓ All Present</button>
+                <button type="button" onclick="markAll('Absent')"  class="tp-btn" style="background:#dc3545;color:#fff;font-size:.78rem;padding:6px 14px">✗ All Absent</button>
+                <button type="button" onclick="markAll('Holiday')" class="tp-btn" style="background:#6c757d;color:#fff;font-size:.78rem;padding:6px 14px">Holiday</button>
+                <span class="ms-auto" style="font-size:.82rem;color:#888;align-self:center">
+                    <i class="fa-solid fa-calendar-day me-1"></i>@date?.ToString("dddd, dd MMMM yyyy")
+                </span>
+            </div>
+
+            <div class="tp-card">
+                <form asp-action="SaveAttendance" asp-route-batchId="@batchId" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="batchId" value="@batchId" />
+                    <input type="hidden" name="date"    value="@date?.ToString("yyyy-MM-dd")" />
+
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0" style="font-size:.85rem">
+                            <thead style="background:#f8f9fa">
+                                <tr>
+                                    <th style="width:40px">#</th>
+                                    <th>Student</th>
+                                    <th>Attendance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{ int idx = 1; }
+                                @foreach (var s in students)
+                                {
+                                    var cur = existing.GetValueOrDefault(s.Id)?.Status ?? "Present";
+                                    <tr>
+                                        <td style="color:#aaa">@(idx++)</td>
+                                        <td>
+                                            <div style="font-weight:600">@s.FullName</div>
+                                            <small style="color:#888">@(s.AdmissionNumber ?? s.Mobile)</small>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex gap-2 flex-wrap att-row" data-sid="@s.Id">
+                                                @foreach (var (status, css) in new[]{ ("Present","present"),("Late","late"),("Absent","absent"),("Holiday","holiday") })
+                                                {
+                                                    <label class="att-label @css">
+                                                        <input type="radio" name="statuses[@s.Id]" value="@status" class="d-none"
+                                                               @(cur == status ? "checked" : "") />
+                                                        @status
+                                                    </label>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="tp-btn tp-btn-primary">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Attendance
+                        </button>
+                        <a asp-action="Attendance" asp-route-batchId="@batchId"
+                           asp-route-date="@date?.AddDays(-1).ToString("yyyy-MM-dd")"
+                           class="tp-btn tp-btn-outline">← Prev Day</a>
+                        @if (date < DateOnly.FromDateTime(DateTime.Today))
+                        {
+                            <a asp-action="Attendance" asp-route-batchId="@batchId"
+                               asp-route-date="@date?.AddDays(1).ToString("yyyy-MM-dd")"
+                               class="tp-btn tp-btn-outline">Next Day →</a>
+                        }
+                    </div>
+                </form>
+            </div>
+        }
+        else if (batchId.HasValue)
+        {
+            <div class="tp-card text-center py-5">
+                <i class="fa-solid fa-users-slash fa-2x mb-3" style="color:#aaa"></i>
+                <p class="text-muted">No students enrolled in this batch yet. Add students via the Admin panel.</p>
+            </div>
+        }
+    </div>
+</section>
+
+@section Scripts {
+<script>
+function markAll(status){
+    document.querySelectorAll('input[type=radio][value="'+status+'"]').forEach(function(r){ r.checked=true; });
+}
+</script>
+}
