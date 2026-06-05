@@ -86,6 +86,7 @@ jobs:
             -verb:sync `
             "-source:contentPath=${{ github.workspace }}\artifacts\web" `
             "-dest:contentPath=$env:SMARTERASP_WEB_SITE_NAME,ComputerName=$env:SMARTERASP_WEBDEPLOY_SERVICE_URL,UserName=$env:SMARTERASP_WEBDEPLOY_USERNAME,Password=$env:SMARTERASP_WEBDEPLOY_PASSWORD,AuthType=Basic" `
+            -enableRule:AppOffline `
             -enableRule:DoNotDeleteRule `
             -useCheckSum `
             -allowUntrusted
