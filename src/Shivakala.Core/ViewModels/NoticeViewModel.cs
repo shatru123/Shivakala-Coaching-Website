@@ -1,3 +1,5 @@
+using Shivakala.Core.Common;
+
 namespace Shivakala.Core.ViewModels;
 
 public sealed class NoticeViewModel
@@ -31,5 +33,5 @@ public sealed class NoticeFormViewModel
     public string Category { get; set; } = "General";
     public bool IsPinned { get; set; }
     public bool IsActive { get; set; } = true;
-    public DateTime PublishedDate { get; set; } = DateTime.Today;
+    public DateTime PublishedDate { get; set; } = UtcDateTime.StartOfToday();
 }

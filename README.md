@@ -69,6 +69,14 @@ For PostgreSQL:
 }
 ```
 
+For local development, keep the default as `Sqlite` unless you already have PostgreSQL running.
+
+To spin up PostgreSQL locally with Docker Compose:
+
+```bash
+docker compose -f docker-compose.postgres.local.yml up -d
+```
+
 ### 3. Apply Migrations
 
 ```bash
@@ -80,7 +88,7 @@ For PostgreSQL:
 
 ```bash
 cd src/Shivakala.Web
-dotnet ef database update --project ../Shivakala.PostgresMigrations
+dotnet ef database update --project ../Shivakala.PostgresMigrations -- --provider=PostgreSql
 ```
 
 ### 4. Run the App
@@ -91,6 +99,34 @@ dotnet run --project src/Shivakala.Web
 
 Open → `http://localhost:5000`  
 Admin → `http://localhost:5000/admin`
+
+### Local PostgreSQL Verification
+
+1. Start PostgreSQL:
+
+```bash
+docker compose -f docker-compose.postgres.local.yml up -d
+```
+
+2. Set `Database:Provider` to `PostgreSql` in `src/Shivakala.Web/appsettings.json`.
+
+3. Apply PostgreSQL migrations:
+
+```bash
+dotnet ef database update --project src/Shivakala.PostgresMigrations --startup-project src/Shivakala.Web -- --provider=PostgreSql
+```
+
+4. Run the app:
+
+```bash
+dotnet run --project src/Shivakala.Web
+```
+
+5. Stop PostgreSQL when finished:
+
+```bash
+docker compose -f docker-compose.postgres.local.yml down
+```
 
 ### 5. Start WhatsApp Sidecar (optional)
 
@@ -140,6 +176,8 @@ For most production hosting providers, set:
 
 - `Database__Provider=PostgreSql`
 - `ConnectionStrings__PostgreSql=<your managed postgres connection string>`
+
+Many hosts also provide a single `DATABASE_URL`. That now works too, as long as `Database__Provider=PostgreSql`.
 
 For very small single-server deployments with file storage:
 

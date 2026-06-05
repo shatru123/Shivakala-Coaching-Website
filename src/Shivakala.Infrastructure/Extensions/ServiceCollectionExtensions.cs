@@ -65,7 +65,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IHomePageService, HomePageService>();
         services.AddScoped<IAdminPortalService, AdminPortalService>();
         services.AddScoped<IPortalUserService, PortalUserService>();
-        services.AddSingleton<IAdminAuthenticationService, AdminAuthenticationService>();
+        services.AddScoped<IAdminAuthenticationService, AdminAuthenticationService>();
 
         // ── New Services ───────────────────────────────────────────────────
         services.AddScoped<IAuditService, AuditService>();
@@ -78,13 +78,49 @@ public static class ServiceCollectionExtensions
     {
         if (DatabaseProviderResolver.IsPostgreSql(provider))
         {
+            var databaseUrl = configuration["DATABASE_URL"];
+            if (!string.IsNullOrWhiteSpace(databaseUrl))
+                return BuildPostgreSqlConnectionStringFromUrl(databaseUrl);
+
             return configuration.GetConnectionString("PostgreSql")
                 ?? throw new InvalidOperationException(
-                    "Connection string 'PostgreSql' is required when Database:Provider is set to PostgreSql.");
+                    "Connection string 'PostgreSql' or environment variable 'DATABASE_URL' is required when Database:Provider is set to PostgreSql.");
         }
 
         return configuration.GetConnectionString("Sqlite")
             ?? configuration.GetConnectionString("DefaultConnection")
             ?? "Data Source=App_Data/shivakala.db";
+    }
+
+    private static string BuildPostgreSqlConnectionStringFromUrl(string databaseUrl)
+    {
+        if (!Uri.TryCreate(databaseUrl, UriKind.Absolute, out var uri))
+            throw new InvalidOperationException("Environment variable 'DATABASE_URL' is not a valid absolute URI.");
+
+        if (!string.Equals(uri.Scheme, "postgres", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(uri.Scheme, "postgresql", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Environment variable 'DATABASE_URL' must start with 'postgres://' or 'postgresql://'.");
+        }
+
+        var userInfo = uri.UserInfo.Split(':', 2);
+        var username = Uri.UnescapeDataString(userInfo[0]);
+        var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : string.Empty;
+        var database = uri.AbsolutePath.Trim('/');
+
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(database))
+            throw new InvalidOperationException("Environment variable 'DATABASE_URL' must include username and database name.");
+
+        var builder = new Npgsql.NpgsqlConnectionStringBuilder
+        {
+            Host = uri.Host,
+            Port = uri.Port > 0 ? uri.Port : 5432,
+            Username = username,
+            Password = password,
+            Database = database,
+            SslMode = Npgsql.SslMode.Prefer
+        };
+
+        return builder.ConnectionString;
     }
 }

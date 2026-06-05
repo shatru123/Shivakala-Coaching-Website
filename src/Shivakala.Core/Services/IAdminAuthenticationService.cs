@@ -1,6 +1,8 @@
+using Shivakala.Core.Entities;
+
 namespace Shivakala.Core.Services;
 
 public interface IAdminAuthenticationService
 {
-    bool ValidateCredentials(string username, string password);
+    Task<AppUser?> ValidateCredentialsAsync(string username, string password, CancellationToken ct = default);
 }

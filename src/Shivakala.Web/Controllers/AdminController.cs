@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shivakala.Core.Common;
 using Shivakala.Core.Interfaces;
 using Shivakala.Core.Services;
 using Shivakala.Core.ViewModels;
@@ -20,6 +21,7 @@ namespace Shivakala.Web.Controllers;
 [Authorize(Roles = "Admin")]
 public sealed class AdminController(
     IAdminAuthenticationService authService,
+    IPortalUserService portalUsers,
     IAdminPortalService portalService,
     ICourseRepository courseRepo,
     INoticeRepository noticeRepo,
@@ -51,22 +53,26 @@ public sealed class AdminController(
     public async Task<IActionResult> Authenticate(AdminLoginViewModel model, CancellationToken ct)
     {
         if (!ModelState.IsValid) return View("Login", model);
-        if (!authService.ValidateCredentials(model.Username, model.Password))
+        var user = await authService.ValidateCredentialsAsync(model.Username, model.Password, ct);
+        if (user is null)
         {
             ModelState.AddModelError(string.Empty, "Invalid username or password.");
             return View("Login", model);
         }
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Name, model.Username.Trim()),
-            new(ClaimTypes.Role, "Admin")
+            new(ClaimTypes.Name, user.FullName ?? user.Username),
+            new(ClaimTypes.Role, "Admin"),
+            new("UserId", user.Id.ToString())
         };
         var principal = new ClaimsPrincipal(
             new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme, principal,
             new AuthenticationProperties { IsPersistent = true, ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8) });
-        logger.LogInformation("Admin logged in: {User}", model.Username);
+        user.LastLoginDate = DateTime.UtcNow;
+        await db.SaveChangesAsync(ct);
+        logger.LogInformation("Admin logged in: {User}", user.Username);
         return !string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl)
             ? LocalRedirect(model.ReturnUrl) : RedirectToAction(nameof(Index));
     }
@@ -85,7 +91,8 @@ public sealed class AdminController(
     public async Task<IActionResult> Index(CancellationToken ct)
     {
         var dashboard = await portalService.GetDashboardAsync(ct);
-        var currentMonth = DateTime.UtcNow.ToString("yyyy-MM");
+        var currentMonth = UtcDateTime.CurrentMonthKey();
+        var todayUtc = UtcDateTime.StartOfToday();
 
         ViewBag.TotalStudents   = await db.Students.CountAsync(ct);
         ViewBag.TotalTeachers   = await db.Teachers.CountAsync(s => s.IsActive, ct);
@@ -98,9 +105,9 @@ public sealed class AdminController(
             .Where(f => f.Status == "Pending")
             .SumAsync(f => (double?)f.Amount - (double?)f.PaidAmount, ct) ?? 0);
         ViewBag.UpcomingExams   = await db.Exams
-            .Where(e => e.ExamDate >= DateTime.Today && !e.IsPublished).CountAsync(ct);
+            .Where(e => e.ExamDate >= todayUtc && !e.IsPublished).CountAsync(ct);
         ViewBag.PendingHomework = await db.Homeworks
-            .Where(h => h.IsActive && h.DueDate >= DateTime.Today).CountAsync(ct);
+            .Where(h => h.IsActive && h.DueDate >= todayUtc).CountAsync(ct);
 
         return View(dashboard);
     }
@@ -247,12 +254,13 @@ public sealed class AdminController(
     public async Task<IActionResult> Notices(CancellationToken ct) => View(await noticeRepo.GetAllAdminAsync(ct));
 
     [HttpGet]
-    public IActionResult CreateNotice() => View("NoticeForm", new NoticeFormViewModel { PublishedDate = DateTime.Today });
+    public IActionResult CreateNotice() => View("NoticeForm", new NoticeFormViewModel { PublishedDate = UtcDateTime.StartOfToday() });
 
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateNotice(NoticeFormViewModel vm, CancellationToken ct)
     {
         if (!ModelState.IsValid) return View("NoticeForm", vm);
+        vm.PublishedDate = UtcDateTime.EnsureUtc(vm.PublishedDate);
         await noticeRepo.AddAsync(new Core.Entities.Notice {
             Title=vm.Title, TitleMarathi=vm.TitleMarathi, Body=vm.Body,
             BodyMarathi=vm.BodyMarathi, Category=vm.Category, IsPinned=vm.IsPinned,
@@ -278,6 +286,7 @@ public sealed class AdminController(
         if (!ModelState.IsValid) return View("NoticeForm", vm);
         var n = await noticeRepo.GetByIdAsync(vm.Id, ct);
         if (n == null) return NotFound();
+        vm.PublishedDate = UtcDateTime.EnsureUtc(vm.PublishedDate);
         n.Title=vm.Title; n.TitleMarathi=vm.TitleMarathi; n.Body=vm.Body;
         n.BodyMarathi=vm.BodyMarathi; n.Category=vm.Category; n.IsPinned=vm.IsPinned;
         n.IsActive=vm.IsActive; n.PublishedDate=vm.PublishedDate;
@@ -299,12 +308,13 @@ public sealed class AdminController(
     public async Task<IActionResult> Results(CancellationToken ct) => View(await resultRepo.GetAllAdminAsync(ct));
 
     [HttpGet]
-    public IActionResult CreateResult() => View("ResultForm", new TestResultFormViewModel { TestDate = DateTime.Today, TotalMarks = 100 });
+    public IActionResult CreateResult() => View("ResultForm", new TestResultFormViewModel { TestDate = UtcDateTime.StartOfToday(), TotalMarks = 100 });
 
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateResult(TestResultFormViewModel vm, CancellationToken ct)
     {
         if (!ModelState.IsValid) return View("ResultForm", vm);
+        vm.TestDate = UtcDateTime.EnsureUtc(vm.TestDate);
         var grade = vm.TotalMarks > 0 ? (int)(vm.Score * 100.0 / vm.TotalMarks) switch {
             >= 90 => "A+", >= 80 => "A", >= 70 => "B+", >= 60 => "B", >= 50 => "C", _ => "D"
         } : null;
@@ -542,7 +552,101 @@ public sealed class AdminController(
         return View(items);
     }
 
+    [HttpGet]
+    public IActionResult ChangePassword()
+        => View(new ChangePasswordViewModel());
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> ChangePassword(ChangePasswordViewModel vm, CancellationToken ct)
+    {
+        if (!ModelState.IsValid) return View(vm);
+
+        if (!TryGetCurrentUserId(out var userId))
+            return Forbid();
+
+        var result = await portalUsers.ChangePasswordAsync(userId, vm.CurrentPassword, vm.NewPassword, ct);
+        if (!result.Success)
+        {
+            ModelState.AddModelError(string.Empty, result.ErrorMessage);
+            return View(vm);
+        }
+
+        TempData["SuccessMessage"] = "Your password has been updated.";
+        return RedirectToAction(nameof(ChangePassword));
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> PortalAccounts(CancellationToken ct)
+    {
+        var users = await db.AppUsers
+            .Where(u => u.Role == "Teacher" || u.Role == "Parent")
+            .OrderBy(u => u.Role)
+            .ThenBy(u => u.FullName)
+            .ToListAsync(ct);
+
+        var teachers = await db.Teachers
+            .ToDictionaryAsync(t => t.Id, t => t.FullName, ct);
+        var students = await db.Students
+            .ToDictionaryAsync(s => s.Id, s => s.FullName, ct);
+
+        var model = users.Select(u => new PortalAccountAdminViewModel
+        {
+            UserId = u.Id,
+            Username = u.Username,
+            Role = u.Role,
+            FullName = u.FullName ?? u.Username,
+            Mobile = u.Mobile,
+            LinkedTo = u.TeacherId.HasValue && teachers.TryGetValue(u.TeacherId.Value, out var teacherName)
+                ? teacherName
+                : u.StudentId.HasValue && students.TryGetValue(u.StudentId.Value, out var studentName)
+                    ? studentName
+                    : "Not linked",
+            IsActive = u.IsActive
+        }).ToList();
+
+        return View(model);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ResetPortalPassword(int id, CancellationToken ct)
+    {
+        var user = await db.AppUsers.FirstOrDefaultAsync(
+            u => u.Id == id && (u.Role == "Teacher" || u.Role == "Parent"), ct);
+        if (user is null) return NotFound();
+
+        return View(new AdminResetPasswordViewModel
+        {
+            UserId = user.Id,
+            Username = user.Username,
+            Role = user.Role,
+            FullName = user.FullName ?? user.Username
+        });
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> ResetPortalPassword(AdminResetPasswordViewModel vm, CancellationToken ct)
+    {
+        if (!ModelState.IsValid) return View(vm);
+
+        var user = await db.AppUsers.FirstOrDefaultAsync(
+            u => u.Id == vm.UserId && (u.Role == "Teacher" || u.Role == "Parent"), ct);
+        if (user is null) return NotFound();
+
+        var result = await portalUsers.SetPasswordAsync(user.Id, vm.NewPassword, ct);
+        if (!result.Success)
+        {
+            ModelState.AddModelError(string.Empty, result.ErrorMessage);
+            return View(vm);
+        }
+
+        TempData["SuccessMessage"] = $"{user.Role} password updated for {user.FullName ?? user.Username}.";
+        return RedirectToAction(nameof(PortalAccounts));
+    }
+
     // ═══ HELPERS ══════════════════════════════════════════════════════════════
+    private bool TryGetCurrentUserId(out int userId)
+        => int.TryParse(User.FindFirst("UserId")?.Value, out userId) && userId > 0;
+
     private static void NormalizeCourse(CourseFormViewModel vm)
     {
         vm.Title             = vm.Title.Trim();

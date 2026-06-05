@@ -24,11 +24,14 @@
             <h1 style="font-size:1.6rem;font-weight:800;margin-bottom:4px">
                 Welcome, @(teacher?.FullName ?? User.Identity?.Name) 👋
             </h1>
-            <p style="opacity:.7;font-size:.85rem;margin:0">@DateTime.Today.ToString("dddd, dd MMMM yyyy")</p>
+            <p style="opacity:.7;font-size:.85rem;margin:0">@UtcDateTime.NowInAppTimeZone().ToString("dddd, dd MMMM yyyy")</p>
         </div>
         <div class="d-flex gap-2 flex-wrap">
             <a asp-action="Attendance" class="tp-btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)">
                 <i class="fa-solid fa-calendar-check"></i> Mark Attendance
+            </a>
+            <a asp-action="ChangePassword" class="tp-btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)">
+                <i class="fa-solid fa-lock"></i> Change Password
             </a>
             <a asp-action="Logout" class="tp-btn" style="background:rgba(255,100,100,.15);color:#ffb3b3;border:1px solid rgba(255,100,100,.2)">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout

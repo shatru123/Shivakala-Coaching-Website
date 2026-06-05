@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shivakala.Core.Common;
 using Shivakala.Core.Entities;
 using Shivakala.Core.Interfaces;
 using Shivakala.Core.Services;
@@ -15,7 +16,7 @@ public sealed class FeeController(
     [HttpGet("")]
     public async Task<IActionResult> Index(string? month, string? status, CancellationToken ct)
     {
-        var m = string.IsNullOrWhiteSpace(month) ? DateTime.Today.ToString("yyyy-MM") : month;
+        var m = string.IsNullOrWhiteSpace(month) ? UtcDateTime.CurrentMonthKey() : month;
         ViewBag.Month = m;
         ViewBag.Status = status;
         ViewBag.Payments = await feeRepo.GetAllAsync(m, status, ct);
@@ -32,7 +33,12 @@ public sealed class FeeController(
         ViewBag.SelectedStudentId = studentId;
         if (studentId.HasValue)
             ViewBag.History = await feeRepo.GetByStudentAsync(studentId.Value, ct);
-        return View(new FeePayment { StudentId = studentId ?? 0, PaidDate = DateTime.Today, Month = DateTime.Today.ToString("yyyy-MM"), FeeType = "Monthly"});
+        return View(new FeePayment {
+            StudentId = studentId ?? 0,
+            PaidDate = UtcDateTime.StartOfToday(),
+            Month = UtcDateTime.CurrentMonthKey(),
+            FeeType = "Monthly"
+        });
     }
 
     [HttpPost("collect"), ValidateAntiForgeryToken]
@@ -44,6 +50,7 @@ public sealed class FeeController(
             ViewBag.Structures = await feeRepo.GetFeeStructuresAsync(ct);
             return View(model);
         }
+        model.PaidDate = UtcDateTime.EnsureUtc(model.PaidDate);
         model.PaidAmount = model.Amount - model.Discount + model.Fine;
         model.Status = "Paid";
         await feeRepo.AddAsync(model, ct);
