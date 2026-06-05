@@ -11,6 +11,17 @@
 </section>
 <section class="section-shell pt-0">
     <div class="container">
+        <div class="glass-card mb-3" style="border-left:4px solid var(--navy)">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <div style="font-weight:700;color:var(--navy)">Homepage usage</div>
+                    <div style="font-size:0.85rem;color:var(--text-mid)">Approved and featured testimonials appear on the home page. If no testimonials are featured, approved testimonials are used as a fallback.</div>
+                </div>
+                <a asp-action="HomePageContent" class="toolbar-btn">
+                    <i class="fa-solid fa-house"></i>Homepage Settings
+                </a>
+            </div>
+        </div>
         <div class="row g-3">
             @foreach (var t in Model)
             {

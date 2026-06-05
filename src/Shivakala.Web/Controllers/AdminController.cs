@@ -429,6 +429,64 @@ public sealed class AdminController(
         return RedirectToAction(nameof(Testimonials));
     }
 
+    [HttpGet]
+    public async Task<IActionResult> HomePageContent(CancellationToken ct)
+    {
+        var settings = await GetHomePageSectionSettingsAsync(ct);
+        return View(new HomePageContentAdminViewModel
+        {
+            ShowStatisticsSection = settings.ShowStatisticsSection,
+            Stat1Value = settings.Stat1Value,
+            Stat1Label = settings.Stat1Label,
+            Stat1LabelMarathi = settings.Stat1LabelMarathi,
+            Stat2Value = settings.Stat2Value,
+            Stat2Label = settings.Stat2Label,
+            Stat2LabelMarathi = settings.Stat2LabelMarathi,
+            Stat3Value = settings.Stat3Value,
+            Stat3Label = settings.Stat3Label,
+            Stat3LabelMarathi = settings.Stat3LabelMarathi,
+            Stat4Value = settings.Stat4Value,
+            Stat4Label = settings.Stat4Label,
+            Stat4LabelMarathi = settings.Stat4LabelMarathi,
+            ShowTestimonialsSection = settings.ShowTestimonialsSection,
+            TestimonialsEyebrow = settings.TestimonialsEyebrow,
+            TestimonialsEyebrowMarathi = settings.TestimonialsEyebrowMarathi,
+            TestimonialsTitle = settings.TestimonialsTitle,
+            TestimonialsTitleMarathi = settings.TestimonialsTitleMarathi
+        });
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> HomePageContent(HomePageContentAdminViewModel vm, CancellationToken ct)
+    {
+        NormalizeHomePageContent(vm);
+        if (!ModelState.IsValid) return View(vm);
+
+        var settings = await GetHomePageSectionSettingsAsync(ct);
+        settings.ShowStatisticsSection = vm.ShowStatisticsSection;
+        settings.Stat1Value = vm.Stat1Value;
+        settings.Stat1Label = vm.Stat1Label;
+        settings.Stat1LabelMarathi = vm.Stat1LabelMarathi;
+        settings.Stat2Value = vm.Stat2Value;
+        settings.Stat2Label = vm.Stat2Label;
+        settings.Stat2LabelMarathi = vm.Stat2LabelMarathi;
+        settings.Stat3Value = vm.Stat3Value;
+        settings.Stat3Label = vm.Stat3Label;
+        settings.Stat3LabelMarathi = vm.Stat3LabelMarathi;
+        settings.Stat4Value = vm.Stat4Value;
+        settings.Stat4Label = vm.Stat4Label;
+        settings.Stat4LabelMarathi = vm.Stat4LabelMarathi;
+        settings.ShowTestimonialsSection = vm.ShowTestimonialsSection;
+        settings.TestimonialsEyebrow = vm.TestimonialsEyebrow;
+        settings.TestimonialsEyebrowMarathi = vm.TestimonialsEyebrowMarathi;
+        settings.TestimonialsTitle = vm.TestimonialsTitle;
+        settings.TestimonialsTitleMarathi = vm.TestimonialsTitleMarathi;
+
+        await db.SaveChangesAsync(ct);
+        TempData["SuccessMessage"] = "Homepage stats and testimonials settings updated.";
+        return RedirectToAction(nameof(HomePageContent));
+    }
+
     // ═══ GALLERY ══════════════════════════════════════════════════════════════
     [HttpGet]
     public async Task<IActionResult> Gallery(CancellationToken ct)
@@ -504,5 +562,36 @@ public sealed class AdminController(
         vm.Quote       = vm.Quote.Trim();
         vm.QuoteMarathi = string.IsNullOrWhiteSpace(vm.QuoteMarathi) ? null : vm.QuoteMarathi.Trim();
         vm.Rating      = Math.Clamp(vm.Rating, 1, 5);
+    }
+
+    private static void NormalizeHomePageContent(HomePageContentAdminViewModel vm)
+    {
+        vm.Stat1Value = vm.Stat1Value.Trim();
+        vm.Stat1Label = vm.Stat1Label.Trim();
+        vm.Stat1LabelMarathi = vm.Stat1LabelMarathi.Trim();
+        vm.Stat2Value = vm.Stat2Value.Trim();
+        vm.Stat2Label = vm.Stat2Label.Trim();
+        vm.Stat2LabelMarathi = vm.Stat2LabelMarathi.Trim();
+        vm.Stat3Value = vm.Stat3Value.Trim();
+        vm.Stat3Label = vm.Stat3Label.Trim();
+        vm.Stat3LabelMarathi = vm.Stat3LabelMarathi.Trim();
+        vm.Stat4Value = vm.Stat4Value.Trim();
+        vm.Stat4Label = vm.Stat4Label.Trim();
+        vm.Stat4LabelMarathi = vm.Stat4LabelMarathi.Trim();
+        vm.TestimonialsEyebrow = vm.TestimonialsEyebrow.Trim();
+        vm.TestimonialsEyebrowMarathi = vm.TestimonialsEyebrowMarathi.Trim();
+        vm.TestimonialsTitle = vm.TestimonialsTitle.Trim();
+        vm.TestimonialsTitleMarathi = vm.TestimonialsTitleMarathi.Trim();
+    }
+
+    private async Task<Core.Entities.HomePageSectionSettings> GetHomePageSectionSettingsAsync(CancellationToken ct)
+    {
+        var settings = await db.HomePageSectionSettings.FirstOrDefaultAsync(ct);
+        if (settings is not null) return settings;
+
+        settings = new Core.Entities.HomePageSectionSettings();
+        db.HomePageSectionSettings.Add(settings);
+        await db.SaveChangesAsync(ct);
+        return settings;
     }
 }

@@ -1,16 +1,27 @@
 using System.Globalization;
+using Microsoft.EntityFrameworkCore;
 using Shivakala.Core.Common;
+using Shivakala.Core.Entities;
 using Shivakala.Core.Services;
 using Shivakala.Core.ViewModels;
+using Shivakala.Infrastructure.Data;
+using Shivakala.Infrastructure.Repositories;
 
 namespace Shivakala.Infrastructure.Services;
 
-public sealed class HomePageService(ICourseService courseService) : IHomePageService
+public sealed class HomePageService(
+    ICourseService courseService,
+    ShivakalaDbContext db,
+    ITestimonialRepository testimonialRepo) : IHomePageService
 {
     public async Task<HomePageViewModel> GetHomePageAsync(CancellationToken cancellationToken = default)
     {
         var isMarathi = CultureInfo.CurrentUICulture.IsMarathi();
         var featuredCourses = await courseService.GetFeaturedCoursesAsync(cancellationToken);
+        var settings = await GetSettingsAsync(cancellationToken);
+        var testimonials = await testimonialRepo.GetApprovedAsync(featuredOnly: true, ct: cancellationToken);
+        if (testimonials.Count == 0)
+            testimonials = await testimonialRepo.GetApprovedAsync(ct: cancellationToken);
 
         return new HomePageViewModel
         {
@@ -21,12 +32,13 @@ public sealed class HomePageService(ICourseService courseService) : IHomePageSer
                 Keywords = "Shivakala Coaching Classes, SSC coaching, foundation batch, scholarship preparation, Marathi coaching website"
             },
             FeaturedCourses = featuredCourses,
+            ShowStatisticsSection = settings.ShowStatisticsSection,
             Statistics =
             [
-                new() { Value = "12+", Label = isMarathi ? "वर्षांचा अनुभव" : "Years of experience" },
-                new() { Value = "2,500+", Label = isMarathi ? "यशस्वी विद्यार्थी" : "Successful students" },
-                new() { Value = "96%", Label = isMarathi ? "बोर्ड निकाल" : "Board success rate" },
-                new() { Value = "24x7", Label = isMarathi ? "विद्यार्थी मार्गदर्शन" : "Student mentoring" }
+                new() { Value = settings.Stat1Value, Label = isMarathi ? settings.Stat1LabelMarathi : settings.Stat1Label },
+                new() { Value = settings.Stat2Value, Label = isMarathi ? settings.Stat2LabelMarathi : settings.Stat2Label },
+                new() { Value = settings.Stat3Value, Label = isMarathi ? settings.Stat3LabelMarathi : settings.Stat3Label },
+                new() { Value = settings.Stat4Value, Label = isMarathi ? settings.Stat4LabelMarathi : settings.Stat4Label }
             ],
             Highlights =
             [
@@ -40,12 +52,19 @@ public sealed class HomePageService(ICourseService courseService) : IHomePageSer
                 new() { Icon = "fa-solid fa-bullseye", Title = isMarathi ? "शिष्यवृत्ती यश" : "Scholarship success", Description = isMarathi ? "स्पर्धात्मक परीक्षांसाठी विशेष सराव आणि रणनीती." : "Targeted preparation helps scholarship aspirants compete confidently." },
                 new() { Icon = "fa-solid fa-lightbulb", Title = isMarathi ? "दैनंदिन शंका समाधान" : "Daily doubt solving", Description = isMarathi ? "शंका राहू नयेत म्हणून वेगवेगळ्या सपोर्ट सत्रांची रचना." : "Dedicated doubt-solving sessions keep learning momentum strong." }
             ],
-            Testimonials =
-            [
-                new() { StudentName = "Aarohi Patil", Achievement = isMarathi ? "SSC - 94.80%" : "SSC - 94.80%", Quote = isMarathi ? "शिवकला मधील चाचण्या आणि वैयक्तिक मार्गदर्शनामुळे माझा आत्मविश्वास खूप वाढला." : "The structured tests and personal mentoring at Shivakala boosted my confidence tremendously." },
-                new() { StudentName = "Vedant Jadhav", Achievement = isMarathi ? "Scholarship Qualifier" : "Scholarship Qualifier", Quote = isMarathi ? "माझ्या रिझनिंग आणि गणितात झालेली प्रगती इथल्या सातत्यपूर्ण सरावामुळेच शक्य झाली." : "My reasoning and maths improved because of the disciplined practice routine here." },
-                new() { StudentName = "Sakshi More", Achievement = isMarathi ? "Maths Topper" : "Maths Topper", Quote = isMarathi ? "प्रत्येक शंका संयमाने समजावून सांगणारी शिक्षकांची टीम ही आमची सर्वात मोठी ताकद आहे." : "The faculty patiently solved every doubt, and that became my biggest strength." }
-            ],
+            ShowTestimonialsSection = settings.ShowTestimonialsSection,
+            TestimonialsEyebrow = isMarathi ? settings.TestimonialsEyebrowMarathi : settings.TestimonialsEyebrow,
+            TestimonialsTitle = isMarathi ? settings.TestimonialsTitleMarathi : settings.TestimonialsTitle,
+            Testimonials = testimonials
+                .Take(3)
+                .Select(t => new TestimonialViewModel
+                {
+                    StudentName = t.Name,
+                    Achievement = t.Role,
+                    Quote = isMarathi && !string.IsNullOrWhiteSpace(t.QuoteMarathi) ? t.QuoteMarathi : t.Quote,
+                    Rating = t.Rating
+                })
+                .ToList(),
             FacultyMembers =
             [
                 new() { Name = "Prof. Shrikant Sir", Designation = isMarathi ? "संस्थापक आणि गणित मार्गदर्शक" : "Founder & Mathematics Mentor", Experience = isMarathi ? "15+ वर्षे" : "15+ years", Speciality = isMarathi ? "बोर्ड, स्कॉलरशिप, ऑलिंपियाड" : "Boards, scholarships, olympiads" },
@@ -53,5 +72,16 @@ public sealed class HomePageService(ICourseService courseService) : IHomePageSer
                 new() { Name = "Mr. Nilesh Sir", Designation = isMarathi ? "इंग्रजी आणि टेस्ट स्ट्रॅटेजी" : "English & Test Strategy", Experience = isMarathi ? "10+ वर्षे" : "10+ years", Speciality = isMarathi ? "भाषिक कौशल्य आणि लेखन" : "Language skills and writing improvement" }
             ]
         };
+    }
+
+    private async Task<HomePageSectionSettings> GetSettingsAsync(CancellationToken cancellationToken)
+    {
+        var settings = await db.HomePageSectionSettings.FirstOrDefaultAsync(cancellationToken);
+        if (settings is not null) return settings;
+
+        settings = new HomePageSectionSettings();
+        db.HomePageSectionSettings.Add(settings);
+        await db.SaveChangesAsync(cancellationToken);
+        return settings;
     }
 }
