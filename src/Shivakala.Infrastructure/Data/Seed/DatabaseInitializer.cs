@@ -39,6 +39,13 @@ public static class DatabaseInitializer
                 logger?.LogInformation("✅  Database schema is already up to date.");
             }
 
+            if (!await db.HomePageSectionSettings.AnyAsync())
+            {
+                db.HomePageSectionSettings.Add(new Core.Entities.HomePageSectionSettings());
+                await db.SaveChangesAsync();
+                logger?.LogInformation("✅  Homepage content settings created.");
+            }
+
             // ── Step 3: ensure teacher/parent portal accounts exist ───────────────
             var portalUsers = scope.ServiceProvider.GetRequiredService<IPortalUserService>();
             await portalUsers.SyncMissingPortalAccountsAsync();

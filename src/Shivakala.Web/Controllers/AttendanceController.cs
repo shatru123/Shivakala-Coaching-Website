@@ -5,7 +5,7 @@ using Shivakala.Core.Interfaces;
 
 namespace Shivakala.Web.Controllers;
 
-[Authorize, Route("admin/attendance")]
+[Authorize(Roles = "Admin"), Route("admin/attendance")]
 public sealed class AttendanceController(
     IAttendanceRepository attendanceRepo,
     IBatchRepository batchRepo,

@@ -14,6 +14,7 @@ public sealed class ShivakalaDbContext(DbContextOptions<ShivakalaDbContext> opti
     public DbSet<StudyMaterial> StudyMaterials => Set<StudyMaterial>();
     public DbSet<GalleryItem>   GalleryItems  => Set<GalleryItem>();
     public DbSet<Testimonial>   Testimonials  => Set<Testimonial>();
+    public DbSet<HomePageSectionSettings> HomePageSectionSettings => Set<HomePageSectionSettings>();
 
     // ── New ────────────────────────────────────────────────────────────────
     public DbSet<AppUser>           AppUsers           => Set<AppUser>();

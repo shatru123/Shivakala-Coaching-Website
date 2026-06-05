@@ -6,7 +6,7 @@ using Shivakala.Core.Services;
 
 namespace Shivakala.Web.Controllers;
 
-[Authorize, Route("admin/whatsapp")]
+[Authorize(Roles = "Admin"), Route("admin/whatsapp")]
 public sealed class WhatsAppController(
     IWhatsAppService wa,
     INotificationRepository notifRepo,

@@ -265,31 +265,28 @@
         </div>
 
         <!-- Stats Row -->
-        <div class="row g-3 mt-2">
-            <div class="col-6 col-md-3">
-                <div class="stat-card reveal"><strong>500+</strong><span>@(isMr ? "विद्यार्थी" : "Students")</span></div>
+        @if (Model?.ShowStatisticsSection == true && Model.Statistics.Count > 0)
+        {
+            <div class="row g-3 mt-2">
+                @foreach (var stat in Model.Statistics)
+                {
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card reveal"><strong>@stat.Value</strong><span>@stat.Label</span></div>
+                    </div>
+                }
             </div>
-            <div class="col-6 col-md-3">
-                <div class="stat-card reveal"><strong>10+</strong><span>@(isMr ? "वर्षांचा अनुभव" : "Years Experience")</span></div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="stat-card reveal"><strong>95%</strong><span>@(isMr ? "उत्तीर्ण दर" : "Pass Rate")</span></div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="stat-card reveal"><strong>KG–10</strong><span>@(isMr ? "सर्व वर्ग" : "All Standards")</span></div>
-            </div>
-        </div>
+        }
     </div>
 </section>
 
 <!-- ===== TESTIMONIALS ===== -->
-@if (Model?.Testimonials is { Count: > 0 })
+@if (Model?.ShowTestimonialsSection == true && Model.Testimonials is { Count: > 0 })
 {
     <section class="section-shell" style="background:var(--white);">
         <div class="container">
             <div class="section-header text-center mb-4">
-                <div class="eyebrow"><i class="fa-solid fa-quote-left me-1"></i>@(isMr ? "विद्यार्थी व पालकांचे मत" : "Testimonials")</div>
-                <h2>@(isMr ? "आमच्या विद्यार्थ्यांचे अनुभव" : "What Parents & Students Say")</h2>
+                <div class="eyebrow"><i class="fa-solid fa-quote-left me-1"></i>@Model.TestimonialsEyebrow</div>
+                <h2>@Model.TestimonialsTitle</h2>
             </div>
             <div class="row g-3">
                 @foreach (var t in Model.Testimonials)

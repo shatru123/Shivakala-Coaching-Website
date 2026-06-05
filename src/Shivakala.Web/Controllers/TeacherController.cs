@@ -8,7 +8,7 @@ using Shivakala.Infrastructure.Data;
 
 namespace Shivakala.Web.Controllers;
 
-[Authorize, Route("admin/teachers")]
+[Authorize(Roles = "Admin"), Route("admin/teachers")]
 public sealed class TeacherController(
     ITeacherRepository repo,
     IPortalUserService portalUsers,

@@ -6,7 +6,7 @@ using Shivakala.Core.Services;
 
 namespace Shivakala.Web.Controllers;
 
-[Authorize, Route("admin/exams")]
+[Authorize(Roles = "Admin"), Route("admin/exams")]
 public sealed class ExamController(
     IExamRepository examRepo,
     IBatchRepository batchRepo,
