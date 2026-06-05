@@ -17,38 +17,34 @@ public sealed class TeacherPortalController(
 {
     private const string Scheme = CookieAuthenticationDefaults.AuthenticationScheme;
 
-    // ── AUTH ───────────────────────────────────────────────────────────────────
+    // ── AUTH ──────────────────────────────────────────────────────────────────
     [HttpGet("login"), AllowAnonymous]
     public IActionResult Login(string? returnUrl = null)
     {
         if (User.Identity?.IsAuthenticated == true && User.IsInRole("Teacher"))
-            return RedirectToAction(nameof(Index));
+            return Redirect("/teacher");
         ViewBag.ReturnUrl = returnUrl;
-        return View();
+        return View("Login");                       // explicit view name
     }
 
     [HttpPost("login"), AllowAnonymous, ValidateAntiForgeryToken]
-    public async Task<IActionResult> Authenticate(string username, string password, string? returnUrl, CancellationToken ct)
+    public async Task<IActionResult> Authenticate(
+        string username, string password, string? returnUrl, CancellationToken ct)
     {
         var user = await portalUsers.ValidateCredentialsAsync(username, password, "Teacher", ct);
         if (user is null)
         {
             ModelState.AddModelError("", "Invalid username or password.");
             ViewBag.ReturnUrl = returnUrl;
-            return View();
+            return View("Login");                   // explicit — not View()
         }
-
-        // Link to Teacher record
-        var teacher = user.TeacherId.HasValue
-            ? await db.Teachers.FindAsync([user.TeacherId.Value], ct)
-            : null;
 
         var claims = new List<Claim>
         {
-            new(ClaimTypes.Name, user.FullName ?? user.Username),
-            new(ClaimTypes.Role, "Teacher"),
-            new("UserId",   user.Id.ToString()),
-            new("TeacherId", (user.TeacherId ?? 0).ToString())
+            new(ClaimTypes.Name,    user.FullName ?? user.Username),
+            new(ClaimTypes.Role,    "Teacher"),
+            new("UserId",           user.Id.ToString()),
+            new("TeacherId",        (user.TeacherId ?? 0).ToString())
         };
         var principal = new ClaimsPrincipal(new ClaimsIdentity(claims, Scheme));
         await HttpContext.SignInAsync(Scheme, principal,
@@ -69,109 +65,306 @@ public sealed class TeacherPortalController(
         return RedirectToAction(nameof(Login));
     }
 
-    // ── DASHBOARD ──────────────────────────────────────────────────────────────
+    // ── DASHBOARD ─────────────────────────────────────────────────────────────
     [HttpGet(""), HttpGet("dashboard"), Authorize(Roles = "Teacher")]
     public async Task<IActionResult> Index(CancellationToken ct)
     {
-        var teacherId = GetTeacherId();
-        var teacher   = teacherId > 0 ? await db.Teachers.FindAsync([teacherId], ct) : null;
+        var tid = GetTeacherId();
+        ViewBag.Teacher = tid > 0 ? await db.Teachers.FindAsync([tid], ct) : null;
 
-        ViewBag.Teacher = teacher;
         ViewBag.MyBatches = await db.BatchSubjects
             .Include(bs => bs.Batch)
-            .Where(bs => bs.TeacherId == teacherId)
-            .Select(bs => bs.Batch)
-            .Distinct().ToListAsync(ct);
+            .Where(bs => bs.TeacherId == tid && bs.Batch!.IsActive)
+            .Select(bs => bs.Batch!).Distinct()
+            .OrderBy(b => b.Standard).ThenBy(b => b.Name)
+            .ToListAsync(ct);
+
         ViewBag.TodayHomework = await db.Homeworks
-            .Where(h => h.AssignedByTeacherId == teacherId && h.IsActive && h.DueDate >= DateTime.Today)
+            .Where(h => h.AssignedByTeacherId == tid && h.IsActive && h.DueDate >= DateTime.Today)
             .CountAsync(ct);
         ViewBag.TotalHomework = await db.Homeworks
-            .Where(h => h.AssignedByTeacherId == teacherId).CountAsync(ct);
+            .CountAsync(h => h.AssignedByTeacherId == tid, ct);
         ViewBag.UpcomingExams = await db.Exams
-            .Where(e => e.ExamDate >= DateTime.Today && !e.IsPublished).CountAsync(ct);
+            .CountAsync(e => e.ExamDate >= DateTime.Today && !e.IsPublished, ct);
+        ViewBag.TotalStudents = await db.StudentBatches
+            .Where(sb => sb.IsActive && db.BatchSubjects
+                .Any(bs => bs.BatchId == sb.BatchId && bs.TeacherId == tid))
+            .Select(sb => sb.StudentId).Distinct().CountAsync(ct);
 
-        return View();
+        return View("Index");
     }
 
-    // ── MARK ATTENDANCE ───────────────────────────────────────────────────────
+    // ── ATTENDANCE ────────────────────────────────────────────────────────────
     [HttpGet("attendance"), Authorize(Roles = "Teacher")]
     public async Task<IActionResult> Attendance(int? batchId, string? date, CancellationToken ct)
     {
-        var teacherId = GetTeacherId();
+        var tid = GetTeacherId();
+
         var myBatches = await db.BatchSubjects
             .Include(bs => bs.Batch)
-            .Where(bs => bs.TeacherId == teacherId && bs.Batch!.IsActive)
-            .Select(bs => bs.Batch!).Distinct().ToListAsync(ct);
+            .Where(bs => bs.TeacherId == tid && bs.Batch!.IsActive)
+            .Select(bs => bs.Batch!).Distinct()
+            .OrderBy(b => b.Standard).ThenBy(b => b.Name)
+            .ToListAsync(ct);
 
-        ViewBag.MyBatches = myBatches;
+        ViewBag.MyBatches       = myBatches;
         ViewBag.SelectedBatchId = batchId;
 
         if (batchId.HasValue)
         {
+            // ── Fix: DateOnly comparison — do NOT use Equals(DateOnly, string) ──
             var d = string.IsNullOrWhiteSpace(date)
-                ? DateOnly.FromDateTime(DateTime.Today) : DateOnly.Parse(date);
+                ? DateOnly.FromDateTime(DateTime.Today)
+                : DateOnly.Parse(date);
             ViewBag.Date = d;
 
             var students = await db.StudentBatches
                 .Include(sb => sb.Student)
                 .Where(sb => sb.BatchId == batchId && sb.IsActive)
-                .Select(sb => sb.Student!).ToListAsync(ct);
+                .Select(sb => sb.Student!)
+                .OrderBy(s => s.FullName)
+                .ToListAsync(ct);
 
+            // Direct DateOnly == DateOnly comparison — EF Core translates correctly
             var existing = await db.Attendances
-                .Where(a => a.BatchId == batchId && Equals(a.Date, d.ToString("yyyy-MM-dd")))
+                .Where(a => a.BatchId == batchId && a.Date == d)
                 .ToDictionaryAsync(a => a.StudentId, ct);
 
             ViewBag.Students = students;
             ViewBag.Existing = existing;
         }
-        return View();
+        return View("Attendance");
     }
 
     [HttpPost("attendance/save"), Authorize(Roles = "Teacher"), ValidateAntiForgeryToken]
-    public async Task<IActionResult> SaveAttendance(int batchId, string date,
+    public async Task<IActionResult> SaveAttendance(
+        int batchId, string date,
         [FromForm] Dictionary<int, string> statuses, CancellationToken ct)
     {
-        var teacherId = GetTeacherId();
+        var tid = GetTeacherId();
+        var d   = DateOnly.Parse(date);
+
         foreach (var (studentId, status) in statuses)
         {
-            var existing = await db.Attendances.FirstOrDefaultAsync(
-                a => a.StudentId == studentId && a.BatchId == batchId && a.Date.Equals(date), ct);
+            var existing = await db.Attendances
+                .FirstOrDefaultAsync(a => a.StudentId == studentId
+                                       && a.BatchId   == batchId
+                                       && a.Date      == d, ct);
             if (existing is null)
                 db.Attendances.Add(new Core.Entities.Attendance {
-                    StudentId = studentId, BatchId = batchId, Date = DateOnly.Parse(date),
-                    Status = status, MarkedByTeacherId = teacherId, CreatedDate = DateTime.UtcNow });
+                    StudentId         = studentId,
+                    BatchId           = batchId,
+                    Date              = d,
+                    Status            = status,
+                    MarkedByTeacherId = tid,
+                    CreatedDate       = DateTime.UtcNow
+                });
             else
-            { existing.Status = status; existing.MarkedByTeacherId = teacherId; }
+            {
+                existing.Status            = status;
+                existing.MarkedByTeacherId = tid;
+            }
         }
         await db.SaveChangesAsync(ct);
-        TempData["SuccessMessage"] = $"Attendance saved for {date}.";
+        TempData["SuccessMessage"] = $"Attendance saved for {d:dd MMM yyyy}.";
         return RedirectToAction(nameof(Attendance), new { batchId, date });
     }
 
-    // ── MY HOMEWORK ───────────────────────────────────────────────────────────
+    // ── HOMEWORK ──────────────────────────────────────────────────────────────
     [HttpGet("homework"), Authorize(Roles = "Teacher")]
     public async Task<IActionResult> Homework(CancellationToken ct)
     {
-        var teacherId = GetTeacherId();
+        var tid  = GetTeacherId();
         var list = await db.Homeworks
-            .Where(h => h.AssignedByTeacherId == teacherId)
-            .OrderByDescending(h => h.CreatedDate).ToListAsync(ct);
-        return View(list);
+            .Include(h => h.Batch)
+            .Where(h => h.AssignedByTeacherId == tid)
+            .OrderByDescending(h => h.CreatedDate)
+            .ToListAsync(ct);
+
+        ViewBag.Batches = await db.BatchSubjects
+            .Include(bs => bs.Batch)
+            .Where(bs => bs.TeacherId == tid && bs.Batch!.IsActive)
+            .Select(bs => bs.Batch!).Distinct().ToListAsync(ct);
+
+        return View("Homework", list);
     }
 
-    // ── MY EXAMS / MARKS ──────────────────────────────────────────────────────
+    [HttpPost("homework/create"), Authorize(Roles = "Teacher"), ValidateAntiForgeryToken]
+    public async Task<IActionResult> CreateHomework(
+        string title, string subject, string standard,
+        int? batchId, DateTime dueDate, string? description,
+        IFormFile? attachment, CancellationToken ct)
+    {
+        var tid = GetTeacherId();
+        if (tid == 0) return Forbid();
+
+        string? attachmentUrl = null;
+        if (attachment is { Length: > 0 })
+        {
+            var dir  = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "homework");
+            Directory.CreateDirectory(dir);
+            var name = $"{Guid.NewGuid()}{Path.GetExtension(attachment.FileName)}";
+            await using var s = System.IO.File.Create(Path.Combine(dir, name));
+            await attachment.CopyToAsync(s, ct);
+            attachmentUrl = $"/uploads/homework/{name}";
+        }
+
+        db.Homeworks.Add(new Core.Entities.Homework {
+            Title               = title,
+            Subject             = subject,
+            Standard            = standard,
+            BatchId             = batchId,
+            AssignedByTeacherId = tid,
+            DueDate             = dueDate,
+            Description         = description,
+            AttachmentUrl       = attachmentUrl,
+            IsActive            = true,
+            CreatedDate         = DateTime.UtcNow
+        });
+        await db.SaveChangesAsync(ct);
+        TempData["SuccessMessage"] = $"Homework '{title}' assigned.";
+        return RedirectToAction(nameof(Homework));
+    }
+
+    [HttpPost("homework/{id}/delete"), Authorize(Roles = "Teacher"), ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteHomework(int id, CancellationToken ct)
+    {
+        var tid = GetTeacherId();
+        var hw  = await db.Homeworks.FirstOrDefaultAsync(
+            h => h.Id == id && h.AssignedByTeacherId == tid, ct);
+        if (hw is not null) { db.Homeworks.Remove(hw); await db.SaveChangesAsync(ct); }
+        TempData["SuccessMessage"] = "Homework deleted.";
+        return RedirectToAction(nameof(Homework));
+    }
+
+    // ── EXAMS & MARKS ─────────────────────────────────────────────────────────
     [HttpGet("exams"), Authorize(Roles = "Teacher")]
     public async Task<IActionResult> Exams(CancellationToken ct)
     {
-        var list = await db.Exams.Include(e => e.Batch)
+        var tid = GetTeacherId();
+
+        // Show exams for batches this teacher teaches
+        var myBatchIds = await db.BatchSubjects
+            .Where(bs => bs.TeacherId == tid)
+            .Select(bs => bs.BatchId).Distinct().ToListAsync(ct);
+
+        var list = await db.Exams
+            .Include(e => e.Batch)
+            .Where(e => e.BatchId == null || myBatchIds.Contains(e.BatchId!.Value))
             .OrderByDescending(e => e.ExamDate).ToListAsync(ct);
-        return View(list);
+
+        return View("Exams", list);
+    }
+
+    [HttpGet("exams/{id}/marks"), Authorize(Roles = "Teacher")]
+    public async Task<IActionResult> ExamMarks(int id, CancellationToken ct)
+    {
+        var exam = await db.Exams
+            .Include(e => e.Batch)
+            .Include(e => e.Results).ThenInclude(r => r.Student)
+            .FirstOrDefaultAsync(e => e.Id == id, ct);
+
+        if (exam is null) return NotFound();
+
+        // If no results yet, build them from students in the batch
+        if (!exam.Results.Any() && exam.BatchId.HasValue)
+        {
+            var students = await db.StudentBatches
+                .Include(sb => sb.Student)
+                .Where(sb => sb.BatchId == exam.BatchId && sb.IsActive)
+                .Select(sb => sb.Student!).ToListAsync(ct);
+
+            foreach (var s in students)
+                exam.Results.Add(new Core.Entities.ExamResult
+                    { ExamId = id, StudentId = s.Id, Student = s });
+        }
+
+        ViewBag.Exam = exam;
+        return View("ExamMarks", exam.Results.OrderBy(r => r.Student?.FullName).ToList());
+    }
+
+    [HttpPost("exams/{id}/marks"), Authorize(Roles = "Teacher"), ValidateAntiForgeryToken]
+    public async Task<IActionResult> SaveMarks(
+        int id,
+        [FromForm] Dictionary<int, int?> marks,
+        [FromForm] Dictionary<int, bool> absent,
+        CancellationToken ct)
+    {
+        var exam = await db.Exams.FindAsync([id], ct);
+        if (exam is null) return NotFound();
+
+        foreach (var (studentId, mark) in marks)
+        {
+            var isAbsent = absent.GetValueOrDefault(studentId);
+            var existing = await db.ExamResults.FirstOrDefaultAsync(
+                r => r.ExamId == id && r.StudentId == studentId, ct);
+
+            if (existing is null)
+                db.ExamResults.Add(new Core.Entities.ExamResult {
+                    ExamId        = id,
+                    StudentId     = studentId,
+                    MarksObtained = isAbsent ? null : mark,
+                    IsAbsent      = isAbsent,
+                    CreatedDate   = DateTime.UtcNow
+                });
+            else
+            {
+                existing.MarksObtained = isAbsent ? null : mark;
+                existing.IsAbsent      = isAbsent;
+            }
+        }
+        await db.SaveChangesAsync(ct);
+
+        // Recalculate ranks
+        var results = await db.ExamResults
+            .Where(r => r.ExamId == id && !r.IsAbsent && r.MarksObtained.HasValue)
+            .OrderByDescending(r => r.MarksObtained).ToListAsync(ct);
+        int rank = 1;
+        foreach (var r in results)
+        {
+            r.Rank  = rank++;
+            var pct = (double)r.MarksObtained!.Value / exam.TotalMarks * 100;
+            r.Grade = pct switch {
+                >= 90 => "A+", >= 80 => "A", >= 70 => "B+",
+                >= 60 => "B",  >= 50 => "C", _      => "D"
+            };
+        }
+        await db.SaveChangesAsync(ct);
+
+        TempData["SuccessMessage"] = "Marks saved and ranks recalculated.";
+        return RedirectToAction(nameof(ExamMarks), new { id });
+    }
+
+    // ── MY STUDENTS ───────────────────────────────────────────────────────────
+    [HttpGet("students"), Authorize(Roles = "Teacher")]
+    public async Task<IActionResult> MyStudents(int? batchId, CancellationToken ct)
+    {
+        var tid = GetTeacherId();
+
+        var myBatches = await db.BatchSubjects
+            .Include(bs => bs.Batch)
+            .Where(bs => bs.TeacherId == tid && bs.Batch!.IsActive)
+            .Select(bs => bs.Batch!).Distinct().ToListAsync(ct);
+
+        ViewBag.MyBatches       = myBatches;
+        ViewBag.SelectedBatchId = batchId;
+
+        List<Core.Entities.Student> students = [];
+        if (batchId.HasValue)
+        {
+            students = await db.StudentBatches
+                .Include(sb => sb.Student)
+                .Where(sb => sb.BatchId == batchId && sb.IsActive)
+                .Select(sb => sb.Student!).OrderBy(s => s.FullName)
+                .ToListAsync(ct);
+        }
+        return View("MyStudents", students);
     }
 
     // ── HELPER ────────────────────────────────────────────────────────────────
     private int GetTeacherId()
     {
-        var claim = User.FindFirst("TeacherId")?.Value;
-        return int.TryParse(claim, out var id) ? id : 0;
+        var v = User.FindFirst("TeacherId")?.Value;
+        return int.TryParse(v, out var id) ? id : 0;
     }
 }
