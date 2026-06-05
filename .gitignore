@@ -238,6 +238,24 @@ PublishScripts/
 *.nuget.props
 *.nuget.targets
 
+# macOS / local tooling
+.DS_Store
+.ai/
+.idea/
+
+# Local automation / browser auth state
+whatsapp-sidecar/.wwebjs_auth/
+
+# Generated docs assets and local handoff artifacts
+docs/assets/
+
+# Local uploaded demo/training files
+src/Shivakala.Web/wwwroot/uploads/homework/
+src/Shivakala.Web/wwwroot/uploads/materials/
+src/Shivakala.Web/wwwroot/uploads/submissions/
+src/Shivakala.Web/wwwroot/uploads/gallery/merit-board.jpeg
+src/Shivakala.Web/wwwroot/uploads/gallery/science-fair.jpeg
+
 # Microsoft Azure Build Output
 csx/
 *.build.csdef
