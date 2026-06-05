@@ -6,7 +6,7 @@ using Shivakala.Core.Services;
 
 namespace Shivakala.Web.Controllers;
 
-[Authorize, Route("admin/batches")]
+[Authorize(Roles = "Admin"), Route("admin/batches")]
 public sealed class BatchController(
     IBatchRepository batchRepo,
     ITeacherRepository teacherRepo,

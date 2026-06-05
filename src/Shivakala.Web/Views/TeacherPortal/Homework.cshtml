@@ -1,0 +1,133 @@
+@model IReadOnlyList<Shivakala.Core.Entities.Homework>
+@{
+    ViewData["Title"] = "Homework | Teacher";
+    var batches = ViewBag.Batches as List<Shivakala.Core.Entities.Batch> ?? [];
+}
+<style>
+.tp-hero{background:linear-gradient(135deg,#0d3b2e,#1a6b3a);color:#fff;padding:36px 0}
+.tp-card{background:#fff;border-radius:16px;padding:24px;box-shadow:0 2px 20px rgba(0,0,0,.07)}
+.tp-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:9px;font-size:.83rem;font-weight:600;text-decoration:none;transition:all .18s;border:none;cursor:pointer}
+.tp-btn-primary{background:#1a6b3a;color:#fff}.tp-btn-primary:hover{background:#0d3b2e;color:#fff}
+.tp-btn-outline{background:transparent;color:#1a6b3a;border:1.5px solid #1a6b3a}.tp-btn-outline:hover{background:#1a6b3a;color:#fff}
+.tp-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:rgba(26,107,58,.1);color:#0d3b2e;font-size:.72rem;font-weight:700}
+</style>
+
+<div class="tp-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <p style="opacity:.65;font-size:.78rem;margin-bottom:4px">Teacher Portal</p>
+            <h1 style="font-size:1.5rem;font-weight:800;margin-bottom:0">Homework</h1>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="/teacher" class="tp-btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)">← Dashboard</a>
+            <a href="/teacher/exams" class="tp-btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)">Exams &amp; Marks</a>
+        </div>
+    </div>
+</div>
+
+<section style="padding:28px 0">
+    <div class="container">
+        @if (TempData["SuccessMessage"] is string msg)
+        {
+            <div class="alert alert-success mb-3">@msg</div>
+        }
+
+        <div class="tp-card mb-4">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <div>
+                    <h5 style="font-weight:700;color:#0d3b2e;margin-bottom:4px">Assign New Homework</h5>
+                    <p class="text-muted small mb-0">Create homework only for your assigned batches.</p>
+                </div>
+                <span class="tp-badge"><i class="fa-solid fa-book-open"></i>@Model.Count active records</span>
+            </div>
+
+            <form action="/teacher/homework/create" method="post" enctype="multipart/form-data" class="row g-3">
+                @Html.AntiForgeryToken()
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Title</label>
+                    <input type="text" name="title" class="form-control" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Subject</label>
+                    <input type="text" name="subject" class="form-control" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Standard</label>
+                    <input type="text" name="standard" class="form-control" required />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Batch</label>
+                    <select name="batchId" class="form-select">
+                        <option value="">All matching students</option>
+                        @foreach (var batch in batches)
+                        {
+                            <option value="@batch.Id">@batch.Name (@batch.Standard@(string.IsNullOrWhiteSpace(batch.TimingSlot) ? "" : $" · {batch.TimingSlot}"))</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Due Date</label>
+                    <input type="date" name="dueDate" class="form-control" value="@DateTime.Today.AddDays(2).ToString("yyyy-MM-dd")" required />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Attachment</label>
+                    <input type="file" name="attachment" class="form-control" />
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Description</label>
+                    <textarea name="description" rows="3" class="form-control" placeholder="Add instructions, pages, or submission notes"></textarea>
+                </div>
+                <div class="col-12">
+                    <button type="submit" class="tp-btn tp-btn-primary"><i class="fa-solid fa-plus"></i> Assign Homework</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="row g-3">
+            @if (Model.Count == 0)
+            {
+                <div class="col-12">
+                    <div class="tp-card text-center py-5">
+                        <i class="fa-solid fa-book-open-reader fa-2x mb-3" style="color:#aaa"></i>
+                        <p class="text-muted mb-0">No homework assigned yet.</p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                @foreach (var item in Model)
+                {
+                    var overdue = item.DueDate.Date < DateTime.Today;
+                    <div class="col-md-6 col-lg-4">
+                        <div class="tp-card h-100" style="border-top:4px solid @(overdue ? "#dc3545" : "#1a6b3a")">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <span class="tp-badge">@item.Subject · @item.Standard</span>
+                                <span class="badge @(item.IsActive ? "bg-success" : "bg-secondary")">@(item.IsActive ? "Active" : "Closed")</span>
+                            </div>
+                            <h5 style="font-weight:700;color:#0d3b2e">@item.Title</h5>
+                            <p class="text-muted small mb-3">@(string.IsNullOrWhiteSpace(item.Description) ? "No description added." : item.Description)</p>
+                            <div class="small text-muted d-flex flex-column gap-1">
+                                <span><i class="fa-solid fa-users me-1"></i>@(item.Batch?.Name ?? "All batches")</span>
+                                <span><i class="fa-solid fa-calendar-day me-1"></i>Due @item.DueDate.ToString("dd MMM yyyy")</span>
+                            </div>
+                            <div class="d-flex gap-2 mt-3 flex-wrap">
+                                @if (!string.IsNullOrWhiteSpace(item.AttachmentUrl))
+                                {
+                                    <a href="@item.AttachmentUrl" target="_blank" class="tp-btn tp-btn-outline">
+                                        <i class="fa-solid fa-paperclip"></i> Attachment
+                                    </a>
+                                }
+                                <form action="/teacher/homework/@item.Id/delete" method="post" onsubmit="return confirm('Delete this homework?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="tp-btn" style="background:#dc3545;color:#fff">
+                                        <i class="fa-solid fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</section>

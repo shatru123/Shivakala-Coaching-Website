@@ -1,0 +1,93 @@
+@model IReadOnlyList<Shivakala.Core.Entities.Exam>
+@{
+    ViewData["Title"] = "Exams | Teacher";
+}
+<style>
+.tp-hero{background:linear-gradient(135deg,#0d3b2e,#1a6b3a);color:#fff;padding:36px 0}
+.tp-card{background:#fff;border-radius:16px;padding:24px;box-shadow:0 2px 20px rgba(0,0,0,.07)}
+.tp-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:9px;font-size:.83rem;font-weight:600;text-decoration:none;transition:all .18s;border:none;cursor:pointer}
+.tp-btn-primary{background:#1a6b3a;color:#fff}.tp-btn-primary:hover{background:#0d3b2e;color:#fff}
+.tp-btn-outline{background:transparent;color:#1a6b3a;border:1.5px solid #1a6b3a}.tp-btn-outline:hover{background:#1a6b3a;color:#fff}
+.tp-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;background:rgba(26,107,58,.1);color:#0d3b2e;font-size:.72rem;font-weight:700}
+</style>
+
+<div class="tp-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <p style="opacity:.65;font-size:.78rem;margin-bottom:4px">Teacher Portal</p>
+            <h1 style="font-size:1.5rem;font-weight:800;margin-bottom:0">Exams &amp; Marks</h1>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="/teacher" class="tp-btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)">← Dashboard</a>
+            <a href="/teacher/homework" class="tp-btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)">Homework</a>
+        </div>
+    </div>
+</div>
+
+<section style="padding:28px 0">
+    <div class="container">
+        @if (TempData["SuccessMessage"] is string msg)
+        {
+            <div class="alert alert-success mb-3">@msg</div>
+        }
+
+        <div class="tp-card">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <div>
+                    <h5 style="font-weight:700;color:#0d3b2e;margin-bottom:4px">Scheduled Exams</h5>
+                    <p class="text-muted small mb-0">Open an exam to enter or update marks for your students.</p>
+                </div>
+                <span class="tp-badge"><i class="fa-solid fa-file-pen"></i>@Model.Count available exams</span>
+            </div>
+
+            @if (Model.Count == 0)
+            {
+                <div class="text-center py-5">
+                    <i class="fa-solid fa-file-circle-xmark fa-2x mb-3" style="color:#aaa"></i>
+                    <p class="text-muted mb-0">No exams are assigned to your batches yet.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0" style="font-size:.85rem">
+                        <thead style="background:#f8f9fa">
+                            <tr>
+                                <th>Exam</th>
+                                <th>Batch</th>
+                                <th>Date</th>
+                                <th>Marks</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var exam in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        <div style="font-weight:700;color:#0d3b2e">@exam.Title</div>
+                                        <div class="text-muted small">@exam.Subject · @exam.Standard · @exam.ExamType</div>
+                                    </td>
+                                    <td>@(exam.Batch?.Name ?? "All batches")</td>
+                                    <td>@exam.ExamDate.ToString("dd MMM yyyy")</td>
+                                    <td>@exam.PassingMarks / @exam.TotalMarks</td>
+                                    <td>
+                                        <span class="badge @(exam.IsPublished ? "bg-success" : "bg-warning text-dark")">
+                                            @(exam.IsPublished ? "Published" : "Draft")
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <a href="/teacher/exams/@exam.Id/marks" class="tp-btn tp-btn-primary">
+                                            <i class="fa-solid fa-pen-to-square"></i> Open Marks
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</section>

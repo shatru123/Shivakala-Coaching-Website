@@ -5,7 +5,7 @@ using Shivakala.Core.Interfaces;
 
 namespace Shivakala.Web.Controllers;
 
-[Authorize, Route("admin/homework")]
+[Authorize(Roles = "Admin"), Route("admin/homework")]
 public sealed class HomeworkController(
     IHomeworkRepository hwRepo,
     IBatchRepository batchRepo,

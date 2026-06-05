@@ -6,7 +6,7 @@ using Shivakala.Core.Services;
 
 namespace Shivakala.Web.Controllers;
 
-[Authorize, Route("admin/fees")]
+[Authorize(Roles = "Admin"), Route("admin/fees")]
 public sealed class FeeController(
     IFeeRepository feeRepo,
     IStudentRepository studentRepo,

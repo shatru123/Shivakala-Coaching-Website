@@ -1,0 +1,129 @@
+@model IReadOnlyList<Shivakala.Core.Entities.ExamResult>
+@{
+    ViewData["Title"] = "Exam Marks | Teacher";
+    var exam = ViewBag.Exam as Shivakala.Core.Entities.Exam;
+}
+<style>
+.tp-hero{background:linear-gradient(135deg,#0d3b2e,#1a6b3a);color:#fff;padding:36px 0}
+.tp-card{background:#fff;border-radius:16px;padding:24px;box-shadow:0 2px 20px rgba(0,0,0,.07)}
+.tp-btn{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:9px;font-size:.83rem;font-weight:600;text-decoration:none;transition:all .18s;border:none;cursor:pointer}
+.tp-btn-primary{background:#1a6b3a;color:#fff}.tp-btn-primary:hover{background:#0d3b2e;color:#fff}
+.tp-btn-outline{background:transparent;color:#1a6b3a;border:1.5px solid #1a6b3a}.tp-btn-outline:hover{background:#1a6b3a;color:#fff}
+</style>
+
+<div class="tp-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <p style="opacity:.65;font-size:.78rem;margin-bottom:4px">Teacher Portal</p>
+            <h1 style="font-size:1.5rem;font-weight:800;margin-bottom:4px">Exam Marks</h1>
+            <p style="opacity:.8;margin:0;font-size:.9rem">
+                @(exam?.Title ?? "Exam") · @(exam?.Subject ?? "Subject") · Total @((exam?.TotalMarks ?? 0)) marks
+            </p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="/teacher/exams" class="tp-btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)">← All Exams</a>
+            <a href="/teacher" class="tp-btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)">Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<section style="padding:28px 0">
+    <div class="container">
+        @if (TempData["SuccessMessage"] is string msg)
+        {
+            <div class="alert alert-success mb-3">@msg</div>
+        }
+
+        <div class="tp-card mb-4">
+            <div class="row g-3 small">
+                <div class="col-md-3"><strong>Standard:</strong> @(exam?.Standard ?? "—")</div>
+                <div class="col-md-3"><strong>Batch:</strong> @(exam?.Batch?.Name ?? "All batches")</div>
+                <div class="col-md-3"><strong>Date:</strong> @(exam?.ExamDate.ToString("dd MMM yyyy") ?? "—")</div>
+                <div class="col-md-3"><strong>Status:</strong> @(exam?.IsPublished == true ? "Published" : "Draft")</div>
+            </div>
+        </div>
+
+        <div class="tp-card">
+            @if (Model.Count == 0)
+            {
+                <div class="text-center py-5">
+                    <i class="fa-solid fa-user-slash fa-2x mb-3" style="color:#aaa"></i>
+                    <p class="text-muted mb-0">No students are available for this exam yet.</p>
+                </div>
+            }
+            else
+            {
+                <form action="/teacher/exams/@(exam?.Id)/marks" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0" style="font-size:.85rem">
+                            <thead style="background:#f8f9fa">
+                                <tr>
+                                    <th style="width:56px">#</th>
+                                    <th>Student</th>
+                                    <th style="width:180px">Marks</th>
+                                    <th style="width:120px">Absent</th>
+                                    <th style="width:120px">Rank</th>
+                                    <th style="width:120px">Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{ var index = 1; }
+                                @foreach (var result in Model)
+                                {
+                                    <tr>
+                                        <td style="color:#999">@(index++)</td>
+                                        <td>
+                                            <div style="font-weight:600">@result.Student?.FullName</div>
+                                            <div class="text-muted small">@(result.Student?.AdmissionNumber ?? result.Student?.Mobile ?? "—")</div>
+                                        </td>
+                                        <td>
+                                            <input type="number"
+                                                   name="marks[@result.StudentId]"
+                                                   class="form-control"
+                                                   min="0"
+                                                   max="@(exam?.TotalMarks ?? 100)"
+                                                   value="@(result.MarksObtained?.ToString() ?? "")" />
+                                        </td>
+                                        <td>
+                                            <div class="form-check">
+                                                <input class="form-check-input absent-toggle"
+                                                       type="checkbox"
+                                                       name="absent[@result.StudentId]"
+                                                       value="true"
+                                                       @(result.IsAbsent ? "checked" : "") />
+                                                <input type="hidden" name="absent[@result.StudentId]" value="false" />
+                                            </div>
+                                        </td>
+                                        <td>@(result.Rank?.ToString() ?? "—")</td>
+                                        <td>@(string.IsNullOrWhiteSpace(result.Grade) ? "—" : result.Grade)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex gap-2 mt-4 flex-wrap">
+                        <button type="submit" class="tp-btn tp-btn-primary">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Marks
+                        </button>
+                        <button type="button" class="tp-btn tp-btn-outline" onclick="fillEmptyMarks()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Fill Empty with 0
+                        </button>
+                    </div>
+                </form>
+            }
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+function fillEmptyMarks() {
+    document.querySelectorAll('input[type="number"]').forEach(function (input) {
+        if (!input.value) {
+            input.value = 0;
+        }
+    });
+}
+</script>
+}

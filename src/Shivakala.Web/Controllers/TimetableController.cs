@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Shivakala.Web.Controllers;
 
-[Authorize, Route("admin/timetable")]
+[Authorize(Roles = "Admin"), Route("admin/timetable")]
 public sealed class TimetableController(
     IBatchRepository batchRepo,
     ITeacherRepository teacherRepo,
