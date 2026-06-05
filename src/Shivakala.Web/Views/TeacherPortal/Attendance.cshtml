@@ -42,11 +42,32 @@
         <div class="tp-card mb-4">
             <form method="get" class="row g-3 align-items-end">
                 <div class="col-md-5">
-                    <label class="form-label fw-600" style="font-size:.83rem">Select Batch</label>
-                    <select name="batchId" class="form-select" required onchange="this.form.submit()">
+                    <label class="form-label fw-600" style="font-size:.83rem">
+                        Select Batch
+                    </label>
+
+                    <select name="batchId"
+                            class="form-select"
+                            required
+                            onchange="this.form.submit()">
+
                         <option value="">— Select your batch —</option>
+
                         @foreach (var b in myBatches)
-                        { <option value="@b.Id" @(batchId == b.Id ? "selected" : "")>@b.Name (@b.Standard · @(b.TimingSlot ?? ""))</option> }
+                        {
+                            if (batchId == b.Id)
+                            {
+                                <option value="@b.Id" selected>
+                                    @b.Name (@b.Standard · @(b.TimingSlot ?? ""))
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@b.Id">
+                                    @b.Name (@b.Standard · @(b.TimingSlot ?? ""))
+                                </option>
+                            }
+                        }
                     </select>
                 </div>
                 <div class="col-md-4">
