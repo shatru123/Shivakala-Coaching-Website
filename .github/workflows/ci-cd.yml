@@ -43,6 +43,33 @@ jobs:
       - name: Publish MVC app
         run: dotnet publish src/Shivakala.Web/Shivakala.Web.csproj --configuration Release --output "${{ github.workspace }}\\artifacts\\web"
 
+      - name: Prepare production appsettings
+        shell: pwsh
+        env:
+          PROD_SQLSERVER_CONNECTION_STRING: ${{ secrets.PROD_SQLSERVER_CONNECTION_STRING }}
+          PROD_WHATSAPP_BASE_URL: ${{ secrets.PROD_WHATSAPP_BASE_URL }}
+          PROD_WHATSAPP_API_KEY: ${{ secrets.PROD_WHATSAPP_API_KEY }}
+        run: |
+          $configPath = Join-Path '${{ github.workspace }}' 'artifacts\web\appsettings.Production.json'
+          $config = @{
+            Database = @{
+              Provider = 'SqlServer'
+            }
+            WhatsApp = @{
+              BaseUrl = if ([string]::IsNullOrWhiteSpace($env:PROD_WHATSAPP_BASE_URL)) { 'http://wa.shivkalaclasses.com' } else { $env:PROD_WHATSAPP_BASE_URL }
+              ApiKey = if ([string]::IsNullOrWhiteSpace($env:PROD_WHATSAPP_API_KEY)) { '' } else { $env:PROD_WHATSAPP_API_KEY }
+            }
+          }
+
+          if (-not [string]::IsNullOrWhiteSpace($env:PROD_SQLSERVER_CONNECTION_STRING)) {
+            $config.ConnectionStrings = @{
+              SqlServer = $env:PROD_SQLSERVER_CONNECTION_STRING
+            }
+          }
+
+          $json = $config | ConvertTo-Json -Depth 5
+          Set-Content -Path $configPath -Value $json
+
       - name: Check web deploy secrets
         id: check-web
         shell: pwsh
