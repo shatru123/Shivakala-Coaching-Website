@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shivakala.Infrastructure", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shivakala.Web", "src\Shivakala.Web\Shivakala.Web.csproj", "{335EB131-29E5-470F-955B-45C3BD5CCF06}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shivakala.SqlServerMigrations", "src\Shivakala.SqlServerMigrations\Shivakala.SqlServerMigrations.csproj", "{6D1922F1-BFED-4026-8AA6-0874AFFDCE55}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,10 +34,15 @@ Global
 		{335EB131-29E5-470F-955B-45C3BD5CCF06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{335EB131-29E5-470F-955B-45C3BD5CCF06}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{335EB131-29E5-470F-955B-45C3BD5CCF06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D1922F1-BFED-4026-8AA6-0874AFFDCE55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D1922F1-BFED-4026-8AA6-0874AFFDCE55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D1922F1-BFED-4026-8AA6-0874AFFDCE55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D1922F1-BFED-4026-8AA6-0874AFFDCE55}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{8E28E392-554A-4557-A829-3FB27FB9810E} = {4DB5F786-7FFD-4C2A-914C-63C90E880011}
 		{B5C6B09F-72F3-4932-A982-71A14A11EE57} = {4DB5F786-7FFD-4C2A-914C-63C90E880011}
 		{335EB131-29E5-470F-955B-45C3BD5CCF06} = {4DB5F786-7FFD-4C2A-914C-63C90E880011}
+		{6D1922F1-BFED-4026-8AA6-0874AFFDCE55} = {4DB5F786-7FFD-4C2A-914C-63C90E880011}
 	EndGlobalSection
 EndGlobal

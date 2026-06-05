@@ -1,0 +1,15 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    container_name: shivakala-sqlserver
+    environment:
+      ACCEPT_EULA: "1"
+      MSSQL_SA_PASSWORD: "YourStrong@Passw0rd"
+      MSSQL_PID: Developer
+    ports:
+      - "14333:1433"
+    volumes:
+      - shivakala_sqlserver_data:/var/opt/mssql
+
+volumes:
+  shivakala_sqlserver_data:
