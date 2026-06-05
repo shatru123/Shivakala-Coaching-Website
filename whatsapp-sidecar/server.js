@@ -1,6 +1,7 @@
 'use strict';
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const QRCode = require('qrcode');
 
@@ -9,10 +10,11 @@ app.use(express.json());
 
 const apiKey = readSetting('WHATSAPP_API_KEY');
 const authPath = readSetting('WHATSAPP_AUTH_PATH') || path.join(__dirname, '.wwebjs_auth');
-const executablePath = readSetting('PUPPETEER_EXECUTABLE_PATH') || undefined;
+const executablePath = resolveExecutablePath();
 
 let qrBase64 = null;
 let isAuthenticated = false;
+let lastInitError = '';
 const messageQueue = [];
 const puppeteerOptions = {
     headless: (process.env.WHATSAPP_PUPPETEER_HEADLESS || 'true') !== 'false',
@@ -49,6 +51,7 @@ client.on('qr', async (qr) => {
 client.on('ready', () => {
     isAuthenticated = true;
     qrBase64 = null;
+    lastInitError = '';
     console.log('[WA] Client ready');
     // Flush queued messages
     messageQueue.splice(0).forEach(({ mobile, message, resolve }) => {
@@ -61,7 +64,10 @@ client.on('disconnected', () => {
     console.log('[WA] Disconnected');
 });
 
-client.initialize().catch(err => console.error('[WA] Init error:', err));
+client.initialize().catch(err => {
+    lastInitError = err && err.message ? err.message : String(err);
+    console.error('[WA] Init error:', err);
+});
 
 async function sendMsg(mobile, message) {
     const number = mobile.replace(/\D/g, '');
@@ -84,7 +90,12 @@ app.get('/qr', (req, res) => {
 
 // GET /status
 app.get('/status', (req, res) => {
-    res.json({ authenticated: isAuthenticated, queueLength: messageQueue.length });
+    res.json({
+        authenticated: isAuthenticated,
+        queueLength: messageQueue.length,
+        browserConfigured: Boolean(executablePath),
+        lastInitError
+    });
 });
 
 // POST /send  { mobile, message }
@@ -126,5 +137,34 @@ function readSetting(name) {
         return '';
     }
 
-    return /^__.+__$/.test(value) ? '' : value;
+    const trimmedValue = value.trim();
+    return /^__.+__$/.test(trimmedValue) ? '' : trimmedValue;
+}
+
+function resolveExecutablePath() {
+    const configuredPath = readSetting('PUPPETEER_EXECUTABLE_PATH');
+    if (configuredPath) {
+        if (fs.existsSync(configuredPath)) {
+            return configuredPath;
+        }
+
+        console.warn(`[WA] Ignoring missing browser executable path: ${configuredPath}`);
+    }
+
+    const candidatePaths = [
+        path.join(__dirname, '.local-chromium', 'chrome-win', 'chrome.exe'),
+        path.join(__dirname, '.local-chromium', 'chrome', 'win64-134.0.6998.35', 'chrome-win64', 'chrome.exe'),
+        path.join(__dirname, 'chrome-win', 'chrome.exe'),
+        path.join(__dirname, 'chrome', 'chrome.exe'),
+        path.join(__dirname, 'Chromium', 'chrome.exe')
+    ];
+
+    for (const candidatePath of candidatePaths) {
+        if (fs.existsSync(candidatePath)) {
+            console.log(`[WA] Using bundled browser at ${candidatePath}`);
+            return candidatePath;
+        }
+    }
+
+    return undefined;
 }

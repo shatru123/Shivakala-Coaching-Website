@@ -180,9 +180,9 @@ jobs:
           $configPath = Join-Path '${{ github.workspace }}' 'artifacts\whatsapp-sidecar\web.config'
           $content = Get-Content $configPath -Raw
 
-          $apiKey = if ([string]::IsNullOrWhiteSpace($env:WHATSAPP_API_KEY)) { '__WHATSAPP_API_KEY__' } else { $env:WHATSAPP_API_KEY }
-          $authPath = if ([string]::IsNullOrWhiteSpace($env:WHATSAPP_AUTH_PATH)) { '__WHATSAPP_AUTH_PATH__' } else { $env:WHATSAPP_AUTH_PATH }
-          $browserPath = if ([string]::IsNullOrWhiteSpace($env:PUPPETEER_EXECUTABLE_PATH)) { '__PUPPETEER_EXECUTABLE_PATH__' } else { $env:PUPPETEER_EXECUTABLE_PATH }
+          $apiKey = if ([string]::IsNullOrWhiteSpace($env:WHATSAPP_API_KEY)) { '' } else { $env:WHATSAPP_API_KEY }
+          $authPath = if ([string]::IsNullOrWhiteSpace($env:WHATSAPP_AUTH_PATH)) { '' } else { $env:WHATSAPP_AUTH_PATH }
+          $browserPath = if ([string]::IsNullOrWhiteSpace($env:PUPPETEER_EXECUTABLE_PATH)) { '' } else { $env:PUPPETEER_EXECUTABLE_PATH }
 
           $content = $content.Replace('__WHATSAPP_API_KEY__', $apiKey)
           $content = $content.Replace('__WHATSAPP_AUTH_PATH__', $authPath)
