@@ -12,6 +12,11 @@ on:
         required: true
         default: false
         type: boolean
+      deploy_smarterasp_sidecar:
+        description: Deploy WhatsApp sidecar to SmarterASP.NET
+        required: true
+        default: false
+        type: boolean
 
 jobs:
   build:
@@ -127,7 +132,7 @@ jobs:
   deploy-whatsapp-sidecar:
     runs-on: windows-latest
     needs: build
-    if: github.event_name == 'workflow_dispatch' && inputs.deploy_production == true
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy_production == true && inputs.deploy_smarterasp_sidecar == true
 
     steps:
       - name: Checkout

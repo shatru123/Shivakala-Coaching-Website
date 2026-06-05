@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: shivakala-whatsapp-sidecar
+    runtime: node
+    rootDir: whatsapp-sidecar
+    plan: starter
+    autoDeploy: false
+    buildCommand: npm install && npm run render-build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: NODE_ENV
+        value: production
+      - key: WHATSAPP_PUPPETEER_HEADLESS
+        value: "true"
+      - key: WHATSAPP_API_KEY
+        sync: false
+      - key: WHATSAPP_AUTH_PATH
+        value: /var/data/whatsapp-auth
+      - key: PUPPETEER_EXECUTABLE_PATH
+        value: ""
+    disk:
+      name: whatsapp-auth
+      mountPath: /var/data
+      sizeGB: 1

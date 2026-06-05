@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json());
 
 const apiKey = readSetting('WHATSAPP_API_KEY');
-const authPath = readSetting('WHATSAPP_AUTH_PATH') || path.join(__dirname, '.wwebjs_auth');
+const authPath = readSetting('WHATSAPP_AUTH_PATH') || getDefaultAuthPath();
 const executablePath = resolveExecutablePath();
 
 let qrBase64 = null;
@@ -31,6 +31,10 @@ const client = new Client({
 });
 
 app.use((req, res, next) => {
+    if (req.path === '/healthz') {
+        return next();
+    }
+
     if (!apiKey) {
         return next();
     }
@@ -98,6 +102,15 @@ app.get('/status', (req, res) => {
     });
 });
 
+// GET /healthz
+app.get('/healthz', (_req, res) => {
+    res.json({
+        ok: true,
+        authenticated: isAuthenticated,
+        browserConfigured: Boolean(executablePath)
+    });
+});
+
 // POST /send  { mobile, message }
 app.post('/send', async (req, res) => {
     const { mobile, message } = req.body;
@@ -152,6 +165,13 @@ function resolveExecutablePath() {
     }
 
     const candidatePaths = [
+        path.join(__dirname, '.render-browsers', 'chrome', 'linux-138.0.7204.168', 'chrome-linux64', 'chrome'),
+        path.join(__dirname, '.render-browsers', 'chrome-headless-shell', 'linux-138.0.7204.168', 'chrome-headless-shell-linux64', 'chrome-headless-shell'),
+        path.join(__dirname, '.render-browsers'),
+        '/usr/bin/google-chrome-stable',
+        '/usr/bin/google-chrome',
+        '/usr/bin/chromium-browser',
+        '/usr/bin/chromium',
         path.join(__dirname, '.local-chromium', 'chrome-win', 'chrome.exe'),
         path.join(__dirname, '.local-chromium', 'chrome', 'win64-134.0.6998.35', 'chrome-win64', 'chrome.exe'),
         path.join(__dirname, 'chrome-win', 'chrome.exe'),
@@ -160,11 +180,64 @@ function resolveExecutablePath() {
     ];
 
     for (const candidatePath of candidatePaths) {
-        if (fs.existsSync(candidatePath)) {
+        try {
+            if (!fs.existsSync(candidatePath)) {
+                continue;
+            }
+
+            if (fs.statSync(candidatePath).isDirectory()) {
+                const nestedExecutable = findChromiumExecutable(candidatePath);
+                if (nestedExecutable) {
+                    console.log(`[WA] Using bundled browser at ${nestedExecutable}`);
+                    return nestedExecutable;
+                }
+
+                continue;
+            }
+
             console.log(`[WA] Using bundled browser at ${candidatePath}`);
             return candidatePath;
+        } catch (error) {
+            console.warn(`[WA] Skipping browser candidate ${candidatePath}: ${error.message}`);
         }
     }
 
     return undefined;
+}
+
+function getDefaultAuthPath() {
+    if (process.env.RENDER && fs.existsSync('/var/data')) {
+        return '/var/data/whatsapp-auth';
+    }
+
+    return path.join(__dirname, '.wwebjs_auth');
+}
+
+function findChromiumExecutable(rootPath) {
+    const queue = [rootPath];
+    const executableNames = new Set(['chrome', 'chrome.exe', 'chromium', 'chromium.exe', 'chrome-headless-shell']);
+
+    while (queue.length > 0) {
+        const currentPath = queue.shift();
+        let entries = [];
+        try {
+            entries = fs.readdirSync(currentPath, { withFileTypes: true });
+        } catch {
+            continue;
+        }
+
+        for (const entry of entries) {
+            const entryPath = path.join(currentPath, entry.name);
+            if (entry.isDirectory()) {
+                queue.push(entryPath);
+                continue;
+            }
+
+            if (executableNames.has(entry.name)) {
+                return entryPath;
+            }
+        }
+    }
+
+    return '';
 }
