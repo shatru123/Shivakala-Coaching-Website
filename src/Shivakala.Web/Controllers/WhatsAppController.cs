@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Shivakala.Core.Entities;
 using Shivakala.Core.Interfaces;
 using Shivakala.Core.Services;
+using Shivakala.Infrastructure.Configuration;
 
 namespace Shivakala.Web.Controllers;
 
@@ -11,12 +13,15 @@ public sealed class WhatsAppController(
     IWhatsAppService wa,
     INotificationRepository notifRepo,
     IStudentRepository studentRepo,
-    IBatchRepository batchRepo) : Controller
+    IBatchRepository batchRepo,
+    IOptions<WhatsAppOptions> whatsAppOptions) : Controller
 {
     [HttpGet("")]
     public async Task<IActionResult> Index(CancellationToken ct)
     {
         ViewBag.IsAuthenticated = wa.IsAuthenticated;
+        ViewBag.IsSidecarConfigured = !string.IsNullOrWhiteSpace(whatsAppOptions.Value.BaseUrl);
+        ViewBag.SidecarBaseUrl = whatsAppOptions.Value.BaseUrl?.Trim();
         ViewBag.Batches = await batchRepo.GetAllAsync(ct);
         ViewBag.RecentNotifs = await notifRepo.GetAllAsync(20, ct);
         return View();

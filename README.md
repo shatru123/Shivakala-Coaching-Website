@@ -224,6 +224,10 @@ docker compose -f docker-compose.prod.yml up -d --build
   "AdminCredentials": {
     "Username": "admin",
     "Password": "changeme123"
+  },
+  "WhatsApp": {
+    "BaseUrl": "http://localhost:3500",
+    "ApiKey": ""
   }
 }
 ```
@@ -244,22 +248,17 @@ For Windows shared hosting such as SmarterASP.NET:
 
 - `Database__Provider=SqlServer`
 - `ConnectionStrings__SqlServer=<your SmarterASP SQL Server connection string>`
+- `WhatsApp__BaseUrl=https://wa.yourdomain.com`
+- `WhatsApp__ApiKey=<shared secret between the MVC app and the Node sidecar>`
 
 ### SmarterASP.NET Deployment Notes
+This repo now supports a split SmarterASP.NET deployment:
 
-If you deploy this app to SmarterASP.NET with SQL Server:
+- the main MVC site runs on `shivkalaclasses.com`
+- SQL Server stays on SmarterASP SQL Server
+- the WhatsApp sidecar runs as a separate Node.js site such as `wa.shivkalaclasses.com`
 
-1. Create a SQL Server database from the SmarterASP control panel.
-2. Copy the exact SQL Server connection string from the database manager.
-3. Set:
-   - `Database__Provider=SqlServer`
-   - `ConnectionStrings__SqlServer=<your connection string>`
-4. Publish the app with Web Deploy or FTP.
-5. Run SQL Server migrations:
-
-```bash
-dotnet ef database update --project src/Shivakala.SqlServerMigrations --startup-project src/Shivakala.Web -- --provider=SqlServer
-```
+See the full runbook in `SMARTERASP_DEPLOYMENT.md`.
 
 For local Mac/Linux verification before deployment, use `docker-compose.sqlserver.local.yml` instead of LocalDB.
 

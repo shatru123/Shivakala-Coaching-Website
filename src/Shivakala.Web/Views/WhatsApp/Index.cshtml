@@ -37,6 +37,17 @@
 
         <div class="row g-4">
 
+            @if (!(bool)ViewBag.IsSidecarConfigured)
+            {
+                <div class="col-12">
+                    <div class="alert alert-warning mb-0">
+                        <strong>WhatsApp sidecar is not configured.</strong>
+                        Set <code>WhatsApp__BaseUrl</code> to your hosted Node.js sidecar URL, for example
+                        <code>https://wa.shivkalaclasses.com</code>, then refresh this page.
+                    </div>
+                </div>
+            }
+
             @if (!(bool)ViewBag.IsAuthenticated)
             {
                 <!-- QR PANEL -->
@@ -67,9 +78,14 @@
                                    style="color:var(--gold)"></i>
 
                                 <p class="small">
-                                    WhatsApp sidecar not running.
-                                    <br />
-                                    <code>cd whatsapp-sidecar && npm start</code>
+                                    @if ((bool)ViewBag.IsSidecarConfigured)
+                                    {
+                                        <text>Could not reach the WhatsApp sidecar at <code>@ViewBag.SidecarBaseUrl</code>.</text>
+                                    }
+                                    else
+                                    {
+                                        <text>Configure and deploy the hosted WhatsApp sidecar first.</text>
+                                    }
                                 </p>
 
                             </div>
@@ -201,7 +217,7 @@ document.querySelectorAll('.tpl-btn').forEach(function(btn){
 
 });
 
-@if (!(bool)ViewBag.IsAuthenticated)
+@if (!(bool)ViewBag.IsAuthenticated && (bool)ViewBag.IsSidecarConfigured)
 {
 <text>
 

@@ -1,11 +1,17 @@
 using System.Globalization;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Localization;
-using Shivakala.Infrastructure.Configuration;
 using Shivakala.Infrastructure.Data.Seed;
 using Shivakala.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+var appDataPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data");
+
+builder.Services
+    .AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(appDataPath, "DataProtection-Keys")))
+    .SetApplicationName("ShivakalaCoaching");
 
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(x =>
     x.MultipartBodyLengthLimit = 20 * 1024 * 1024);   // 20 MB uploads
@@ -100,18 +106,15 @@ var app = builder.Build();
 
 // Ensure upload directories exist on startup
 var wwwroot = app.Environment.WebRootPath;
-var provider = DatabaseProviderResolver.Normalize(builder.Configuration[$"{DatabaseOptions.SectionName}:Provider"]);
 var directories = new List<string>
 {
+    appDataPath,
     Path.Combine(wwwroot, "uploads", "students"),
     Path.Combine(wwwroot, "uploads", "teachers"),
     Path.Combine(wwwroot, "uploads", "homework"),
     Path.Combine(wwwroot, "uploads", "materials"),
     Path.Combine(wwwroot, "uploads", "gallery"),
 };
-
-if (DatabaseProviderResolver.IsSqlite(provider))
-    directories.Insert(0, "App_Data");
 
 foreach (var dir in directories)
     Directory.CreateDirectory(dir);

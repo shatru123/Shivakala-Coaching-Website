@@ -1,0 +1,176 @@
+name: CI-CD
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore solution
+        run: dotnet restore ShivakalaCoaching.sln
+
+      - name: Build solution
+        run: dotnet build ShivakalaCoaching.sln --configuration Release --no-restore
+
+  deploy-web:
+    runs-on: windows-latest
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Publish MVC app
+        run: dotnet publish src/Shivakala.Web/Shivakala.Web.csproj --configuration Release --output "${{ github.workspace }}\\artifacts\\web"
+
+      - name: Check web deploy secrets
+        id: check-web
+        shell: pwsh
+        env:
+          SMARTERASP_WEBDEPLOY_SERVICE_URL: ${{ secrets.SMARTERASP_WEBDEPLOY_SERVICE_URL }}
+          SMARTERASP_WEB_SITE_NAME: ${{ secrets.SMARTERASP_WEB_SITE_NAME }}
+          SMARTERASP_WEBDEPLOY_USERNAME: ${{ secrets.SMARTERASP_WEBDEPLOY_USERNAME }}
+          SMARTERASP_WEBDEPLOY_PASSWORD: ${{ secrets.SMARTERASP_WEBDEPLOY_PASSWORD }}
+        run: |
+          $required = @(
+            'SMARTERASP_WEBDEPLOY_SERVICE_URL',
+            'SMARTERASP_WEB_SITE_NAME',
+            'SMARTERASP_WEBDEPLOY_USERNAME',
+            'SMARTERASP_WEBDEPLOY_PASSWORD'
+          )
+
+          $missing = $required | Where-Object { [string]::IsNullOrWhiteSpace((Get-Item "Env:$_").Value) }
+          if ($missing.Count -gt 0) {
+            Write-Warning "Skipping MVC deploy. Missing secrets: $($missing -join ', ')"
+            "enabled=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            exit 0
+          }
+
+          "enabled=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Deploy MVC app to SmarterASP.NET
+        if: steps.check-web.outputs.enabled == 'true'
+        shell: pwsh
+        env:
+          SMARTERASP_WEBDEPLOY_SERVICE_URL: ${{ secrets.SMARTERASP_WEBDEPLOY_SERVICE_URL }}
+          SMARTERASP_WEB_SITE_NAME: ${{ secrets.SMARTERASP_WEB_SITE_NAME }}
+          SMARTERASP_WEBDEPLOY_USERNAME: ${{ secrets.SMARTERASP_WEBDEPLOY_USERNAME }}
+          SMARTERASP_WEBDEPLOY_PASSWORD: ${{ secrets.SMARTERASP_WEBDEPLOY_PASSWORD }}
+        run: |
+          $msdeploy = 'C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe'
+          if (-not (Test-Path $msdeploy)) {
+            throw "msdeploy.exe not found at $msdeploy"
+          }
+
+          & $msdeploy `
+            -verb:sync `
+            "-source:contentPath=${{ github.workspace }}\artifacts\web" `
+            "-dest:contentPath=$env:SMARTERASP_WEB_SITE_NAME,ComputerName=$env:SMARTERASP_WEBDEPLOY_SERVICE_URL,UserName=$env:SMARTERASP_WEBDEPLOY_USERNAME,Password=$env:SMARTERASP_WEBDEPLOY_PASSWORD,AuthType=Basic" `
+            -enableRule:DoNotDeleteRule `
+            -useCheckSum `
+            -allowUntrusted
+
+  deploy-whatsapp-sidecar:
+    runs-on: windows-latest
+    needs: build
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install WhatsApp sidecar dependencies
+        working-directory: whatsapp-sidecar
+        run: npm install --omit=dev
+
+      - name: Prepare sidecar web.config
+        shell: pwsh
+        env:
+          WHATSAPP_API_KEY: ${{ secrets.WHATSAPP_API_KEY }}
+          WHATSAPP_AUTH_PATH: ${{ secrets.WHATSAPP_AUTH_PATH }}
+          PUPPETEER_EXECUTABLE_PATH: ${{ secrets.PUPPETEER_EXECUTABLE_PATH }}
+        run: |
+          $configPath = Join-Path '${{ github.workspace }}' 'whatsapp-sidecar\web.config'
+          $content = Get-Content $configPath -Raw
+
+          $apiKey = if ([string]::IsNullOrWhiteSpace($env:WHATSAPP_API_KEY)) { '__WHATSAPP_API_KEY__' } else { $env:WHATSAPP_API_KEY }
+          $authPath = if ([string]::IsNullOrWhiteSpace($env:WHATSAPP_AUTH_PATH)) { '__WHATSAPP_AUTH_PATH__' } else { $env:WHATSAPP_AUTH_PATH }
+          $browserPath = if ([string]::IsNullOrWhiteSpace($env:PUPPETEER_EXECUTABLE_PATH)) { '__PUPPETEER_EXECUTABLE_PATH__' } else { $env:PUPPETEER_EXECUTABLE_PATH }
+
+          $content = $content.Replace('__WHATSAPP_API_KEY__', $apiKey)
+          $content = $content.Replace('__WHATSAPP_AUTH_PATH__', $authPath)
+          $content = $content.Replace('__PUPPETEER_EXECUTABLE_PATH__', $browserPath)
+
+          Set-Content -Path $configPath -Value $content -NoNewline
+
+      - name: Check sidecar deploy secrets
+        id: check-sidecar
+        shell: pwsh
+        env:
+          SMARTERASP_NODE_WEBDEPLOY_SERVICE_URL: ${{ secrets.SMARTERASP_NODE_WEBDEPLOY_SERVICE_URL }}
+          SMARTERASP_NODE_SITE_NAME: ${{ secrets.SMARTERASP_NODE_SITE_NAME }}
+          SMARTERASP_NODE_WEBDEPLOY_USERNAME: ${{ secrets.SMARTERASP_NODE_WEBDEPLOY_USERNAME }}
+          SMARTERASP_NODE_WEBDEPLOY_PASSWORD: ${{ secrets.SMARTERASP_NODE_WEBDEPLOY_PASSWORD }}
+        run: |
+          $required = @(
+            'SMARTERASP_NODE_WEBDEPLOY_SERVICE_URL',
+            'SMARTERASP_NODE_SITE_NAME',
+            'SMARTERASP_NODE_WEBDEPLOY_USERNAME',
+            'SMARTERASP_NODE_WEBDEPLOY_PASSWORD'
+          )
+
+          $missing = $required | Where-Object { [string]::IsNullOrWhiteSpace((Get-Item "Env:$_").Value) }
+          if ($missing.Count -gt 0) {
+            Write-Warning "Skipping WhatsApp sidecar deploy. Missing secrets: $($missing -join ', ')"
+            "enabled=false" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+            exit 0
+          }
+
+          "enabled=true" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Deploy WhatsApp sidecar to SmarterASP.NET
+        if: steps.check-sidecar.outputs.enabled == 'true'
+        shell: pwsh
+        env:
+          SMARTERASP_NODE_WEBDEPLOY_SERVICE_URL: ${{ secrets.SMARTERASP_NODE_WEBDEPLOY_SERVICE_URL }}
+          SMARTERASP_NODE_SITE_NAME: ${{ secrets.SMARTERASP_NODE_SITE_NAME }}
+          SMARTERASP_NODE_WEBDEPLOY_USERNAME: ${{ secrets.SMARTERASP_NODE_WEBDEPLOY_USERNAME }}
+          SMARTERASP_NODE_WEBDEPLOY_PASSWORD: ${{ secrets.SMARTERASP_NODE_WEBDEPLOY_PASSWORD }}
+        run: |
+          $msdeploy = 'C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe'
+          if (-not (Test-Path $msdeploy)) {
+            throw "msdeploy.exe not found at $msdeploy"
+          }
+
+          & $msdeploy `
+            -verb:sync `
+            "-source:contentPath=${{ github.workspace }}\whatsapp-sidecar" `
+            "-dest:contentPath=$env:SMARTERASP_NODE_SITE_NAME,ComputerName=$env:SMARTERASP_NODE_WEBDEPLOY_SERVICE_URL,UserName=$env:SMARTERASP_NODE_WEBDEPLOY_USERNAME,Password=$env:SMARTERASP_NODE_WEBDEPLOY_PASSWORD,AuthType=Basic" `
+            -enableRule:DoNotDeleteRule `
+            -useCheckSum `
+            -allowUntrusted

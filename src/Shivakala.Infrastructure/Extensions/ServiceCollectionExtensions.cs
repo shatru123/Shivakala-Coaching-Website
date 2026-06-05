@@ -15,6 +15,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<DatabaseOptions>(configuration.GetSection(DatabaseOptions.SectionName));
+        services.Configure<WhatsAppOptions>(configuration.GetSection(WhatsAppOptions.SectionName));
 
         var provider = DatabaseProviderResolver.Normalize(configuration[$"{DatabaseOptions.SectionName}:Provider"]);
         var connectionString = GetConnectionString(configuration, provider);

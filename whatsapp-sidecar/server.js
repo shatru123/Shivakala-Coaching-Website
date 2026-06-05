@@ -1,21 +1,43 @@
 'use strict';
 const express = require('express');
+const path = require('path');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const QRCode = require('qrcode');
 
 const app = express();
 app.use(express.json());
 
+const apiKey = readSetting('WHATSAPP_API_KEY');
+const authPath = readSetting('WHATSAPP_AUTH_PATH') || path.join(__dirname, '.wwebjs_auth');
+const executablePath = readSetting('PUPPETEER_EXECUTABLE_PATH') || undefined;
+
 let qrBase64 = null;
 let isAuthenticated = false;
 const messageQueue = [];
+const puppeteerOptions = {
+    headless: (process.env.WHATSAPP_PUPPETEER_HEADLESS || 'true') !== 'false',
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+};
+
+if (executablePath) {
+    puppeteerOptions.executablePath = executablePath;
+}
 
 const client = new Client({
-    authStrategy: new LocalAuth({ dataPath: './.wwebjs_auth' }),
-    puppeteer: {
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    authStrategy: new LocalAuth({ dataPath: authPath }),
+    puppeteer: puppeteerOptions
+});
+
+app.use((req, res, next) => {
+    if (!apiKey) {
+        return next();
     }
+
+    if (req.header('X-Api-Key') !== apiKey) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    next();
 });
 
 client.on('qr', async (qr) => {
@@ -96,4 +118,13 @@ app.post('/broadcast', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3500;
-app.listen(PORT, () => console.log(`[WA Sidecar] listening on :${PORT}`));
+app.listen(PORT, () => console.log(`[WA Sidecar] listening on :${PORT} | auth path: ${authPath}`));
+
+function readSetting(name) {
+    const value = process.env[name];
+    if (!value) {
+        return '';
+    }
+
+    return /^__.+__$/.test(value) ? '' : value;
+}
