@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Data.SqlClient;
 using Npgsql;
 using Shivakala.Core.Services;
 using Shivakala.Infrastructure.Configuration;
@@ -83,6 +84,19 @@ public static class DatabaseInitializer
             }
 
             return $"{ex.Message}. Verify PostgreSQL connection settings or switch `Database:Provider` to `Sqlite` for local development.";
+        }
+
+        if (db.Database.IsSqlServer())
+        {
+            if (ex is SqlException or System.Net.Sockets.SocketException)
+            {
+                var connectionString = db.Database.GetConnectionString() ?? "";
+                var builder = new SqlConnectionStringBuilder(connectionString);
+                return $"Could not connect to SQL Server at {builder.DataSource} / database '{builder.InitialCatalog}'. " +
+                       $"Verify the SQL Server connection string, firewall rules, and host database settings.";
+            }
+
+            return $"{ex.Message}. Verify SQL Server connection settings or switch `Database:Provider` to `Sqlite` for local development.";
         }
 
         return ex.Message;

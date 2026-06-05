@@ -35,6 +35,13 @@ public static class ServiceCollectionExtensions
                 return;
             }
 
+            if (DatabaseProviderResolver.IsSqlServer(provider))
+            {
+                options.UseSqlServer(connectionString,
+                    sql => sql.MigrationsAssembly("Shivakala.SqlServerMigrations"));
+                return;
+            }
+
             options.UseSqlite(connectionString,
                 sql => sql.MigrationsAssembly("Shivakala.Infrastructure"));
         });
@@ -85,6 +92,13 @@ public static class ServiceCollectionExtensions
             return configuration.GetConnectionString("PostgreSql")
                 ?? throw new InvalidOperationException(
                     "Connection string 'PostgreSql' or environment variable 'DATABASE_URL' is required when Database:Provider is set to PostgreSql.");
+        }
+
+        if (DatabaseProviderResolver.IsSqlServer(provider))
+        {
+            return configuration.GetConnectionString("SqlServer")
+                ?? throw new InvalidOperationException(
+                    "Connection string 'SqlServer' is required when Database:Provider is set to SqlServer.");
         }
 
         return configuration.GetConnectionString("Sqlite")

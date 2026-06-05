@@ -11,12 +11,15 @@ public static class DatabaseProviderResolver
         {
             "sqlite" => DatabaseProviderNames.Sqlite,
             "postgres" or "postgresql" or "npgsql" => DatabaseProviderNames.PostgreSql,
+            "sqlserver" or "sql-server" or "mssql" => DatabaseProviderNames.SqlServer,
             _ => throw new InvalidOperationException(
-                $"Unsupported database provider '{provider}'. Use '{DatabaseProviderNames.Sqlite}' or '{DatabaseProviderNames.PostgreSql}'.")
+                $"Unsupported database provider '{provider}'. Use '{DatabaseProviderNames.Sqlite}', '{DatabaseProviderNames.PostgreSql}', or '{DatabaseProviderNames.SqlServer}'.")
         };
     }
 
     public static bool IsSqlite(string? provider) => Normalize(provider) == DatabaseProviderNames.Sqlite;
 
     public static bool IsPostgreSql(string? provider) => Normalize(provider) == DatabaseProviderNames.PostgreSql;
+
+    public static bool IsSqlServer(string? provider) => Normalize(provider) == DatabaseProviderNames.SqlServer;
 }

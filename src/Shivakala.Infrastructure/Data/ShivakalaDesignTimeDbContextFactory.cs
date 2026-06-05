@@ -22,6 +22,12 @@ public sealed class ShivakalaDesignTimeDbContextFactory : IDesignTimeDbContextFa
             builder.UseNpgsql(postgresConnection,
                 sql => sql.MigrationsAssembly("Shivakala.PostgresMigrations"));
         }
+        else if (DatabaseProviderResolver.IsSqlServer(provider))
+        {
+            const string sqlServerConnection = "Server=localhost,14333;Database=shivakala;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=true";
+            builder.UseSqlServer(sqlServerConnection,
+                sql => sql.MigrationsAssembly("Shivakala.SqlServerMigrations"));
+        }
         else
         {
             const string sqliteConnection = "Data Source=App_Data/shivakala.db";

@@ -6,13 +6,14 @@ COPY ShivakalaCoaching.sln .
 COPY global.json .
 COPY src/Shivakala.Core/Shivakala.Core.csproj            src/Shivakala.Core/
 COPY src/Shivakala.Infrastructure/Shivakala.Infrastructure.csproj  src/Shivakala.Infrastructure/
+COPY src/Shivakala.PostgresMigrations/Shivakala.PostgresMigrations.csproj  src/Shivakala.PostgresMigrations/
+COPY src/Shivakala.SqlServerMigrations/Shivakala.SqlServerMigrations.csproj  src/Shivakala.SqlServerMigrations/
 COPY src/Shivakala.Web/Shivakala.Web.csproj              src/Shivakala.Web/
 
-RUN dotnet restore
+RUN dotnet restore src/Shivakala.Web/Shivakala.Web.csproj
 
 COPY . .
-WORKDIR /src/src/Shivakala.Web
-RUN dotnet publish -c Release -o /app/publish --no-restore
+RUN dotnet publish src/Shivakala.Web/Shivakala.Web.csproj -c Release -o /app/publish
 
 # ── Runtime Stage ─────────────────────────────────────────────────────────────
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime

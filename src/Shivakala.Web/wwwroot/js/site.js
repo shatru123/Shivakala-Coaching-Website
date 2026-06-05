@@ -36,8 +36,7 @@ function applyTheme(theme) {
     }
 }
 
-const saved = localStorage.getItem(THEME_KEY) ||
-    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+const saved = localStorage.getItem(THEME_KEY) || 'light';
 applyTheme(saved);
 
 if (themeBtn) {

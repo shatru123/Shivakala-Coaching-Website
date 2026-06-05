@@ -4,6 +4,7 @@
     <ProjectReference Include="..\Shivakala.Core\Shivakala.Core.csproj" />
     <ProjectReference Include="..\Shivakala.Infrastructure\Shivakala.Infrastructure.csproj" />
     <ProjectReference Include="..\Shivakala.PostgresMigrations\Shivakala.PostgresMigrations.csproj" />
+    <ProjectReference Include="..\Shivakala.SqlServerMigrations\Shivakala.SqlServerMigrations.csproj" />
   </ItemGroup>
 
   <ItemGroup>

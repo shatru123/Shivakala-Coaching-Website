@@ -1,6 +1,6 @@
 # 🎓 Shivakala Coaching Classes — Management System
 
-> **Enterprise-grade coaching institute management platform** built with ASP.NET Core 8 MVC · EF Core · SQLite/PostgreSQL · Bootstrap 5 · whatsapp-web.js
+> **Enterprise-grade coaching institute management platform** built with ASP.NET Core 8 MVC · EF Core · SQLite/PostgreSQL/SQL Server · Bootstrap 5 · whatsapp-web.js
 
 ---
 
@@ -69,12 +69,26 @@ For PostgreSQL:
 }
 ```
 
-For local development, keep the default as `Sqlite` unless you already have PostgreSQL running.
+For SQL Server:
+
+```json
+"Database": {
+  "Provider": "SqlServer"
+}
+```
+
+For local development, keep the default as `Sqlite` unless you already have PostgreSQL or SQL Server running.
 
 To spin up PostgreSQL locally with Docker Compose:
 
 ```bash
 docker compose -f docker-compose.postgres.local.yml up -d
+```
+
+To spin up SQL Server locally with Docker Compose:
+
+```bash
+docker compose -f docker-compose.sqlserver.local.yml up -d
 ```
 
 ### 3. Apply Migrations
@@ -89,6 +103,13 @@ For PostgreSQL:
 ```bash
 cd src/Shivakala.Web
 dotnet ef database update --project ../Shivakala.PostgresMigrations -- --provider=PostgreSql
+```
+
+For SQL Server:
+
+```bash
+cd src/Shivakala.Web
+dotnet ef database update --project ../Shivakala.SqlServerMigrations -- --provider=SqlServer
 ```
 
 ### 4. Run the App
@@ -128,6 +149,40 @@ dotnet run --project src/Shivakala.Web
 docker compose -f docker-compose.postgres.local.yml down
 ```
 
+### Local SQL Server Verification
+
+1. Start SQL Server:
+
+```bash
+docker compose -f docker-compose.sqlserver.local.yml up -d
+```
+
+2. Set `Database:Provider` to `SqlServer` in `src/Shivakala.Web/appsettings.json`.
+
+3. Keep the default local SQL Server connection string:
+
+```json
+"SqlServer": "Server=localhost,14333;Database=shivakala;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=true"
+```
+
+4. Apply SQL Server migrations:
+
+```bash
+dotnet ef database update --project src/Shivakala.SqlServerMigrations --startup-project src/Shivakala.Web -- --provider=SqlServer
+```
+
+5. Run the app:
+
+```bash
+dotnet run --project src/Shivakala.Web
+```
+
+6. Stop SQL Server when finished:
+
+```bash
+docker compose -f docker-compose.sqlserver.local.yml down
+```
+
 ### 5. Start WhatsApp Sidecar (optional)
 
 ```bash
@@ -163,7 +218,8 @@ docker compose -f docker-compose.prod.yml up -d --build
   },
   "ConnectionStrings": {
     "Sqlite": "Data Source=App_Data/shivakala.db",
-    "PostgreSql": "Host=localhost;Port=5432;Database=shivakala;Username=postgres;Password=strong-password"
+    "PostgreSql": "Host=localhost;Port=5432;Database=shivakala;Username=postgres;Password=strong-password",
+    "SqlServer": "Server=YOUR_SQL_SERVER;Database=shivakala;User Id=YOUR_DB_USER;Password=YOUR_DB_PASSWORD;TrustServerCertificate=True;"
   },
   "AdminCredentials": {
     "Username": "admin",
@@ -183,6 +239,31 @@ For very small single-server deployments with file storage:
 
 - `Database__Provider=Sqlite`
 - `ConnectionStrings__Sqlite=Data Source=App_Data/shivakala.db`
+
+For Windows shared hosting such as SmarterASP.NET:
+
+- `Database__Provider=SqlServer`
+- `ConnectionStrings__SqlServer=<your SmarterASP SQL Server connection string>`
+
+### SmarterASP.NET Deployment Notes
+
+If you deploy this app to SmarterASP.NET with SQL Server:
+
+1. Create a SQL Server database from the SmarterASP control panel.
+2. Copy the exact SQL Server connection string from the database manager.
+3. Set:
+   - `Database__Provider=SqlServer`
+   - `ConnectionStrings__SqlServer=<your connection string>`
+4. Publish the app with Web Deploy or FTP.
+5. Run SQL Server migrations:
+
+```bash
+dotnet ef database update --project src/Shivakala.SqlServerMigrations --startup-project src/Shivakala.Web -- --provider=SqlServer
+```
+
+For local Mac/Linux verification before deployment, use `docker-compose.sqlserver.local.yml` instead of LocalDB.
+
+If you cannot run EF commands against the remote host directly, I can add a SQL migration bundle path next.
 
 ---
 
