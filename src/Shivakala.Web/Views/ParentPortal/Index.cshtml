@@ -1,0 +1,118 @@
+@{
+    ViewData["Title"] = "Parent Dashboard | SK Classes";
+    var children = ViewBag.Children as List<Shivakala.Core.Entities.Student> ?? [];
+    var attendance = ViewBag.Attendance as List<Shivakala.Core.Entities.Attendance> ?? [];
+    var fees = ViewBag.FeePayments as List<Shivakala.Core.Entities.FeePayment> ?? [];
+    var results = ViewBag.ExamResults as List<Shivakala.Core.Entities.ExamResult> ?? [];
+}
+
+<style>
+.pp-hero{background:linear-gradient(135deg,#3d2f6b,#5a4e8e);color:#fff;padding:40px 0}
+.pp-card{background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(0,0,0,.07);border-left:4px solid #5a4e8e;height:100%}
+.pp-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;font-size:.85rem;font-weight:600;text-decoration:none}
+</style>
+
+<div class="pp-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <p style="opacity:.7;font-size:.82rem;margin-bottom:4px"><i class="fa-solid fa-user-group me-1"></i>Parent Portal</p>
+            <h1 style="font-size:1.6rem;font-weight:800;margin-bottom:4px">Welcome, @User.Identity?.Name 👋</h1>
+            <p style="opacity:.7;font-size:.85rem;margin:0">@DateTime.Today.ToString("dddd, dd MMMM yyyy")</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-action="Attendance" class="pp-btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)">
+                <i class="fa-solid fa-calendar-check"></i> Attendance
+            </a>
+            <a asp-action="Fees" class="pp-btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)">
+                <i class="fa-solid fa-indian-rupee-sign"></i> Fees
+            </a>
+            <a asp-action="Logout" class="pp-btn" style="background:rgba(255,100,100,.15);color:#ffb3b3;border:1px solid rgba(255,100,100,.2)">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </div>
+</div>
+
+<section style="padding:32px 0">
+    <div class="container">
+        @if (children.Count == 0)
+        {
+            <div class="alert alert-warning">No admitted students linked to your account. Please contact the institute office.</div>
+        }
+        else
+        {
+            <div class="row g-3 mb-4">
+                @foreach (var child in children)
+                {
+                    <div class="col-md-6">
+                        <div class="pp-card">
+                            <h5 style="font-weight:700;color:#3d2f6b;margin-bottom:8px">@child.FullName</h5>
+                            <div style="font-size:.82rem;color:#666">
+                                <div>Standard: <strong>@child.Standard</strong></div>
+                                <div>Subject: @child.Subject</div>
+                                @if (!string.IsNullOrWhiteSpace(child.AdmissionNumber))
+                                { <div>Admission #: @child.AdmissionNumber</div> }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="pp-card">
+                        <h6 style="font-weight:700;color:#3d2f6b">Recent Attendance</h6>
+                        @if (attendance.Any())
+                        {
+                            <ul class="list-unstyled mb-0" style="font-size:.82rem">
+                                @foreach (var a in attendance.Take(8))
+                                {
+                                    <li class="py-1 border-bottom d-flex justify-content-between">
+                                        <span>@a.Date</span>
+                                        <span style="font-weight:600;color:@(a.Status=="Present"?"#1a6b3a":"#c0392b")">@a.Status</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else { <p class="text-muted small mb-0">No attendance records yet.</p> }
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="pp-card" style="border-left-color:#c8a84b">
+                        <h6 style="font-weight:700;color:#3d2f6b">Fee Status</h6>
+                        @if (fees.Any())
+                        {
+                            <ul class="list-unstyled mb-0" style="font-size:.82rem">
+                                @foreach (var f in fees.Take(6))
+                                {
+                                    <li class="py-1 border-bottom d-flex justify-content-between">
+                                        <span>@f.Month</span>
+                                        <span style="font-weight:600">@f.Status · ₹@f.PaidAmount/@f.Amount</span>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else { <p class="text-muted small mb-0">No fee records yet.</p> }
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="pp-card" style="border-left-color:#1a3a6b">
+                        <h6 style="font-weight:700;color:#3d2f6b">Exam Results</h6>
+                        @if (results.Any())
+                        {
+                            <ul class="list-unstyled mb-0" style="font-size:.82rem">
+                                @foreach (var r in results.Take(6))
+                                {
+                                    <li class="py-1 border-bottom">
+                                        <strong>@(r.Exam?.Title ?? "Exam")</strong> — @(r.MarksObtained?.ToString() ?? "—") marks @(r.Grade is not null ? $"({r.Grade})" : "")
+                                    </li>
+                                }
+                            </ul>
+                        }
+                        else { <p class="text-muted small mb-0">No exam results yet.</p> }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>

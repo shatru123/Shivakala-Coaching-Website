@@ -13,16 +13,21 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection") ?? "Data Source=App_Data/shivakala.db";
-        var adminSection = configuration.GetSection(AdminCredentialsOptions.SectionName);
-        services.Configure<AdminCredentialsOptions>(options => {
-            options.Username = adminSection["Username"] ?? "admin";
-            options.Password = adminSection["Password"] ?? "P@$$w0rd";
+        var connectionString = configuration.GetConnectionString("DefaultConnection")
+                               ?? "Data Source=App_Data/shivakala.db";
+
+        services.Configure<AdminCredentialsOptions>(options =>
+        {
+            var section = configuration.GetSection(AdminCredentialsOptions.SectionName);
+            options.Username = section["Username"] ?? "admin";
+            options.Password = section["Password"] ?? "P@$$w0rd";
         });
 
-        services.AddDbContext<ShivakalaDbContext>(options => options.UseSqlite(connectionString));
+        services.AddDbContext<ShivakalaDbContext>(options =>
+            options.UseSqlite(connectionString,
+                sql => sql.MigrationsAssembly("Shivakala.Infrastructure")));
 
-        // Repositories
+        // ── Existing Repositories ──────────────────────────────────────────
         services.AddScoped<IStudentRepository, StudentRepository>();
         services.AddScoped<IEnquiryRepository, EnquiryRepository>();
         services.AddScoped<ICourseRepository, CourseRepository>();
@@ -32,13 +37,27 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGalleryRepository, GalleryRepository>();
         services.AddScoped<ITestimonialRepository, TestimonialRepository>();
 
-        // Services
+        // ── New Repositories ───────────────────────────────────────────────
+        services.AddScoped<ITeacherRepository, TeacherRepository>();
+        services.AddScoped<IBatchRepository, BatchRepository>();
+        services.AddScoped<IAttendanceRepository, AttendanceRepository>();
+        services.AddScoped<IFeeRepository, FeeRepository>();
+        services.AddScoped<IExamRepository, ExamRepository>();
+        services.AddScoped<IHomeworkRepository, HomeworkRepository>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+
+        // ── Existing Services ──────────────────────────────────────────────
         services.AddScoped<IRegistrationService, RegistrationService>();
         services.AddScoped<IEnquiryService, EnquiryService>();
         services.AddScoped<ICourseService, CourseService>();
         services.AddScoped<IHomePageService, HomePageService>();
         services.AddScoped<IAdminPortalService, AdminPortalService>();
+        services.AddScoped<IPortalUserService, PortalUserService>();
         services.AddSingleton<IAdminAuthenticationService, AdminAuthenticationService>();
+
+        // ── New Services ───────────────────────────────────────────────────
+        services.AddScoped<IAuditService, AuditService>();
+        services.AddSingleton<IWhatsAppService, WhatsAppService>();
 
         return services;
     }

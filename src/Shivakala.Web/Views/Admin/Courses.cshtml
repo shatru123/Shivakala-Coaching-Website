@@ -1,0 +1,49 @@
+@model IReadOnlyList<Shivakala.Core.Entities.Course>
+@{ ViewData["Title"] = "Courses | Admin"; ViewData["MetaDescription"] = "Admin courses."; }
+<section class="page-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div><span class="badge-soft">Admin</span><h1>Courses</h1><p>Manage courses shown on the website</p></div>
+        <div class="d-flex gap-2">
+            <a asp-action="CreateCourse" class="btn-green-sk"><i class="fa-solid fa-plus"></i>New Course</a>
+            <a asp-action="Index" class="toolbar-btn"><i class="fa-solid fa-gauge"></i>Dashboard</a>
+        </div>
+    </div>
+</section>
+<section class="section-shell pt-0">
+    <div class="container">
+        <div class="glass-card">
+            <div class="table-responsive">
+                <table class="table admin-table align-middle">
+                    <thead><tr><th>#</th><th>Title</th><th>Slug</th><th>Standard</th><th>Duration</th><th>Order</th><th>Featured</th><th>Actions</th></tr></thead>
+                    <tbody>
+                        @foreach (var c in Model.OrderBy(x => x.DisplayOrder))
+                        {
+                            <tr>
+                                <td style="font-size:0.78rem;color:var(--text-light)">@c.Id</td>
+                                <td>
+                                    <div style="font-weight:600;color:var(--text)">@c.Title</div>
+                                    <div style="font-size:0.72rem;color:var(--text-mid)">@c.TitleMarathi</div>
+                                </td>
+                                <td style="font-size:0.78rem;color:var(--text-mid)">@c.Slug</td>
+                                <td><span class="badge-soft dark" style="font-size:0.7rem">@c.Standard</span></td>
+                                <td style="font-size:0.82rem">@c.DurationMonths mo</td>
+                                <td style="font-size:0.82rem">@c.DisplayOrder</td>
+                                <td>@(c.IsFeatured ? "⭐ Yes" : "-")</td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a asp-action="EditCourse" asp-route-id="@c.Id" class="toolbar-btn" style="font-size:0.7rem;padding:4px 8px"><i class="fa-solid fa-pen"></i></a>
+                                        <form asp-action="DeleteCourse" method="post" onsubmit="return confirm('Delete this course?')">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@c.Id" />
+                                            <button type="submit" class="toolbar-btn" style="font-size:0.7rem;padding:4px 8px;background:var(--red)"><i class="fa-solid fa-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

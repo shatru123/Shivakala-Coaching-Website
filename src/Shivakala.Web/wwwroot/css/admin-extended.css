@@ -1,0 +1,170 @@
+/* ================================================================
+   Shivakala Coaching – Admin Extended Styles
+   ================================================================ */
+
+/* ── CSS Variables ──────────────────────────────────────────────── */
+:root {
+  --navy-dark:    #0d1b3e;
+  --navy-mid:     #1a3a6b;
+  --navy-light:   #2855a0;
+  --gold:         #c8a84b;
+  --gold-dark:    #9c6b00;
+  --gold-light:   #fef9e7;
+  --green:        #198754;
+  --red:          #dc3545;
+  --teal:         #0d6efd;
+  --blue:         #0d6efd;
+  --purple:       #5a4e8e;
+  --border:       rgba(0,0,0,.1);
+  --glass-bg:     rgba(255,255,255,.92);
+}
+
+/* ── Glass Card ─────────────────────────────────────────────────── */
+.glass-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 20px rgba(0,0,0,.06);
+}
+
+/* ── Admin Stat Card ────────────────────────────────────────────── */
+.admin-stat-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--gold);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.admin-stat-card strong {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--navy-dark);
+  line-height: 1.1;
+}
+.admin-stat-card span {
+  font-size: .76rem;
+  color: #666;
+}
+
+/* ── Admin Table ────────────────────────────────────────────────── */
+.admin-table thead th {
+  font-size: .78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: #555;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.admin-table tbody tr:hover { background: rgba(26,58,107,.03); }
+.admin-table td { font-size: .85rem; vertical-align: middle; }
+
+/* ── Buttons ────────────────────────────────────────────────────── */
+.btn-primary-sk {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--navy-mid);
+  color: #fff !important;
+  border: none;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all .18s;
+}
+.btn-primary-sk:hover { background: var(--navy-dark); transform: translateY(-1px); }
+
+.btn-outline-sk {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--navy-mid) !important;
+  border: 1.5px solid var(--navy-mid);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all .18s;
+}
+.btn-outline-sk:hover { background: var(--navy-mid); color: #fff !important; }
+
+.toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--navy-mid);
+  color: #fff !important;
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: .75rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all .15s;
+}
+.toolbar-btn:hover { filter: brightness(1.15); }
+
+/* ── Badge ──────────────────────────────────────────────────────── */
+.badge-soft {
+  background: rgba(200,168,75,.15);
+  color: var(--gold-dark);
+  border: 1px solid rgba(200,168,75,.3);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: .76rem;
+  font-weight: 600;
+  letter-spacing: .03em;
+  display: inline-block;
+}
+.badge-soft.dark {
+  background: rgba(26,58,107,.1);
+  color: var(--navy-mid);
+  border-color: rgba(26,58,107,.2);
+}
+
+/* ── Page Hero ──────────────────────────────────────────────────── */
+.page-hero {
+  padding: 32px 0;
+  color: #fff;
+}
+.page-hero h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: 4px; }
+.page-hero p  { opacity: .75; font-size: .9rem; margin: 0; }
+
+/* ── Section Shell ──────────────────────────────────────────────── */
+.section-shell { padding: 32px 0; }
+
+/* ── Avatar Initials ────────────────────────────────────────────── */
+.avatar-initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--navy-mid);
+  color: #fff;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: .95rem;
+}
+
+/* ── Utility ────────────────────────────────────────────────────── */
+.fw-600 { font-weight: 600 !important; }
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+@media (max-width: 576px) {
+  .glass-card { padding: 16px; }
+  .page-hero  { padding: 20px 0; }
+  .page-hero h1 { font-size: 1.2rem; }
+  .admin-stat-card strong { font-size: 1.1rem; }
+}

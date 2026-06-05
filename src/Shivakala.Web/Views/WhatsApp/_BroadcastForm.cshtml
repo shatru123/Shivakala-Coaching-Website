@@ -1,0 +1,85 @@
+@{
+    var batches = (IReadOnlyList<Shivakala.Core.Entities.Batch>)ViewBag.Batches;
+}
+
+<div class="glass-card">
+    <h5 class="mb-3">
+        <i class="fa-brands fa-whatsapp me-1" style="color:#128c7e"></i>
+        Compose Broadcast
+    </h5>
+
+    <form asp-controller="WhatsApp" asp-action="Broadcast" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="mb-3">
+            <label class="form-label fw-600">Audience</label>
+            <div class="d-flex flex-wrap gap-3">
+                <div class="form-check">
+                    <input class="form-check-input audience-opt" type="radio" name="audience" id="audAll" value="all" checked />
+                    <label class="form-check-label" for="audAll">All parents (every student)</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input audience-opt" type="radio" name="audience" id="audBatch" value="batch" />
+                    <label class="form-check-label" for="audBatch">Specific batch</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3" id="batchSelectWrap" style="display:none">
+            <label class="form-label fw-600" for="batchId">Batch</label>
+            <select name="batchId" id="batchId" class="form-select">
+                <option value="">— Select batch —</option>
+                @foreach (var b in batches)
+                {
+                    <option value="@b.Id">@b.Name (@b.Standard)</option>
+                }
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-600">Quick templates</label>
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-sm btn-outline-secondary tpl-btn"
+                        data-text="Dear Parent, this is a reminder that the monthly fee for your ward is due. Please pay at the earliest. Thank you — Shivakala Coaching Classes.">
+                    Fee reminder
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary tpl-btn"
+                        data-text="Dear Parent, classes will remain closed tomorrow due to a holiday. Regular schedule resumes the day after. — Shivakala Coaching Classes.">
+                    Holiday notice
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary tpl-btn"
+                        data-text="Dear Parent, please note that the upcoming exam timetable has been published. Ensure your ward revises all subjects. — Shivakala Coaching Classes.">
+                    Exam reminder
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary tpl-btn"
+                        data-text="Dear Parent, the class timing for your ward's batch has been updated. Please contact the office for details. — Shivakala Coaching Classes.">
+                    Timing change
+                </button>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label fw-600" for="msgBox">Message *</label>
+            <textarea name="message" id="msgBox" class="form-control" rows="6" required
+                      placeholder="Type your broadcast message here…"></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary-sk w-100" style="background:#075e54">
+            <i class="fa-brands fa-whatsapp"></i>
+            Send Broadcast
+        </button>
+    </form>
+</div>
+
+<script>
+document.querySelectorAll('.audience-opt').forEach(function (radio) {
+    radio.addEventListener('change', function () {
+        var wrap = document.getElementById('batchSelectWrap');
+        var sel = document.getElementById('batchId');
+        var show = document.getElementById('audBatch').checked;
+        wrap.style.display = show ? '' : 'none';
+        sel.required = show;
+        if (!show) sel.value = '';
+    });
+});
+</script>

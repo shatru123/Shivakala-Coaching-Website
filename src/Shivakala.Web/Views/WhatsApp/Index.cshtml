@@ -1,0 +1,260 @@
+@{
+    ViewData["Title"] = "WhatsApp Broadcast | Admin";
+}
+
+<section class="page-hero" style="background:linear-gradient(135deg,#075e54,#128c7e)">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+
+        <div>
+            <span class="badge-soft">
+                <i class="fa-brands fa-whatsapp me-1"></i>Admin
+            </span>
+
+            <h1>WhatsApp Broadcast</h1>
+
+            <p>Send messages to parents &amp; students instantly</p>
+        </div>
+
+        <span id="statusBadge"
+              class="badge @(ViewBag.IsAuthenticated ? "bg-success" : "bg-warning text-dark")"
+              style="font-size:.9rem;padding:8px 18px">
+
+            @(ViewBag.IsAuthenticated ? "✓ Connected" : "⚠ Scan QR to Connect")
+
+        </span>
+
+    </div>
+</section>
+
+<section class="section-shell pt-0">
+
+    <div class="container">
+
+        @if (TempData["SuccessMessage"] is string m)
+        {
+            <div class="alert alert-success">@m</div>
+        }
+
+        <div class="row g-4">
+
+            @if (!(bool)ViewBag.IsAuthenticated)
+            {
+                <!-- QR PANEL -->
+                <div class="col-md-4">
+
+                    <div class="glass-card text-center">
+
+                        <h5 class="mb-2">Step 1 — Scan QR Code</h5>
+
+                        <p class="text-muted small mb-3">
+                            Open WhatsApp → Linked Devices → Link a Device
+                        </p>
+
+                        <div id="qrContainer"
+                             style="min-height:230px;display:flex;align-items:center;justify-content:center;flex-direction:column">
+
+                            <img id="qrImg"
+                                 src="/admin/whatsapp/qr.png"
+                                 alt="WhatsApp QR"
+                                 style="max-width:210px;border-radius:12px;border:4px solid #128c7e"
+                                 onerror="this.style.display='none';document.getElementById('qrError').style.display='block'" />
+
+                            <div id="qrError"
+                                 style="display:none"
+                                 class="text-muted mt-2">
+
+                                <i class="fa-solid fa-triangle-exclamation fa-2x mb-2"
+                                   style="color:var(--gold)"></i>
+
+                                <p class="small">
+                                    WhatsApp sidecar not running.
+                                    <br />
+                                    <code>cd whatsapp-sidecar && npm start</code>
+                                </p>
+
+                            </div>
+
+                        </div>
+
+                        <button onclick="refreshQr()" class="btn-outline-sk mt-3 w-100">
+                            <i class="fa-solid fa-rotate"></i>
+                            Refresh QR
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <!-- FORM -->
+                <div class="col-md-8">
+
+                    @await Html.PartialAsync("_BroadcastForm")
+
+                </div>
+            }
+            else
+            {
+                <!-- FULL WIDTH FORM -->
+                <div class="col-12">
+
+                    @await Html.PartialAsync("_BroadcastForm")
+
+                </div>
+            }
+
+            <!-- BROADCAST LOG -->
+            <div class="col-12">
+
+                <div class="glass-card">
+
+                    <h5 class="mb-3">Recent Broadcasts</h5>
+
+                    <div class="table-responsive">
+
+                        <table class="table admin-table table-sm">
+
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Message</th>
+                                    <th>Audience</th>
+                                    <th>Sent</th>
+                                    <th>Failed</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                @foreach (var n in (IReadOnlyList<Shivakala.Core.Entities.Notification>)ViewBag.RecentNotifs)
+                                {
+                                    var badgeClass =
+                                        n.Status == "Sent"
+                                            ? "bg-success"
+                                            : n.Status == "Failed"
+                                                ? "bg-danger"
+                                                : "bg-warning text-dark";
+
+                                    <tr>
+
+                                        <td style="font-size:.78rem;white-space:nowrap">
+                                            @n.CreatedDate.ToLocalTime().ToString("dd MMM HH:mm")
+                                        </td>
+
+                                        <td style="font-size:.8rem;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                                            @n.Message
+                                        </td>
+
+                                        <td style="font-size:.78rem">
+                                            @n.Audience
+                                        </td>
+
+                                        <td>
+                                            <span class="badge bg-success">
+                                                @n.DeliveredCount
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <span class="badge bg-danger">
+                                                @n.FailedCount
+                                            </span>
+                                        </td>
+
+                                        <td>
+                                            <span class="badge @badgeClass">
+                                                @n.Status
+                                            </span>
+                                        </td>
+
+                                    </tr>
+                                }
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+@section Scripts {
+
+<script>
+
+document.querySelectorAll('.tpl-btn').forEach(function(btn){
+
+    btn.addEventListener('click', function(){
+
+        document.getElementById('msgBox').value =
+            this.getAttribute('data-text');
+
+    });
+
+});
+
+@if (!(bool)ViewBag.IsAuthenticated)
+{
+<text>
+
+var qrPoll = setInterval(function(){
+
+    fetch('/admin/whatsapp/status')
+        .then(function(r){
+            return r.json();
+        })
+        .then(function(d){
+
+            if(d.authenticated){
+
+                clearInterval(qrPoll);
+
+                document.getElementById('statusBadge').textContent =
+                    '✓ Connected';
+
+                document.getElementById('statusBadge').className =
+                    'badge bg-success';
+
+                document.getElementById('qrContainer').innerHTML =
+                    '<div class="text-success"><i class="fa-solid fa-circle-check fa-3x"></i><p class="mt-2 fw-600">WhatsApp Connected!</p></div>';
+
+            }
+            else{
+
+                refreshQr();
+
+            }
+
+        });
+
+}, 5000);
+
+function refreshQr(){
+
+    var img = document.getElementById('qrImg');
+
+    if(img){
+
+        img.src = '/admin/whatsapp/qr.png?t=' + Date.now();
+        img.style.display = '';
+
+    }
+
+    document.getElementById('qrError').style.display = 'none';
+
+}
+
+</text>
+}
+
+</script>
+
+}

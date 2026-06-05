@@ -1,0 +1,112 @@
+@model Shivakala.Core.Entities.FeePayment
+@{ ViewData["Title"] = "Receipt | " + Model.ReceiptNumber; Layout = null; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Receipt @Model.ReceiptNumber</title>
+    <style>
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f0f0;display:flex;justify-content:center;padding:32px 16px}
+        .receipt{background:#fff;width:100%;max-width:520px;border-radius:14px;box-shadow:0 4px 32px rgba(0,0,0,.13);overflow:hidden}
+        .header{background:linear-gradient(135deg,#0d1b3e,#1a3a6b);color:#fff;padding:24px;text-align:center}
+        .header h2{font-size:1.5rem;margin-bottom:2px}
+        .header p{opacity:.8;font-size:.85rem}
+        .badge-rcp{background:#c8a84b;color:#0d1b3e;font-weight:700;padding:4px 12px;border-radius:20px;font-size:.8rem;display:inline-block;margin-top:8px}
+        .body{padding:24px}
+        .row-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0}
+        .row-item:last-child{border-bottom:none}
+        .label{color:#666;font-size:.85rem}
+        .value{font-weight:600;font-size:.9rem;color:#111}
+        .total-row{background:#f7f7ff;border-radius:8px;padding:12px 16px;margin:16px 0;display:flex;justify-content:space-between;align-items:center}
+        .total-row span:first-child{font-size:.85rem;color:#333}
+        .total-row span:last-child{font-size:1.4rem;font-weight:800;color:#1a3a6b}
+        .footer{text-align:center;padding:16px;background:#f9f9f9;font-size:.78rem;color:#888}
+        .status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:700}
+        .status-paid{background:#d4edda;color:#155724}
+        .no-print{display:flex;gap:10px;justify-content:center;margin:24px 0}
+        @@media print{.no-print{display:none}body{background:#fff;padding:0}.receipt{box-shadow:none;border-radius:0;max-width:100%}}
+    </style>
+</head>
+<body>
+<div class="receipt">
+    <div class="header">
+        <h2>🎓 Shivakala Coaching Classes</h2>
+        <p>Chikhali, Maharashtra | SK Classes</p>
+        <div class="badge-rcp">Receipt # @Model.ReceiptNumber</div>
+    </div>
+    <div class="body">
+        <div class="row-item">
+            <span class="label">Student</span>
+            <span class="value">@Model.Student?.FullName</span>
+        </div>
+        <div class="row-item">
+            <span class="label">Standard</span>
+            <span class="value">@Model.Student?.Standard</span>
+        </div>
+        <div class="row-item">
+            <span class="label">Fee Type</span>
+            <span class="value">@Model.FeeType</span>
+        </div>
+        <div class="row-item">
+            <span class="label">Month / Period</span>
+            <span class="value">@Model.Month</span>
+        </div>
+        <div class="row-item">
+            <span class="label">Gross Amount</span>
+            <span class="value">₹ @Model.Amount.ToString("N2")</span>
+        </div>
+        @if (Model.Discount > 0)
+        {
+            <div class="row-item">
+                <span class="label">Discount</span>
+                <span class="value" style="color:#155724">- ₹ @Model.Discount.ToString("N2")</span>
+            </div>
+        }
+        @if (Model.Fine > 0)
+        {
+            <div class="row-item">
+                <span class="label">Fine</span>
+                <span class="value" style="color:#c0392b">+ ₹ @Model.Fine.ToString("N2")</span>
+            </div>
+        }
+        <div class="total-row">
+            <span>Net Paid</span>
+            <span>₹ @Model.PaidAmount.ToString("N2")</span>
+        </div>
+        <div class="row-item">
+            <span class="label">Payment Mode</span>
+            <span class="value">@Model.PaymentMode @(string.IsNullOrEmpty(Model.TransactionRef)?"":"("+ Model.TransactionRef +")")</span>
+        </div>
+        <div class="row-item">
+            <span class="label">Date</span>
+            <span class="value">@Model.PaidDate.ToLocalTime().ToString("dd MMMM yyyy")</span>
+        </div>
+        <div class="row-item">
+            <span class="label">Status</span>
+            <span class="status-badge status-paid">@Model.Status</span>
+        </div>
+        @if (!string.IsNullOrEmpty(Model.Remarks))
+        {
+            <div class="row-item">
+                <span class="label">Remarks</span>
+                <span class="value">@Model.Remarks</span>
+            </div>
+        }
+    </div>
+    <div class="footer">
+        Generated on @DateTime.Now.ToString("dd MMM yyyy HH:mm") &nbsp;|&nbsp; SK Classes Admin Portal<br/>
+        <em>This is a computer-generated receipt.</em>
+    </div>
+</div>
+
+<div class="no-print">
+    <button onclick="window.print()" style="padding:10px 24px;background:#1a3a6b;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.9rem">
+        🖨️ Print Receipt
+    </button>
+    <a href="/admin/fees" style="padding:10px 24px;background:#f0f0f0;color:#333;border:none;border-radius:8px;text-decoration:none;font-size:.9rem">
+        ← Back to Fees
+    </a>
+</div>
+</body>
+</html>

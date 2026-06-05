@@ -1,0 +1,117 @@
+@{ ViewData["Title"] = "Attendance Report | Admin"; }
+
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid))">
+    <div class="container">
+        <span class="badge-soft">Admin</span><h1>Attendance Report</h1>
+    </div>
+</section>
+
+<section class="section-shell pt-0">
+    <div class="container">
+
+        <!-- Filter -->
+        <div class="glass-card mb-4">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-600">Report Type</label>
+                    <select name="mode" id="modeSelect" class="form-select" onchange="toggleMode(this.value)">
+                        <option value="student" selected="@(ViewBag.StudentId != null)">By Student</option>
+                        <option value="batch" selected="@(ViewBag.BatchId != null)">By Batch</option>
+                    </select>
+                </div>
+                <div class="col-md-3" id="studentDiv">
+                    <label class="form-label fw-600">Student</label>
+                    <select name="studentId" class="form-select">
+                        <option value="">— Select —</option>
+                        @foreach (var s in (IReadOnlyList<Shivakala.Core.Entities.Student>)ViewBag.Students)
+                        { <option value="@s.Id" selected="@(ViewBag.StudentId?.ToString()==s.Id.ToString())">@s.FullName (@s.Standard)</option> }
+                    </select>
+                </div>
+                <div class="col-md-3" id="batchDiv" style="display:none">
+                    <label class="form-label fw-600">Batch</label>
+                    <select name="batchId" class="form-select">
+                        <option value="">— Select —</option>
+                        @foreach (var b in (IReadOnlyList<Shivakala.Core.Entities.Batch>)ViewBag.Batches)
+                        { <option value="@b.Id" selected="@(ViewBag.BatchId?.ToString()==b.Id.ToString())">@b.Name</option> }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-600">From</label>
+                    <input type="date" name="from" class="form-control" value="@ViewBag.From?.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-600">To</label>
+                    <input type="date" name="to" class="form-control" value="@ViewBag.To?.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn-primary-sk w-100"><i class="fa-solid fa-search"></i></button>
+                </div>
+            </form>
+        </div>
+
+        @if (ViewBag.Records is IReadOnlyList<Shivakala.Core.Entities.Attendance> records)
+        {
+            <!-- Student report -->
+            <div class="glass-card">
+                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                    <h5 class="mb-0">Student Attendance Report</h5>
+                    <div class="admin-stat-card" style="border-left-color:var(--green);padding:8px 16px;min-width:160px">
+                        <strong style="font-size:1.4rem">@ViewBag.Percentage%</strong>
+                        <span>Attendance Rate</span>
+                    </div>
+                </div>
+                <!-- Attendance bar -->
+                <div style="height:10px;background:#e0e0e0;border-radius:20px;overflow:hidden;margin-bottom:16px">
+                    <div style="width:@ViewBag.Percentage%;height:100%;background:@(ViewBag.Percentage>=75?"var(--green)":ViewBag.Percentage>=50?"#e0a800":"var(--red)");transition:width .4s"></div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-sm admin-table">
+                        <thead><tr><th>Date</th><th>Status</th><th>Subject</th><th>Remarks</th></tr></thead>
+                        <tbody>
+                            @foreach (var r in records)
+                            {
+                                var col = r.Status switch {"Present"=>"bg-success","Late"=>"bg-warning text-dark","Absent"=>"bg-danger",_=>"bg-secondary"};
+                                <tr>
+                                    <td>@r.Date.ToString("dd MMM yyyy")</td>
+                                    <td><span class="badge @col" style="font-size:.72rem">@r.Status</span></td>
+                                    <td>@(r.Subject ?? "—")</td>
+                                    <td style="font-size:.8rem">@(r.Remarks ?? "—")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+
+        @if (ViewBag.Summary is Dictionary<int,double> summary)
+        {
+            <!-- Batch report -->
+            <div class="glass-card">
+                <h5 class="mb-3">Batch Attendance Summary</h5>
+                @foreach (var kv in summary.OrderBy(x=>x.Value))
+                {
+                    var col = kv.Value>=75?"var(--green)":kv.Value>=50?"#e0a800":"var(--red)";
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                        <span style="width:120px;font-size:.82rem;font-weight:600">Student #@kv.Key</span>
+                        <div style="flex:1;height:14px;background:#e0e0e0;border-radius:20px;overflow:hidden">
+                            <div style="width:@kv.Value%;height:100%;background:@col"></div>
+                        </div>
+                        <span style="width:50px;text-align:right;font-weight:700;font-size:.82rem">@kv.Value%</span>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+@section Scripts {
+<script>
+function toggleMode(v){
+    document.getElementById('studentDiv').style.display = v==='student'?'':'none';
+    document.getElementById('batchDiv').style.display   = v==='batch'  ?'':'none';
+}
+toggleMode(document.getElementById('modeSelect').value);
+</script>
+}

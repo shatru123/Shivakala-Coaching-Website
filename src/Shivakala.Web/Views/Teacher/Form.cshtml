@@ -1,0 +1,90 @@
+@model Shivakala.Core.Entities.Teacher
+@{ var isEdit = Model.Id > 0; ViewData["Title"] = (isEdit ? "Edit" : "Add") + " Teacher | Admin"; }
+
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid))">
+    <div class="container">
+        <span class="badge-soft">Admin</span>
+        <h1>@(isEdit ? "Edit Teacher" : "Add Teacher")</h1>
+    </div>
+</section>
+
+<section class="section-shell pt-0">
+    <div class="container" style="max-width:720px">
+        <div class="glass-card">
+            <form asp-action="@(isEdit ? "Edit" : "Create")" asp-route-id="@Model.Id"
+                  method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <label class="form-label fw-600">Full Name *</label>
+                        <input asp-for="FullName" class="form-control" required />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-600">Employee Code</label>
+                        <input asp-for="EmployeeCode" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Mobile *</label>
+                        <input asp-for="Mobile" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Email</label>
+                        <input asp-for="Email" class="form-control" type="email" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Qualification</label>
+                        <input asp-for="Qualification" class="form-control" placeholder="B.Ed, M.Sc, etc." />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Specialisation / Subjects</label>
+                        <input asp-for="Specialisation" class="form-control" placeholder="Maths, Science" />
+                    </div>
+                    <div class="col-md-8">
+                        <label class="form-label fw-600">Address</label>
+                        <input asp-for="Address" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-600">Monthly Salary (₹)</label>
+                        <input asp-for="MonthlySalary" class="form-control" type="number" step="0.01" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Joining Date</label>
+                        <input asp-for="JoiningDate" class="form-control" type="date" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Photo</label>
+                        <input name="photo" type="file" class="form-control" accept="image/*" />
+                        @if (!string.IsNullOrEmpty(Model.PhotoUrl))
+                        { <img src="@Model.PhotoUrl" style="height:60px;margin-top:8px;border-radius:8px" /> }
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label fw-600">Admin Notes</label>
+                        <textarea asp-for="AdminNotes" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="col-12"><hr /><h6 style="color:var(--navy);font-weight:700">Portal Login (optional)</h6></div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Portal Username</label>
+                        <input name="portalUsername" class="form-control" placeholder="Leave blank to auto-generate" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Portal Password</label>
+                        <input name="portalPassword" type="password" class="form-control" placeholder="Leave blank = last 4 digits of mobile" />
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-check mt-2">
+                            <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                            <label asp-for="IsActive" class="form-check-label">Active</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-floppy-disk"></i>Save</button>
+                    <a asp-action="Index" class="btn-outline-sk">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>

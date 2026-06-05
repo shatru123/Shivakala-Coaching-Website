@@ -5,6 +5,7 @@
     <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div><span class="badge-soft">Admin</span><h1>Registrations</h1><p>All submitted admission forms</p></div>
         <div class="d-flex gap-2">
+            <a asp-action="CreateStudent" class="btn-green-sk"><i class="fa-solid fa-user-plus"></i>Add Student</a>
             <a asp-action="ExportRegistrations" class="toolbar-btn" style="background:var(--green)"><i class="fa-solid fa-download"></i>Export CSV</a>
             <a asp-action="Index" class="toolbar-btn"><i class="fa-solid fa-gauge"></i>Dashboard</a>
         </div>

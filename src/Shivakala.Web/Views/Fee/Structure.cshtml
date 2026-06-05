@@ -1,0 +1,73 @@
+@model IReadOnlyList<Shivakala.Core.Entities.FeeStructure>
+@{ ViewData["Title"] = "Fee Structure | Admin"; }
+
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid))">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div><span class="badge-soft">Admin</span><h1>Fee Structure</h1></div>
+        <a asp-action="Index" class="btn-outline-sk">← Fees</a>
+    </div>
+</section>
+
+<section class="section-shell pt-0">
+    <div class="container" style="max-width:900px">
+        @if (TempData["SuccessMessage"] is string msg) { <div class="alert alert-success">@msg</div> }
+
+        <div class="glass-card mb-4">
+            <h5 class="mb-3">Add New Fee Structure</h5>
+            <form asp-action="CreateStructure" method="post">
+                @Html.AntiForgeryToken()
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label fw-600">Standard</label>
+                        <input name="Standard" class="form-control" placeholder="8th / 9th / 10th" required />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-600">Fee Type</label>
+                        <select name="FeeType" class="form-select">
+                            @foreach (var t in new[]{"Monthly","Admission","Exam","Annual","Other"})
+                            { <option value="@t">@t</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-600">Amount (₹)</label>
+                        <input name="Amount" type="number" step="0.01" class="form-control" required />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-600">Academic Year</label>
+                        <input name="AcademicYear" class="form-control" value="@($"{DateTime.Now.Year}-{DateTime.Now.Year+1}")" />
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary-sk mt-3"><i class="fa-solid fa-plus"></i>Add</button>
+            </form>
+        </div>
+
+        <div class="glass-card">
+            <div class="table-responsive">
+                <table class="table admin-table align-middle">
+                    <thead><tr><th>Standard</th><th>Fee Type</th><th>Amount</th><th>Year</th><th>Active</th><th></th></tr></thead>
+                    <tbody>
+                        @foreach (var s in Model)
+                        {
+                            <tr>
+                                <td style="font-weight:700">@s.Standard</td>
+                                <td>@s.FeeType</td>
+                                <td>₹@s.Amount.ToString("N0")</td>
+                                <td>@s.AcademicYear</td>
+                                <td><span class="badge @(s.IsActive?"bg-success":"bg-secondary")">@(s.IsActive?"Yes":"No")</span></td>
+                                <td>
+                                    <form asp-action="DeleteStructure" asp-route-id="@s.Id" method="post"
+                                          onsubmit="return confirm('Delete this structure?')">
+                                        @Html.AntiForgeryToken()
+                                        <button class="toolbar-btn" style="font-size:.7rem;padding:4px 8px;background:var(--red)">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>

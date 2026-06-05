@@ -1,0 +1,154 @@
+@{
+    ViewData["Title"] = "Teacher Dashboard | SK Classes";
+    var teacher = ViewBag.Teacher as Shivakala.Core.Entities.Teacher;
+    var batches  = ViewBag.MyBatches as List<Shivakala.Core.Entities.Batch> ?? [];
+}
+
+<style>
+.tp-hero{background:linear-gradient(135deg,#0d3b2e,#1a6b3a);color:#fff;padding:40px 0}
+.tp-card{background:#fff;border-radius:16px;padding:22px;box-shadow:0 2px 20px rgba(0,0,0,.07);border-left:4px solid #1a6b3a;height:100%}
+.tp-stat{font-size:1.8rem;font-weight:800;color:#0d3b2e;display:block}
+.tp-stat-label{font-size:.75rem;color:#888;text-transform:uppercase;letter-spacing:.06em}
+.tp-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;font-size:.85rem;font-weight:600;text-decoration:none;transition:all .18s;border:none;cursor:pointer}
+.tp-btn-primary{background:#1a6b3a;color:#fff}.tp-btn-primary:hover{background:#0d3b2e;color:#fff}
+.tp-btn-outline{background:transparent;color:#1a6b3a;border:1.5px solid #1a6b3a}.tp-btn-outline:hover{background:#1a6b3a;color:#fff}
+.batch-pill{display:inline-block;background:rgba(26,107,58,.1);color:#0d3b2e;border:1px solid rgba(26,107,58,.2);border-radius:20px;padding:4px 14px;font-size:.78rem;font-weight:600;margin:3px}
+</style>
+
+<div class="tp-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <p style="opacity:.7;font-size:.82rem;margin-bottom:4px">
+                <i class="fa-solid fa-chalkboard-teacher me-1"></i>Teacher Portal
+            </p>
+            <h1 style="font-size:1.6rem;font-weight:800;margin-bottom:4px">
+                Welcome, @(teacher?.FullName ?? User.Identity?.Name) 👋
+            </h1>
+            <p style="opacity:.7;font-size:.85rem;margin:0">@DateTime.Today.ToString("dddd, dd MMMM yyyy")</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-action="Attendance" class="tp-btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3)">
+                <i class="fa-solid fa-calendar-check"></i> Mark Attendance
+            </a>
+            <a asp-action="Logout" class="tp-btn" style="background:rgba(255,100,100,.15);color:#ffb3b3;border:1px solid rgba(255,100,100,.2)">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </div>
+</div>
+
+<section style="padding:32px 0">
+    <div class="container">
+
+        @* Stats *@
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+                <div class="tp-card">
+                    <span class="tp-stat">@batches.Count</span>
+                    <span class="tp-stat-label">My Batches</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="tp-card" style="border-left-color:#128c7e">
+                    <span class="tp-stat" style="color:#128c7e">@ViewBag.TodayHomework</span>
+                    <span class="tp-stat-label">Active Homework</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="tp-card" style="border-left-color:#c8a84b">
+                    <span class="tp-stat" style="color:#9c6b00">@ViewBag.TotalHomework</span>
+                    <span class="tp-stat-label">Total Assigned</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="tp-card" style="border-left-color:#1a3a6b">
+                    <span class="tp-stat" style="color:#1a3a6b">@ViewBag.UpcomingExams</span>
+                    <span class="tp-stat-label">Upcoming Exams</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+
+            @* Quick Actions *@
+            <div class="col-md-4">
+                <div class="tp-card">
+                    <h5 style="font-weight:700;color:#0d3b2e;margin-bottom:16px">Quick Actions</h5>
+                    <div class="d-grid gap-2">
+                        <a asp-action="Attendance" class="tp-btn tp-btn-primary">
+                            <i class="fa-solid fa-calendar-check"></i> Mark Attendance
+                        </a>
+                        <a asp-action="Homework" class="tp-btn tp-btn-outline">
+                            <i class="fa-solid fa-book-open"></i> Homework List
+                        </a>
+                        <a asp-action="Exams" class="tp-btn tp-btn-outline">
+                            <i class="fa-solid fa-file-pen"></i> Exams &amp; Marks
+                        </a>
+                        <a asp-controller="Timetable" asp-action="Index" class="tp-btn tp-btn-outline">
+                            <i class="fa-solid fa-calendar-week"></i> View Timetable
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            @* My Batches *@
+            <div class="col-md-4">
+                <div class="tp-card">
+                    <h5 style="font-weight:700;color:#0d3b2e;margin-bottom:16px">My Batches</h5>
+                    @if (batches.Any())
+                    {
+                        foreach (var b in batches)
+                        {
+                            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f0f0f0">
+                                <div>
+                                    <div style="font-weight:600;font-size:.88rem">@b.Name</div>
+                                    <div style="font-size:.75rem;color:#888">@b.Standard · @(b.TimingSlot ?? "—")</div>
+                                </div>
+                                <a asp-action="Attendance" asp-route-batchId="@b.Id"
+                                   style="font-size:.72rem;padding:4px 10px;background:#1a6b3a;color:#fff;border-radius:6px;text-decoration:none">
+                                    Mark
+                                </a>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted small">No batches assigned yet. Contact admin.</p>
+                    }
+                </div>
+            </div>
+
+            @* Profile *@
+            <div class="col-md-4">
+                <div class="tp-card">
+                    <h5 style="font-weight:700;color:#0d3b2e;margin-bottom:16px">My Profile</h5>
+                    @if (teacher != null)
+                    {
+                        <div class="text-center mb-3">
+                            @if (!string.IsNullOrEmpty(teacher.PhotoUrl))
+                            {
+                                <img src="@teacher.PhotoUrl" style="width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid #1a6b3a" alt="" />
+                            }
+                            else
+                            {
+                                <div style="width:72px;height:72px;background:#1a6b3a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:#fff;margin:0 auto">
+                                    @teacher.FullName[0]
+                                </div>
+                            }
+                        </div>
+                        <div style="font-size:.82rem">
+                            <div class="d-flex justify-content-between py-1 border-bottom"><span class="text-muted">Name</span><span style="font-weight:600">@teacher.FullName</span></div>
+                            <div class="d-flex justify-content-between py-1 border-bottom"><span class="text-muted">Mobile</span><span>@teacher.Mobile</span></div>
+                            <div class="d-flex justify-content-between py-1 border-bottom"><span class="text-muted">Subjects</span><span>@(teacher.Specialisation ?? "—")</span></div>
+                            <div class="d-flex justify-content-between py-1"><span class="text-muted">Since</span><span>@teacher.JoiningDate.ToString("MMM yyyy")</span></div>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted small">Profile not linked. Contact admin to link your account.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

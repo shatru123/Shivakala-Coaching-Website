@@ -1,0 +1,128 @@
+@model Shivakala.Core.Entities.FeePayment
+@{ ViewData["Title"] = "Collect Fee | Admin"; }
+
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid))">
+    <div class="container"><span class="badge-soft">Admin</span><h1>Collect Fee</h1></div>
+</section>
+
+<section class="section-shell pt-0">
+    <div class="container" style="max-width:760px">
+        <div class="glass-card">
+            <form asp-action="Collect" method="post" id="feeForm">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label class="form-label fw-600">Student *</label>
+                        <select asp-for="StudentId" class="form-select" required id="studentSelect">
+                            <option value="">— Select Student —</option>
+                            @foreach (var s in (IReadOnlyList<Shivakala.Core.Entities.Student>)ViewBag.Students)
+                            { <option value="@s.Id" selected="@(Model.StudentId==s.Id)">@s.FullName (@s.Standard) — @s.Mobile</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Fee Type *</label>
+                        <select asp-for="FeeType" class="form-select" required id="feeTypeSelect">
+                            @foreach (var ft in new[]{"Monthly","Admission","Exam","Annual","Other"})
+                            { <option value="@ft">@ft</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Month</label>
+                        <input asp-for="Month" type="month" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-600">Amount (₹) *</label>
+                        <input asp-for="Amount" type="number" step="0.01" class="form-control" required id="amtInput" oninput="calcPaid()" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-600">Discount (₹)</label>
+                        <input asp-for="Discount" type="number" step="0.01" class="form-control" id="discInput" oninput="calcPaid()" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-600">Fine (₹)</label>
+                        <input asp-for="Fine" type="number" step="0.01" class="form-control" id="fineInput" oninput="calcPaid()" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-600">Net Payable</label>
+                        <input id="paidDisplay" class="form-control" readonly style="background:var(--gold-light);font-weight:700" placeholder="₹ 0" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-600">Payment Mode *</label>
+                        <select asp-for="PaymentMode" class="form-select">
+                            @foreach (var m in new[]{"Cash","UPI","Cheque","Online","NEFT"})
+                            { <option value="@m">@m</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-600">Transaction Ref</label>
+                        <input asp-for="TransactionRef" class="form-control" placeholder="UPI/Cheque no." />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Date *</label>
+                        <input asp-for="PaidDate" type="date" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Remarks</label>
+                        <input asp-for="Remarks" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-receipt"></i>Collect & Print Receipt</button>
+                    <a asp-action="Index" class="btn-outline-sk">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        @if (ViewBag.History is IReadOnlyList<Shivakala.Core.Entities.FeePayment> hist && hist.Any())
+        {
+            <div class="glass-card mt-4">
+                <h5 class="mb-3">Recent Payments for this Student</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead><tr><th>Receipt</th><th>Type</th><th>Paid</th><th>Mode</th><th>Date</th></tr></thead>
+                        <tbody>
+                            @foreach (var h in hist.Take(6))
+                            {
+                                <tr>
+                                    <td><small>@h.ReceiptNumber</small></td>
+                                    <td>@h.FeeType</td>
+                                    <td>₹@h.PaidAmount.ToString("N0")</td>
+                                    <td>@h.PaymentMode</td>
+                                    <td style="font-size:0.78rem">@h.PaidDate.ToLocalTime().ToString("dd MMM yy")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+@section Scripts {
+<script>
+function calcPaid(){
+    var amt  = parseFloat(document.getElementById('amtInput').value)||0;
+    var disc = parseFloat(document.getElementById('discInput').value)||0;
+    var fine = parseFloat(document.getElementById('fineInput').value)||0;
+    document.getElementById('paidDisplay').value = '₹ '+(amt-disc+fine).toFixed(2);
+}
+// Auto-fill amount from fee structure when type changes
+(function(){
+    var structures = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        ((IReadOnlyList<Shivakala.Core.Entities.FeeStructure>)ViewBag.Structures)
+        .Select(s => new { s.FeeType, s.Amount, s.Standard }).ToArray()));
+    document.getElementById('feeTypeSelect').addEventListener('change', function(){
+        var studentSel = document.getElementById('studentSelect');
+        var stdText = studentSel.options[studentSel.selectedIndex]?.text || '';
+        var stdMatch = stdText.match(/\(([^)]+)\)/);
+        var std = stdMatch ? stdMatch[1] : '';
+        var match = structures.find(s => s.feeType === this.value && s.standard === std);
+        if(match) document.getElementById('amtInput').value = match.amount;
+        calcPaid();
+    });
+})();
+</script>
+}

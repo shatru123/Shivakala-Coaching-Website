@@ -1,0 +1,33 @@
+@model IReadOnlyList<Shivakala.Core.Entities.FeePayment>
+@{
+    ViewData["Title"] = "Fees | Parent Portal";
+    var children = ViewBag.Children as List<Shivakala.Core.Entities.Student> ?? [];
+    var childMap = children.ToDictionary(c => c.Id, c => c.FullName);
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 style="font-size:1.4rem;font-weight:800;color:#3d2f6b">Fee Payments</h1>
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">← Dashboard</a>
+    </div>
+    <div class="glass-card">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>Student</th><th>Month</th><th>Amount</th><th>Paid</th><th>Status</th></tr></thead>
+                <tbody>
+                    @foreach (var f in Model)
+                    {
+                        <tr>
+                            <td>@(childMap.GetValueOrDefault(f.StudentId, $"#{f.StudentId}"))</td>
+                            <td>@f.Month</td>
+                            <td>₹@f.Amount</td>
+                            <td>₹@f.PaidAmount</td>
+                            <td>@f.Status</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            @if (!Model.Any()) { <p class="text-muted p-3 mb-0">No fee records found.</p> }
+        </div>
+    </div>
+</div>

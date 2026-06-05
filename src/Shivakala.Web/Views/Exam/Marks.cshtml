@@ -1,0 +1,76 @@
+@{ 
+    var exam = (Shivakala.Core.Entities.Exam)ViewBag.Exam;
+    var results = (IReadOnlyList<Shivakala.Core.Entities.ExamResult>)Model;
+    ViewData["Title"] = $"Marks – {exam.Title}";
+}
+
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid))">
+    <div class="container">
+        <span class="badge-soft">Admin</span>
+        <h1>Marks Entry — @exam.Title</h1>
+        <p>@exam.Standard · @exam.Subject · @exam.ExamDate.ToString("dd MMM yyyy") · Total: @exam.TotalMarks</p>
+    </div>
+</section>
+
+<section class="section-shell pt-0">
+    <div class="container" style="max-width:900px">
+        @if (TempData["SuccessMessage"] is string m){ <div class="alert alert-success">@m</div> }
+
+        <div class="glass-card">
+            <form asp-action="SaveMarks" asp-route-id="@exam.Id" method="post">
+                @Html.AntiForgeryToken()
+                <div class="table-responsive">
+                    <table class="table admin-table align-middle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Student</th>
+                                <th>Absent</th>
+                                <th>Marks (out of @exam.TotalMarks)</th>
+                                <th>Grade</th>
+                                <th>Rank</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int i = 1; }
+                            @foreach (var r in results)
+                            {
+                                <tr id="row-@r.StudentId">
+                                    <td>@(i++)</td>
+                                    <td style="font-weight:600">@r.Student?.FullName</td>
+                                    <td>
+                                        <input type="checkbox" name="absent[@r.StudentId]" value="true"
+                                               @(r.IsAbsent?"checked":"")
+                                               onchange="toggleRow(@r.StudentId,this.checked)" />
+                                    </td>
+                                    <td>
+                                        <input type="number" name="marks[@r.StudentId]"
+                                               value="@r.MarksObtained" min="0" max="@exam.TotalMarks"
+                                               class="form-control" style="width:100px"
+                                               id="marks-@r.StudentId" @(r.IsAbsent?"disabled":"") />
+                                    </td>
+                                    <td><span class="badge @(r.Grade=="A+"||r.Grade=="A"?"bg-success":r.Grade=="D"?"bg-danger":"bg-warning text-dark")">@(r.Grade ?? "—")</span></td>
+                                    <td>@(r.Rank?.ToString() ?? "—")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-floppy-disk"></i>Save & Recalculate Ranks</button>
+                    <a asp-action="Index" class="btn-outline-sk">← Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+function toggleRow(sid, absent){
+    var inp = document.getElementById('marks-'+sid);
+    inp.disabled = absent;
+    if(absent) inp.value='';
+}
+</script>
+}

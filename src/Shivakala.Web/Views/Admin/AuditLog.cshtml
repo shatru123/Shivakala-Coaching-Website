@@ -1,0 +1,73 @@
+@model IReadOnlyList<Shivakala.Core.Entities.AuditLog>
+@{ ViewData["Title"] = "Audit Log | Admin"; }
+
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid))">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="badge-soft"><i class="fa-solid fa-shield-halved me-1"></i>Admin</span>
+            <h1>Audit Log</h1>
+            <p>Every admin action recorded with timestamp and IP address</p>
+        </div>
+    </div>
+</section>
+
+<section class="section-shell pt-0">
+    <div class="container">
+        <div class="glass-card">
+            <div class="table-responsive">
+                <table class="table admin-table align-middle table-sm">
+                    <thead>
+                        <tr>
+                            <th>Date / Time</th>
+                            <th>Action</th>
+                            <th>Entity</th>
+                            <th>ID</th>
+                            <th>Performed By</th>
+                            <th>IP Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var log in Model)
+                        {
+                            var col = log.Action switch {
+                                "Created"  => "bg-success",
+                                "Updated"  => "bg-warning text-dark",
+                                "Deleted"  => "bg-danger",
+                                "Login"    => "bg-info text-dark",
+                                _          => "bg-secondary"
+                            };
+                            <tr>
+                                <td style="font-size:.78rem;white-space:nowrap">
+                                    @log.CreatedDate.ToLocalTime().ToString("dd MMM yy HH:mm:ss")
+                                </td>
+                                <td><span class="badge @col" style="font-size:.7rem">@log.Action</span></td>
+                                <td style="font-size:.82rem;font-weight:600">@log.EntityType</td>
+                                <td style="font-size:.78rem;color:#888">@(log.EntityId?.ToString() ?? "—")</td>
+                                <td style="font-size:.82rem">@(log.PerformedByUsername ?? "—")</td>
+                                <td style="font-size:.75rem;color:#888">@(log.IpAddress ?? "—")</td>
+                            </tr>
+                        }
+                        @if (!Model.Any())
+                        {
+                            <tr><td colspan="6" class="text-center text-muted py-5">No audit records yet.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @* Pagination *@
+            @if ((int)ViewBag.TotalPages > 1)
+            {
+                <div class="d-flex gap-2 mt-3 flex-wrap align-items-center">
+                    @for (int p = 1; p <= (int)ViewBag.TotalPages; p++)
+                    {
+                        <a asp-action="AuditLog" asp-route-page="@p"
+                           class="@(p == (int)ViewBag.Page ? "btn-primary-sk" : "btn-outline-sk")"
+                           style="padding:5px 14px;font-size:.78rem">@p</a>
+                    }
+                    <span class="text-muted small ms-2">Page @ViewBag.Page of @ViewBag.TotalPages</span>
+                </div>
+            }
+        </div>
+    </div>
+</section>

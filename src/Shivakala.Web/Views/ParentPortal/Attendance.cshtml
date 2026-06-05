@@ -1,0 +1,31 @@
+@model IReadOnlyList<Shivakala.Core.Entities.Attendance>
+@{
+    ViewData["Title"] = "Attendance | Parent Portal";
+    var children = ViewBag.Children as List<Shivakala.Core.Entities.Student> ?? [];
+    var childMap = children.ToDictionary(c => c.Id, c => c.FullName);
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 style="font-size:1.4rem;font-weight:800;color:#3d2f6b">Attendance History</h1>
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">← Dashboard</a>
+    </div>
+    <div class="glass-card">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead><tr><th>Student</th><th>Date</th><th>Status</th></tr></thead>
+                <tbody>
+                    @foreach (var a in Model)
+                    {
+                        <tr>
+                            <td>@(childMap.GetValueOrDefault(a.StudentId, $"#{a.StudentId}"))</td>
+                            <td>@a.Date.ToString("dd MMM yyyy")</td>
+                            <td><span style="font-weight:600;color:@(a.Status=="Present"?"#1a6b3a":"#c0392b")">@a.Status</span></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            @if (!Model.Any()) { <p class="text-muted p-3 mb-0">No attendance records found.</p> }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,58 @@
+@model Shivakala.Core.ViewModels.TestimonialFormViewModel
+@{ ViewData["Title"] = (Model.Id == 0 ? "Create" : "Edit") + " Testimonial | Admin"; ViewData["MetaDescription"] = "Admin testimonial form.";
+   bool isEdit = Model.Id != 0; }
+<section class="page-hero" style="background:linear-gradient(135deg,var(--gold),var(--orange))">
+    <div class="container">
+        <span class="badge-soft">Admin</span>
+        <h1>@(isEdit ? "Edit Testimonial" : "New Testimonial")</h1>
+    </div>
+</section>
+<section class="section-shell pt-0">
+    <div class="container" style="max-width:700px">
+        <div class="glass-card">
+            <form asp-action="@(isEdit ? "EditTestimonial" : "CreateTestimonial")" method="post">
+                @Html.AntiForgeryToken()
+                @if (isEdit) { <input type="hidden" asp-for="Id" /> }
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Name *</label>
+                        <input asp-for="Name" class="form-control" required />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Role</label>
+                        <input asp-for="Role" class="form-control" placeholder="Parent / Student" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Quote (English) *</label>
+                        <textarea asp-for="Quote" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Quote (मराठी)</label>
+                        <textarea asp-for="QuoteMarathi" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Rating (1–5)</label>
+                        <select asp-for="Rating" class="form-select">
+                            @for (int i = 5; i >= 1; i--)
+                            { <option value="@i">@string.Concat(Enumerable.Repeat("★", i)) (@i)</option> }
+                        </select>
+                    </div>
+                    <div class="col-md-8 d-flex align-items-end gap-4 flex-wrap">
+                        <div class="form-check">
+                            <input asp-for="IsApproved" type="checkbox" class="form-check-input" id="approved" />
+                            <label class="form-check-label" for="approved">Approved</label>
+                        </div>
+                        <div class="form-check">
+                            <input asp-for="IsFeatured" type="checkbox" class="form-check-input" id="featured" />
+                            <label class="form-check-label" for="featured">⭐ Featured</label>
+                        </div>
+                    </div>
+                    <div class="col-12 d-flex gap-2 pt-2">
+                        <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-save"></i>@(isEdit ? "Update" : "Create")</button>
+                        <a asp-action="Testimonials" class="btn-outline-sk">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>

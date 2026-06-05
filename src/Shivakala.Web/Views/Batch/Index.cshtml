@@ -1,0 +1,50 @@
+@{ ViewData["Title"] = "Batches | Admin"; }
+
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid))">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div><span class="badge-soft"><i class="fa-solid fa-layer-group me-1"></i>Admin</span><h1>Batch Management</h1></div>
+        <a asp-action="Create" class="btn-primary-sk"><i class="fa-solid fa-plus"></i>New Batch</a>
+    </div>
+</section>
+
+<section class="section-shell pt-0">
+    <div class="container">
+        @if (TempData["SuccessMessage"] is string m){ <div class="alert alert-success">@m</div> }
+        <div class="row g-3">
+            @foreach (var b in (IReadOnlyList<Shivakala.Core.Entities.Batch>)ViewBag.Batches)
+            {
+                <div class="col-md-4">
+                    <div class="glass-card h-100">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <h6 class="mb-0" style="font-weight:700">@b.Name</h6>
+                                <small class="text-muted">@b.Standard · @b.Medium · @b.AcademicYear</small>
+                            </div>
+                            <span class="badge @(b.IsActive?"bg-success":"bg-secondary")">@(b.IsActive?"Active":"Inactive")</span>
+                        </div>
+                        <div class="d-flex gap-3 mt-2 mb-3 text-muted small">
+                            <span><i class="fa-solid fa-clock me-1"></i>@(b.TimingSlot ?? "—")</span>
+                            <span><i class="fa-solid fa-door-open me-1"></i>@(b.Room ?? "—")</span>
+                            <span><i class="fa-solid fa-users me-1"></i>@b.StudentBatches.Count(sb=>sb.IsActive) / @b.MaxStrength</span>
+                        </div>
+                        <div class="d-flex gap-1 flex-wrap">
+                            <a asp-action="Detail" asp-route-id="@b.Id" class="toolbar-btn" style="font-size:.72rem;padding:4px 10px">
+                                <i class="fa-solid fa-eye"></i> Manage
+                            </a>
+                            <a asp-controller="Timetable" asp-action="Index" asp-route-batchId="@b.Id"
+                               class="toolbar-btn" style="font-size:.72rem;padding:4px 10px;background:#5a4e8e">
+                                <i class="fa-solid fa-calendar-week"></i> Timetable
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@b.Id" method="post" onsubmit="return confirm('Delete @b.Name?')">
+                                @Html.AntiForgeryToken()
+                                <button class="toolbar-btn" style="font-size:.72rem;padding:4px 10px;background:var(--red)">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>

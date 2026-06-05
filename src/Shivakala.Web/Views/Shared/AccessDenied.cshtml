@@ -1,0 +1,78 @@
+@{
+    ViewData["Title"] = "Access Denied";
+    Layout = "_Layout";
+    var role = User.IsInRole("Teacher") ? "Teacher"
+             : User.IsInRole("Parent")  ? "Parent"
+             : User.IsInRole("Admin")   ? "Admin"
+             : "";
+}
+
+<section style="min-height:65vh;display:flex;align-items:center;background:linear-gradient(135deg,#0a0f1e,#1e2d5a)">
+    <div class="container text-center text-white py-5">
+
+        <div style="font-size:4rem;margin-bottom:16px">🚫</div>
+        <h1 style="font-size:2rem;font-weight:800;margin-bottom:10px">Access Denied</h1>
+
+        @if (!string.IsNullOrEmpty(role))
+        {
+            <p style="opacity:.7;font-size:1rem;max-width:440px;margin:0 auto 32px">
+                You are logged in as a <strong style="color:#c8a84b">@role</strong>.
+                This page is restricted to a different role.
+                Please use your own portal below.
+            </p>
+
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                @if (User.IsInRole("Teacher"))
+                {
+                    <a href="/teacher"
+                       style="background:#1a6b3a;color:#fff;padding:12px 28px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.92rem">
+                        <i class="fa-solid fa-chalkboard-teacher me-2"></i>Go to Teacher Portal
+                    </a>
+                }
+                @if (User.IsInRole("Parent"))
+                {
+                    <a href="/parent"
+                       style="background:#3b2b6b;color:#fff;padding:12px 28px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.92rem">
+                        <i class="fa-solid fa-user-group me-2"></i>Go to Parent Portal
+                    </a>
+                }
+                @if (User.IsInRole("Admin"))
+                {
+                    <a href="/admin"
+                       style="background:#1a3a6b;color:#fff;padding:12px 28px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.92rem">
+                        <i class="fa-solid fa-gauge-high me-2"></i>Go to Admin Dashboard
+                    </a>
+                }
+                <a asp-controller="Admin" asp-action="Logout"
+                   style="background:rgba(255,255,255,.1);color:#fff;padding:12px 28px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.92rem;border:1px solid rgba(255,255,255,.2)">
+                    <i class="fa-solid fa-right-from-bracket me-2"></i>Logout &amp; Switch Account
+                </a>
+            </div>
+        }
+        else
+        {
+            <p style="opacity:.7;font-size:1rem;max-width:440px;margin:0 auto 32px">
+                You do not have permission to access this page.
+                Please log in with an authorised account.
+            </p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <a href="/admin/login"
+                   style="background:#1a3a6b;color:#fff;padding:12px 28px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.92rem">
+                    <i class="fa-solid fa-shield-halved me-2"></i>Admin Login
+                </a>
+                <a href="/teacher/login"
+                   style="background:#1a6b3a;color:#fff;padding:12px 28px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.92rem">
+                    <i class="fa-solid fa-chalkboard-teacher me-2"></i>Teacher Login
+                </a>
+                <a href="/parent/login"
+                   style="background:#3b2b6b;color:#fff;padding:12px 28px;border-radius:10px;text-decoration:none;font-weight:700;font-size:.92rem">
+                    <i class="fa-solid fa-user-group me-2"></i>Parent Login
+                </a>
+            </div>
+        }
+
+        <p style="opacity:.35;font-size:.78rem;margin-top:36px">
+            HTTP 403 — If you believe this is an error, contact the institute admin.
+        </p>
+    </div>
+</section>
