@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Shivakala.Core.Services;
+using Shivakala.Infrastructure.Configuration;
 
 namespace Shivakala.Infrastructure.Data.Seed;
 
@@ -17,13 +18,14 @@ public static class DatabaseInitializer
 
         // Ensure App_Data directory exists (SQLite file goes here)
         var cs = db.Database.GetConnectionString() ?? "";
-        if (cs.Contains("App_Data", StringComparison.OrdinalIgnoreCase))
+        if (db.Database.IsSqlite() && cs.Contains("App_Data", StringComparison.OrdinalIgnoreCase))
             Directory.CreateDirectory("App_Data");
 
         try
         {
             // ── Step 1: detect broken migration (marked applied but column missing) ──
-            await FixSchemaDriftAsync(db, logger);
+            if (db.Database.IsSqlite())
+                await FixSchemaDriftAsync(db, logger);
 
             // ── Step 2: apply any pending migrations ─────────────────────────────
             var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();

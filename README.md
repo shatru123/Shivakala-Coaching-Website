@@ -1,6 +1,6 @@
 # 🎓 Shivakala Coaching Classes — Management System
 
-> **Enterprise-grade coaching institute management platform** built with ASP.NET Core 8 MVC · EF Core · SQLite · Bootstrap 5 · whatsapp-web.js
+> **Enterprise-grade coaching institute management platform** built with ASP.NET Core 8 MVC · EF Core · SQLite/PostgreSQL · Bootstrap 5 · whatsapp-web.js
 
 ---
 
@@ -51,14 +51,39 @@ cd Shivakala-Coaching-Website
 dotnet restore
 ```
 
-### 2. Apply Migrations
+### 2. Choose Database Provider
+
+For local SQLite:
+
+```json
+"Database": {
+  "Provider": "Sqlite"
+}
+```
+
+For PostgreSQL:
+
+```json
+"Database": {
+  "Provider": "PostgreSql"
+}
+```
+
+### 3. Apply Migrations
 
 ```bash
 cd src/Shivakala.Web
 dotnet ef database update --project ../Shivakala.Infrastructure
 ```
 
-### 3. Run the App
+For PostgreSQL:
+
+```bash
+cd src/Shivakala.Web
+dotnet ef database update --project ../Shivakala.PostgresMigrations
+```
+
+### 4. Run the App
 
 ```bash
 dotnet run --project src/Shivakala.Web
@@ -67,7 +92,7 @@ dotnet run --project src/Shivakala.Web
 Open → `http://localhost:5000`  
 Admin → `http://localhost:5000/admin`
 
-### 4. Start WhatsApp Sidecar (optional)
+### 5. Start WhatsApp Sidecar (optional)
 
 ```bash
 cd whatsapp-sidecar
@@ -97,8 +122,12 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 ```json
 {
+  "Database": {
+    "Provider": "Sqlite"
+  },
   "ConnectionStrings": {
-    "DefaultConnection": "Data Source=App_Data/shivakala.db"
+    "Sqlite": "Data Source=App_Data/shivakala.db",
+    "PostgreSql": "Host=localhost;Port=5432;Database=shivakala;Username=postgres;Password=strong-password"
   },
   "AdminCredentials": {
     "Username": "admin",
@@ -106,6 +135,16 @@ docker compose -f docker-compose.prod.yml up -d --build
   }
 }
 ```
+
+For most production hosting providers, set:
+
+- `Database__Provider=PostgreSql`
+- `ConnectionStrings__PostgreSql=<your managed postgres connection string>`
+
+For very small single-server deployments with file storage:
+
+- `Database__Provider=Sqlite`
+- `ConnectionStrings__Sqlite=Data Source=App_Data/shivakala.db`
 
 ---
 

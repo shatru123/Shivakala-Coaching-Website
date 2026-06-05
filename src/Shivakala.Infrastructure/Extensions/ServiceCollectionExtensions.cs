@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Shivakala.Core.Interfaces;
 using Shivakala.Core.Services;
+using Shivakala.Infrastructure.Configuration;
 using Shivakala.Infrastructure.Data;
 using Shivakala.Infrastructure.Repositories;
 using Shivakala.Infrastructure.Services;
@@ -13,8 +14,10 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
-                               ?? "Data Source=App_Data/shivakala.db";
+        services.Configure<DatabaseOptions>(configuration.GetSection(DatabaseOptions.SectionName));
+
+        var provider = DatabaseProviderResolver.Normalize(configuration[$"{DatabaseOptions.SectionName}:Provider"]);
+        var connectionString = GetConnectionString(configuration, provider);
 
         services.Configure<AdminCredentialsOptions>(options =>
         {
@@ -24,8 +27,17 @@ public static class ServiceCollectionExtensions
         });
 
         services.AddDbContext<ShivakalaDbContext>(options =>
+        {
+            if (DatabaseProviderResolver.IsPostgreSql(provider))
+            {
+                options.UseNpgsql(connectionString,
+                    sql => sql.MigrationsAssembly("Shivakala.PostgresMigrations"));
+                return;
+            }
+
             options.UseSqlite(connectionString,
-                sql => sql.MigrationsAssembly("Shivakala.Infrastructure")));
+                sql => sql.MigrationsAssembly("Shivakala.Infrastructure"));
+        });
 
         // ── Existing Repositories ──────────────────────────────────────────
         services.AddScoped<IStudentRepository, StudentRepository>();
@@ -60,5 +72,19 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IWhatsAppService, WhatsAppService>();
 
         return services;
+    }
+
+    private static string GetConnectionString(IConfiguration configuration, string provider)
+    {
+        if (DatabaseProviderResolver.IsPostgreSql(provider))
+        {
+            return configuration.GetConnectionString("PostgreSql")
+                ?? throw new InvalidOperationException(
+                    "Connection string 'PostgreSql' is required when Database:Provider is set to PostgreSql.");
+        }
+
+        return configuration.GetConnectionString("Sqlite")
+            ?? configuration.GetConnectionString("DefaultConnection")
+            ?? "Data Source=App_Data/shivakala.db";
     }
 }
