@@ -63,6 +63,23 @@
                         <label class="form-label fw-600">Admin Notes</label>
                         <textarea asp-for="AdminNotes" class="form-control" rows="2"></textarea>
                     </div>
+                    <div class="col-12"><hr /><h6 style="color:var(--navy);font-weight:700">About Page Display</h6></div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Designation (English)</label>
+                        <input asp-for="PublicDesignation" class="form-control" placeholder="Founder & Chief Mentor" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Designation (Marathi)</label>
+                        <input asp-for="PublicDesignationMarathi" class="form-control" placeholder="संस्थापक आणि मुख्य मार्गदर्शक" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Experience (English)</label>
+                        <input asp-for="PublicExperience" class="form-control" placeholder="15+ years of experience" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-600">Experience (Marathi)</label>
+                        <input asp-for="PublicExperienceMarathi" class="form-control" placeholder="15+ वर्षे अनुभव" />
+                    </div>
                     <div class="col-12"><hr /><h6 style="color:var(--navy);font-weight:700">Portal Login (optional)</h6></div>
                     <div class="col-md-6">
                         <label class="form-label fw-600">Portal Username</label>
@@ -76,6 +93,10 @@
                         <div class="form-check mt-2">
                             <input asp-for="IsActive" class="form-check-input" type="checkbox" />
                             <label asp-for="IsActive" class="form-check-label">Active</label>
+                        </div>
+                        <div class="form-check mt-2">
+                            <input asp-for="ShowOnAboutPage" class="form-check-input" type="checkbox" />
+                            <label asp-for="ShowOnAboutPage" class="form-check-label">Show on About page</label>
                         </div>
                     </div>
                 </div>

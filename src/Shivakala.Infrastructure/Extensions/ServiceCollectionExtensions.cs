@@ -71,6 +71,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IEnquiryService, EnquiryService>();
         services.AddScoped<ICourseService, CourseService>();
         services.AddScoped<IHomePageService, HomePageService>();
+        services.AddScoped<IAboutPageService, AboutPageService>();
         services.AddScoped<IAdminPortalService, AdminPortalService>();
         services.AddScoped<IPortalUserService, PortalUserService>();
         services.AddScoped<IAdminAuthenticationService, AdminAuthenticationService>();

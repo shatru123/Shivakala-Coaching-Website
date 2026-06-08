@@ -2,6 +2,20 @@ namespace Shivakala.Core.ViewModels;
 
 public sealed class HomePageContentAdminViewModel
 {
+    public string CurrentHeroBannerImageUrl { get; set; } = "/img/Banner.jpeg";
+    public string HeroBannerAltText { get; set; } = "Shivakala Classes admissions banner";
+    public bool ShowTrendingBanner { get; set; }
+    public string CurrentTrendingImageUrl { get; set; } = "/img/Banner.jpeg";
+    public string TrendingEyebrow { get; set; } = "Trending Now";
+    public string TrendingEyebrowMarathi { get; set; } = "नवीन अपडेट";
+    public string TrendingTitle { get; set; } = "Admissions open for the new academic year";
+    public string TrendingTitleMarathi { get; set; } = "नवीन शैक्षणिक वर्षासाठी प्रवेश सुरू";
+    public string TrendingDescription { get; set; } = "Highlight important announcements, batches, offers, or events right from the admin panel.";
+    public string TrendingDescriptionMarathi { get; set; } = "महत्त्वाच्या घोषणा, बॅचेस, ऑफर्स किंवा इव्हेंट्स अॅडमिन पॅनलमधून लगेच दाखवा.";
+    public string TrendingAltText { get; set; } = "Trending banner for Shivakala Coaching Classes";
+    public string TrendingLinkText { get; set; } = "Explore Now";
+    public string TrendingLinkTextMarathi { get; set; } = "अधिक जाणून घ्या";
+    public string TrendingLinkUrl { get; set; } = "/registration";
     public bool ShowStatisticsSection { get; set; } = true;
     public string Stat1Value { get; set; } = "500+";
     public string Stat1Label { get; set; } = "Students";

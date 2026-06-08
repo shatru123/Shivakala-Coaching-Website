@@ -32,6 +32,24 @@ public sealed class HomePageService(
                 Keywords = "Shivakala Coaching Classes, SSC coaching, foundation batch, scholarship preparation, Marathi coaching website"
             },
             FeaturedCourses = featuredCourses,
+            HeroBannerImageUrl = string.IsNullOrWhiteSpace(settings.HeroBannerImageUrl) ? "/img/Banner.jpeg" : settings.HeroBannerImageUrl,
+            HeroBannerAltText = string.IsNullOrWhiteSpace(settings.HeroBannerAltText) ? "Shivakala Classes admissions banner" : settings.HeroBannerAltText,
+            ShowTrendingBanner = settings.ShowTrendingBanner,
+            TrendingEyebrow = isMarathi
+                ? (string.IsNullOrWhiteSpace(settings.TrendingEyebrowMarathi) ? "नवीन अपडेट" : settings.TrendingEyebrowMarathi)
+                : (string.IsNullOrWhiteSpace(settings.TrendingEyebrow) ? "Trending Now" : settings.TrendingEyebrow),
+            TrendingTitle = isMarathi
+                ? (string.IsNullOrWhiteSpace(settings.TrendingTitleMarathi) ? "नवीन शैक्षणिक वर्षासाठी प्रवेश सुरू" : settings.TrendingTitleMarathi)
+                : (string.IsNullOrWhiteSpace(settings.TrendingTitle) ? "Admissions open for the new academic year" : settings.TrendingTitle),
+            TrendingDescription = isMarathi
+                ? (string.IsNullOrWhiteSpace(settings.TrendingDescriptionMarathi) ? "महत्त्वाच्या घोषणा, बॅचेस, ऑफर्स किंवा इव्हेंट्स अॅडमिन पॅनलमधून लगेच दाखवा." : settings.TrendingDescriptionMarathi)
+                : (string.IsNullOrWhiteSpace(settings.TrendingDescription) ? "Highlight important announcements, batches, offers, or events right from the admin panel." : settings.TrendingDescription),
+            TrendingImageUrl = string.IsNullOrWhiteSpace(settings.TrendingImageUrl) ? "/img/Banner.jpeg" : settings.TrendingImageUrl,
+            TrendingAltText = string.IsNullOrWhiteSpace(settings.TrendingAltText) ? "Trending banner for Shivakala Coaching Classes" : settings.TrendingAltText,
+            TrendingLinkText = isMarathi
+                ? (string.IsNullOrWhiteSpace(settings.TrendingLinkTextMarathi) ? "अधिक जाणून घ्या" : settings.TrendingLinkTextMarathi)
+                : (string.IsNullOrWhiteSpace(settings.TrendingLinkText) ? "Explore Now" : settings.TrendingLinkText),
+            TrendingLinkUrl = string.IsNullOrWhiteSpace(settings.TrendingLinkUrl) ? "/registration" : settings.TrendingLinkUrl,
             ShowStatisticsSection = settings.ShowStatisticsSection,
             Statistics =
             [

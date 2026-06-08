@@ -1,6 +1,13 @@
 @model Shivakala.Core.ViewModels.FacultyMemberViewModel
 <div class="faculty-card reveal">
-    <div class="faculty-avatar">@(Model.Name?.Length > 0 ? Model.Name[0].ToString().ToUpper() : "S")</div>
+    @if (!string.IsNullOrWhiteSpace(Model.PhotoUrl))
+    {
+        <img src="@Model.PhotoUrl" alt="@Model.Name" class="faculty-avatar-image" />
+    }
+    else
+    {
+        <div class="faculty-avatar">@(Model.Name?.Length > 0 ? Model.Name[0].ToString().ToUpper() : "S")</div>
+    }
     <h3>@Model.Name</h3>
     <span class="faculty-designation">@Model.Designation</span>
     <ul class="faculty-meta">

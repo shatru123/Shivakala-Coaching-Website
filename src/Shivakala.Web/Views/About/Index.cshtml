@@ -24,12 +24,20 @@
                 <p class="text-muted">@(isMr ? "आमचे अनुभवी शिक्षक प्रत्येक विद्यार्थ्याकडे वैयक्तिक लक्ष देतात व त्यांना त्यांच्या क्षमतेपर्यंत पोहोचण्यास मदत करतात." : "Our experienced faculty gives personal attention to every student, helping them realize their full potential through concept-based learning.")</p>
             </div>
             <div class="col-lg-6">
-                <div class="row g-3">
-                    <div class="col-6"><div class="stat-card"><strong>500+</strong><span>@(isMr ? "विद्यार्थी" : "Students Enrolled")</span></div></div>
-                    <div class="col-6"><div class="stat-card"><strong>10+</strong><span>@(isMr ? "वर्षांचा अनुभव" : "Years of Excellence")</span></div></div>
-                    <div class="col-6"><div class="stat-card"><strong>95%</strong><span>@(isMr ? "उत्तीर्ण दर" : "Pass Rate")</span></div></div>
-                    <div class="col-6"><div class="stat-card"><strong>3</strong><span>@(isMr ? "मुख्य विषय" : "Core Subjects")</span></div></div>
-                </div>
+                @if (Model is { ShowStatisticsSection: true } && Model.Statistics.Count > 0)
+                {
+                    <div class="row g-3">
+                        @foreach (var statistic in Model.Statistics.Take(4))
+                        {
+                            <div class="col-6">
+                                <div class="stat-card">
+                                    <strong>@statistic.Value</strong>
+                                    <span>@statistic.Label</span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -80,3 +88,40 @@
         </div>
     </div>
 </section>
+
+@if (Model is not null && (!string.IsNullOrWhiteSpace(Model.Address) || !string.IsNullOrWhiteSpace(Model.MapEmbedUrl)))
+{
+    <section class="section-shell" style="background:var(--white)">
+        <div class="container">
+            <div class="section-header text-center mb-4">
+                <div class="eyebrow"><i class="fa-solid fa-map-location-dot me-1"></i>@(isMr ? "ठिकाण" : "Location")</div>
+                <h2>@(isMr ? "आम्हाला भेट द्या" : "Visit Our Campus")</h2>
+            </div>
+            <div class="row g-4 align-items-stretch">
+                <div class="col-lg-5">
+                    <div class="feature-card h-100">
+                        <div class="icon-wrap"><i class="fa-solid fa-location-dot"></i></div>
+                        <h3>@(isMr ? "पत्ता" : "Address")</h3>
+                        <p>@Model.Address</p>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    @if (!string.IsNullOrWhiteSpace(Model.MapEmbedUrl))
+                    {
+                        <div class="map-frame" style="height:100%">
+                            <iframe
+                                src="@Model.MapEmbedUrl"
+                                width="100%"
+                                height="320"
+                                style="border:0;border-radius:24px"
+                                loading="lazy"
+                                allowfullscreen=""
+                                referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+}

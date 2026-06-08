@@ -12,7 +12,7 @@
         <div class="hero-main">
             <!-- Homepage banner -->
             <div class="hero-kids-img">
-                <img src="~/img/Banner.jpeg" asp-append-version="true" alt="Shivakala Classes admissions banner" />
+                <img src="@Model.HeroBannerImageUrl" alt="@Model.HeroBannerAltText" />
             </div>
 
             <!-- Center content -->
@@ -71,6 +71,27 @@
         </div>
     </div>
 </section>
+
+@if (Model.ShowTrendingBanner)
+{
+    <section class="homepage-trending-strip">
+        <div class="container">
+            <div class="homepage-trending-card">
+                <div class="homepage-trending-card__content">
+                    <span class="homepage-trending-card__eyebrow">@Model.TrendingEyebrow</span>
+                    <h2>@Model.TrendingTitle</h2>
+                    <p>@Model.TrendingDescription</p>
+                    <a href="@Model.TrendingLinkUrl" class="btn-green-sk">
+                        <i class="fa-solid fa-arrow-trend-up"></i>@Model.TrendingLinkText
+                    </a>
+                </div>
+                <div class="homepage-trending-card__media">
+                    <img src="@Model.TrendingImageUrl" alt="@Model.TrendingAltText" />
+                </div>
+            </div>
+        </div>
+    </section>
+}
 
 <!-- ===== OUR COURSES ===== -->
 <section class="courses-section">

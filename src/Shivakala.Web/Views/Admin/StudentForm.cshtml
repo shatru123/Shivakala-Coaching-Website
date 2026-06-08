@@ -13,7 +13,7 @@
 <section class="section-shell pt-0">
     <div class="container" style="max-width:760px">
         <div class="glass-card">
-            <form asp-action="CreateStudent" method="post">
+            <form asp-action="CreateStudent" method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
                 <div asp-validation-summary="All" class="text-danger small mb-2"></div>
                 <div class="row g-3">
@@ -99,6 +99,11 @@
                     <div class="col-12">
                         <label asp-for="AdminNotes" class="form-label">Admin Notes (optional)</label>
                         <textarea asp-for="AdminNotes" class="form-control" rows="2" placeholder="Internal notes..."></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Student Photo (optional)</label>
+                        <input type="file" name="photo" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif" />
+                        <div class="form-text">You can use this photo later on the printable ID card.</div>
                     </div>
                     <div class="col-12 d-flex gap-2 pt-2">
                         <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-user-plus"></i>Add Student</button>

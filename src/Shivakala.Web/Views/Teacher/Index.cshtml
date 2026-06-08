@@ -21,7 +21,7 @@
             <div class="table-responsive">
                 <table class="table admin-table align-middle">
                     <thead>
-                        <tr><th>Photo</th><th>Name</th><th>Mobile</th><th>Portal Login</th><th>Qualification</th><th>Subjects</th><th>Status</th><th>Actions</th></tr>
+                        <tr><th>Photo</th><th>Name</th><th>Mobile</th><th>Portal Login</th><th>Qualification</th><th>Subjects</th><th>About Page</th><th>Status</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
                         @foreach (var t in Model)
@@ -45,6 +45,11 @@
                                 </td>
                                 <td>@(t.Qualification ?? "—")</td>
                                 <td><small>@(t.Specialisation ?? "—")</small></td>
+                                <td>
+                                    <span class="badge @(t.ShowOnAboutPage ? "bg-info text-dark" : "bg-light text-dark")">
+                                        @(t.ShowOnAboutPage ? "Visible" : "Hidden")
+                                    </span>
+                                </td>
                                 <td>
                                     <span class="badge @(t.IsActive ? "bg-success" : "bg-secondary")">@(t.IsActive ? "Active" : "Inactive")</span>
                                 </td>
