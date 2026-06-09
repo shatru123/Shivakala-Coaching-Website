@@ -527,7 +527,10 @@ public sealed class AdminController(
     [HttpGet]
     public async Task<IActionResult> HomePageContent(CancellationToken ct)
     {
-        var settings = await GetHomePageSectionSettingsAsync(ct);
+        var (settings, usedFallback) = await GetHomePageSectionSettingsAsync(ct);
+        if (usedFallback)
+            ViewBag.ContentSettingsWarning = "Homepage content settings are temporarily using safe defaults because the production database schema is behind the deployed code.";
+
         return View(new HomePageContentAdminViewModel
         {
             CurrentHeroBannerImageUrl = settings.HeroBannerImageUrl,
@@ -569,9 +572,11 @@ public sealed class AdminController(
     public async Task<IActionResult> HomePageContent(HomePageContentAdminViewModel vm, IFormFile? heroBannerImage, IFormFile? trendingBannerImage, CancellationToken ct)
     {
         NormalizeHomePageContent(vm);
-        var settings = await GetHomePageSectionSettingsAsync(ct);
+        var (settings, usedFallback) = await GetHomePageSectionSettingsAsync(ct);
         vm.CurrentHeroBannerImageUrl = settings.HeroBannerImageUrl;
         vm.CurrentTrendingImageUrl = settings.TrendingImageUrl;
+        if (usedFallback)
+            ModelState.AddModelError(string.Empty, "Homepage content cannot be saved yet because the production database schema is behind the deployed code.");
         if (!ModelState.IsValid) return View(vm);
 
         if (heroBannerImage is { Length: > 0 })
@@ -631,7 +636,17 @@ public sealed class AdminController(
         settings.TestimonialsTitle = vm.TestimonialsTitle;
         settings.TestimonialsTitleMarathi = vm.TestimonialsTitleMarathi;
 
-        await db.SaveChangesAsync(ct);
+        try
+        {
+            await db.SaveChangesAsync(ct);
+        }
+        catch (Exception ex) when (db.Database.IsSqlServer())
+        {
+            logger.LogWarning(ex, "Homepage content save failed because the SQL Server schema is behind the deployed code.");
+            ModelState.AddModelError(string.Empty, "Homepage content could not be saved because the production database schema is not fully updated yet.");
+            return View(vm);
+        }
+
         TempData["SuccessMessage"] = "Homepage hero, trending banner, stats, and testimonials settings updated.";
         return RedirectToAction(nameof(HomePageContent));
     }
@@ -639,7 +654,10 @@ public sealed class AdminController(
     [HttpGet]
     public async Task<IActionResult> AboutPageContent(CancellationToken ct)
     {
-        var settings = await GetAboutPageSectionSettingsAsync(ct);
+        var (settings, usedFallback) = await GetAboutPageSectionSettingsAsync(ct);
+        if (usedFallback)
+            ViewBag.ContentSettingsWarning = "About page content settings are temporarily using safe defaults because the production database schema is behind the deployed code.";
+
         return View(new AboutPageContentAdminViewModel
         {
             ShowStatisticsSection = settings.ShowStatisticsSection,
@@ -667,7 +685,13 @@ public sealed class AdminController(
         NormalizeAboutPageContent(vm);
         if (!ModelState.IsValid) return View(vm);
 
-        var settings = await GetAboutPageSectionSettingsAsync(ct);
+        var (settings, usedFallback) = await GetAboutPageSectionSettingsAsync(ct);
+        if (usedFallback)
+        {
+            ModelState.AddModelError(string.Empty, "About page content cannot be saved yet because the production database schema is behind the deployed code.");
+            return View(vm);
+        }
+
         settings.ShowStatisticsSection = vm.ShowStatisticsSection;
         settings.Stat1Value = vm.Stat1Value;
         settings.Stat1Label = vm.Stat1Label;
@@ -685,7 +709,17 @@ public sealed class AdminController(
         settings.AddressMarathi = vm.AddressMarathi;
         settings.MapEmbedUrl = vm.MapEmbedUrl;
 
-        await db.SaveChangesAsync(ct);
+        try
+        {
+            await db.SaveChangesAsync(ct);
+        }
+        catch (Exception ex) when (db.Database.IsSqlServer())
+        {
+            logger.LogWarning(ex, "About page content save failed because the SQL Server schema is behind the deployed code.");
+            ModelState.AddModelError(string.Empty, "About page content could not be saved because the production database schema is not fully updated yet.");
+            return View(vm);
+        }
+
         TempData["SuccessMessage"] = "About page settings updated.";
         return RedirectToAction(nameof(AboutPageContent));
     }
@@ -911,26 +945,42 @@ public sealed class AdminController(
         vm.MapEmbedUrl = vm.MapEmbedUrl.Trim();
     }
 
-    private async Task<Core.Entities.HomePageSectionSettings> GetHomePageSectionSettingsAsync(CancellationToken ct)
+    private async Task<(Core.Entities.HomePageSectionSettings Settings, bool UsedFallback)> GetHomePageSectionSettingsAsync(CancellationToken ct)
     {
-        var settings = await db.HomePageSectionSettings.FirstOrDefaultAsync(ct);
-        if (settings is not null) return settings;
+        try
+        {
+            var settings = await db.HomePageSectionSettings.FirstOrDefaultAsync(ct);
+            if (settings is not null) return (settings, false);
 
-        settings = new Core.Entities.HomePageSectionSettings();
-        db.HomePageSectionSettings.Add(settings);
-        await db.SaveChangesAsync(ct);
-        return settings;
+            settings = new Core.Entities.HomePageSectionSettings();
+            db.HomePageSectionSettings.Add(settings);
+            await db.SaveChangesAsync(ct);
+            return (settings, false);
+        }
+        catch (Exception ex) when (db.Database.IsSqlServer())
+        {
+            logger.LogWarning(ex, "Homepage content settings are unavailable because the SQL Server schema is behind the deployed code.");
+            return (new Core.Entities.HomePageSectionSettings(), true);
+        }
     }
 
-    private async Task<Core.Entities.AboutPageSectionSettings> GetAboutPageSectionSettingsAsync(CancellationToken ct)
+    private async Task<(Core.Entities.AboutPageSectionSettings Settings, bool UsedFallback)> GetAboutPageSectionSettingsAsync(CancellationToken ct)
     {
-        var settings = await db.AboutPageSectionSettings.FirstOrDefaultAsync(ct);
-        if (settings is not null) return settings;
+        try
+        {
+            var settings = await db.AboutPageSectionSettings.FirstOrDefaultAsync(ct);
+            if (settings is not null) return (settings, false);
 
-        settings = new Core.Entities.AboutPageSectionSettings();
-        db.AboutPageSectionSettings.Add(settings);
-        await db.SaveChangesAsync(ct);
-        return settings;
+            settings = new Core.Entities.AboutPageSectionSettings();
+            db.AboutPageSectionSettings.Add(settings);
+            await db.SaveChangesAsync(ct);
+            return (settings, false);
+        }
+        catch (Exception ex) when (db.Database.IsSqlServer())
+        {
+            logger.LogWarning(ex, "About page content settings are unavailable because the SQL Server schema is behind the deployed code.");
+            return (new Core.Entities.AboutPageSectionSettings(), true);
+        }
     }
 
     private async Task<string> SaveImageUploadAsync(IFormFile file, string folderName, string? existingUrl, CancellationToken ct)
