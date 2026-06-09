@@ -79,6 +79,9 @@ jobs:
       - name: Restore solution for deploy
         run: dotnet restore ShivakalaCoaching.sln
 
+      - name: Restore .NET tools
+        run: dotnet tool restore
+
       - name: Apply production SQL Server migrations
         shell: pwsh
         env:
@@ -87,7 +90,7 @@ jobs:
           ConnectionStrings__SqlServer: ${{ secrets.PROD_SQLSERVER_CONNECTION_STRING }}
         run: |
           Write-Host 'Applying latest SQL Server migrations to production...'
-          dotnet ef database update `
+          dotnet tool run dotnet-ef database update `
             --project src/Shivakala.SqlServerMigrations/Shivakala.SqlServerMigrations.csproj `
             --startup-project src/Shivakala.Web/Shivakala.Web.csproj `
             --context ShivakalaDbContext `
