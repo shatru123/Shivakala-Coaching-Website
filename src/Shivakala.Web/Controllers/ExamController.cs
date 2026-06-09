@@ -20,7 +20,15 @@ public sealed class ExamController(
     [HttpGet("create")]
     public async Task<IActionResult> Create(CancellationToken ct)
     {
-        ViewBag.Batches = await batchRepo.GetAllAsync(ct);
+        try
+        {
+            ViewBag.Batches = await batchRepo.GetAllAsync(ct);
+        }
+        catch
+        {
+            ViewBag.Batches = Array.Empty<Batch>();
+            ViewBag.PageLoadWarning = "Batch data is temporarily unavailable. You can still prepare the exam form.";
+        }
         return View("Form", new Exam { Title = "", Standard = "", Subject = "", ExamDate = UtcDateTime.StartOfToday() });
     }
 

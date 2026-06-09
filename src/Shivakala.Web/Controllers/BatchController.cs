@@ -17,14 +17,30 @@ public sealed class BatchController(
     [HttpGet("")]
     public async Task<IActionResult> Index(CancellationToken ct)
     {
-        ViewBag.Batches = await batchRepo.GetAllAsync(ct);
+        try
+        {
+            ViewBag.Batches = await batchRepo.GetAllAsync(ct);
+        }
+        catch
+        {
+            ViewBag.Batches = Array.Empty<Batch>();
+            ViewBag.PageLoadWarning = "Batch data is temporarily unavailable. The page is running in safe mode.";
+        }
         return View();
     }
 
     [HttpGet("create")]
     public async Task<IActionResult> Create(CancellationToken ct)
     {
-        ViewBag.Teachers = await teacherRepo.GetAllAsync(ct);
+        try
+        {
+            ViewBag.Teachers = await teacherRepo.GetAllAsync(ct);
+        }
+        catch
+        {
+            ViewBag.Teachers = Array.Empty<Teacher>();
+            ViewBag.PageLoadWarning = "Teacher data is temporarily unavailable. You can still open the batch form.";
+        }
         return View("Form", new Batch { Name = "", Standard = "", AcademicYear = $"{DateTime.UtcNow.Year}-{DateTime.UtcNow.Year+1}" });
     }
 
@@ -47,11 +63,19 @@ public sealed class BatchController(
     [HttpGet("{id}")]
     public async Task<IActionResult> Detail(int id, CancellationToken ct)
     {
-        var batch = await batchRepo.GetByIdWithDetailsAsync(id, ct);
-        if (batch is null) return NotFound();
-        ViewBag.AllStudents = await studentRepo.ListAsync(ct);
-        ViewBag.AllTeachers = await teacherRepo.GetAllAsync(ct);
-        return View(batch);
+        try
+        {
+            var batch = await batchRepo.GetByIdWithDetailsAsync(id, ct);
+            if (batch is null) return NotFound();
+            ViewBag.AllStudents = await studentRepo.ListAsync(ct);
+            ViewBag.AllTeachers = await teacherRepo.GetAllAsync(ct);
+            return View(batch);
+        }
+        catch
+        {
+            TempData["WarningMessage"] = "Batch details could not be loaded right now.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 
     [HttpPost("{id}/assign-student"), ValidateAntiForgeryToken]

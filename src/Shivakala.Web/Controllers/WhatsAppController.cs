@@ -22,8 +22,17 @@ public sealed class WhatsAppController(
         ViewBag.IsAuthenticated = wa.IsAuthenticated;
         ViewBag.IsSidecarConfigured = !string.IsNullOrWhiteSpace(whatsAppOptions.Value.BaseUrl);
         ViewBag.SidecarBaseUrl = whatsAppOptions.Value.BaseUrl?.Trim();
-        ViewBag.Batches = await batchRepo.GetAllAsync(ct);
-        ViewBag.RecentNotifs = await notifRepo.GetAllAsync(20, ct);
+        try
+        {
+            ViewBag.Batches = await batchRepo.GetAllAsync(ct);
+            ViewBag.RecentNotifs = await notifRepo.GetAllAsync(20, ct);
+        }
+        catch
+        {
+            ViewBag.Batches = Array.Empty<Batch>();
+            ViewBag.RecentNotifs = Array.Empty<Notification>();
+            ViewBag.PageLoadWarning = "Batch or broadcast history data is temporarily unavailable. WhatsApp connection controls are still shown.";
+        }
         return View();
     }
 

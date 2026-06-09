@@ -16,15 +16,33 @@ public sealed class HomeworkController(
     [HttpGet("")]
     public async Task<IActionResult> Index(string? standard, string? subject, CancellationToken ct)
     {
-        ViewBag.Batches = await batchRepo.GetAllAsync(ct);
-        return View(await hwRepo.GetAllAsync(standard, subject, ct));
+        try
+        {
+            ViewBag.Batches = await batchRepo.GetAllAsync(ct);
+            return View(await hwRepo.GetAllAsync(standard, subject, ct));
+        }
+        catch
+        {
+            ViewBag.Batches = Array.Empty<Batch>();
+            ViewBag.PageLoadWarning = "Homework data is temporarily unavailable. The page is running in safe mode.";
+            return View(Array.Empty<Homework>());
+        }
     }
 
     [HttpGet("create")]
     public async Task<IActionResult> Create(CancellationToken ct)
     {
-        ViewBag.Batches = await batchRepo.GetAllAsync(ct);
-        ViewBag.Teachers = await teacherRepo.GetAllAsync(ct);
+        try
+        {
+            ViewBag.Batches = await batchRepo.GetAllAsync(ct);
+            ViewBag.Teachers = await teacherRepo.GetAllAsync(ct);
+        }
+        catch
+        {
+            ViewBag.Batches = Array.Empty<Batch>();
+            ViewBag.Teachers = Array.Empty<Teacher>();
+            ViewBag.PageLoadWarning = "Teacher or batch data is temporarily unavailable. You can still open the homework form.";
+        }
         return View("Form", new Homework
         {
             Title = "", Subject = "", Standard = "",

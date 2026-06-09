@@ -20,11 +20,20 @@ public sealed class TeacherController(
     [HttpGet("")]
     public async Task<IActionResult> Index(CancellationToken ct)
     {
-        ViewBag.PortalUsernames = await db.AppUsers
-            .Where(u => u.Role == "Teacher" && u.TeacherId != null)
-            .ToDictionaryAsync(u => u.TeacherId!.Value, u => u.Username, ct);
-        await PopulateSchemaWarningAsync(ct);
-        return View(await repo.GetAllAsync(ct));
+        try
+        {
+            ViewBag.PortalUsernames = await db.AppUsers
+                .Where(u => u.Role == "Teacher" && u.TeacherId != null)
+                .ToDictionaryAsync(u => u.TeacherId!.Value, u => u.Username, ct);
+            await PopulateSchemaWarningAsync(ct);
+            return View(await repo.GetAllAsync(ct));
+        }
+        catch
+        {
+            ViewBag.PortalUsernames = new Dictionary<int, string>();
+            ViewBag.PageLoadWarning = "Teacher data is temporarily unavailable. The page is running in safe mode while production data access is being stabilized.";
+            return View(Array.Empty<Teacher>());
+        }
     }
 
     [HttpGet("create")]
@@ -58,10 +67,18 @@ public sealed class TeacherController(
     [HttpGet("{id}/edit")]
     public async Task<IActionResult> Edit(int id, CancellationToken ct)
     {
-        var t = await repo.GetByIdAsync(id, ct);
-        if (t is null) return NotFound();
-        await PopulateSchemaWarningAsync(ct);
-        return View("Form", t);
+        try
+        {
+            var t = await repo.GetByIdAsync(id, ct);
+            if (t is null) return NotFound();
+            await PopulateSchemaWarningAsync(ct);
+            return View("Form", t);
+        }
+        catch
+        {
+            TempData["WarningMessage"] = "Teacher details could not be loaded right now.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 
     [HttpPost("{id}/edit"), ValidateAntiForgeryToken]
@@ -131,7 +148,14 @@ public sealed class TeacherController(
 
     private async Task PopulateSchemaWarningAsync(CancellationToken ct)
     {
-        if (!await TeacherSchemaCompatibility.SupportsAboutPageFieldsAsync(db, ct))
-            ViewBag.SchemaWarning = "Teacher management is running in compatibility mode. Core teacher details still work, but About page display fields will start saving after the production teacher migration finishes.";
+        try
+        {
+            if (!await TeacherSchemaCompatibility.SupportsAboutPageFieldsAsync(db, ct))
+                ViewBag.SchemaWarning = "Teacher management is running in compatibility mode. Core teacher details still work, but About page display fields will start saving after the production teacher migration finishes.";
+        }
+        catch
+        {
+            ViewBag.SchemaWarning = "About page teacher fields are temporarily unavailable, but you can still manage core teacher details.";
+        }
     }
 }

@@ -806,33 +806,41 @@ public sealed class AdminController(
     [HttpGet]
     public async Task<IActionResult> PortalAccounts(CancellationToken ct)
     {
-        var users = await db.AppUsers
-            .Where(u => u.Role == "Teacher" || u.Role == "Parent")
-            .OrderBy(u => u.Role)
-            .ThenBy(u => u.FullName)
-            .ToListAsync(ct);
-
-        var teachers = (await teacherRepo.GetAllAsync(ct))
-            .ToDictionary(t => t.Id, t => t.FullName);
-        var students = await db.Students
-            .ToDictionaryAsync(s => s.Id, s => s.FullName, ct);
-
-        var model = users.Select(u => new PortalAccountAdminViewModel
+        try
         {
-            UserId = u.Id,
-            Username = u.Username,
-            Role = u.Role,
-            FullName = u.FullName ?? u.Username,
-            Mobile = u.Mobile,
-            LinkedTo = u.TeacherId.HasValue && teachers.TryGetValue(u.TeacherId.Value, out var teacherName)
-                ? teacherName
-                : u.StudentId.HasValue && students.TryGetValue(u.StudentId.Value, out var studentName)
-                    ? studentName
-                    : "Not linked",
-            IsActive = u.IsActive
-        }).ToList();
+            var users = await db.AppUsers
+                .Where(u => u.Role == "Teacher" || u.Role == "Parent")
+                .OrderBy(u => u.Role)
+                .ThenBy(u => u.FullName)
+                .ToListAsync(ct);
 
-        return View(model);
+            var teachers = (await teacherRepo.GetAllAsync(ct))
+                .ToDictionary(t => t.Id, t => t.FullName);
+            var students = await db.Students
+                .ToDictionaryAsync(s => s.Id, s => s.FullName, ct);
+
+            var model = users.Select(u => new PortalAccountAdminViewModel
+            {
+                UserId = u.Id,
+                Username = u.Username,
+                Role = u.Role,
+                FullName = u.FullName ?? u.Username,
+                Mobile = u.Mobile,
+                LinkedTo = u.TeacherId.HasValue && teachers.TryGetValue(u.TeacherId.Value, out var teacherName)
+                    ? teacherName
+                    : u.StudentId.HasValue && students.TryGetValue(u.StudentId.Value, out var studentName)
+                        ? studentName
+                        : "Not linked",
+                IsActive = u.IsActive
+            }).ToList();
+
+            return View(model);
+        }
+        catch
+        {
+            ViewBag.PageLoadWarning = "Portal account data is temporarily unavailable. The page is running in safe mode.";
+            return View(Array.Empty<PortalAccountAdminViewModel>());
+        }
     }
 
     [HttpGet]

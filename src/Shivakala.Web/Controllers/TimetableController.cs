@@ -18,32 +18,41 @@ public sealed class TimetableController(
     [HttpGet("")]
     public async Task<IActionResult> Index(int? batchId, CancellationToken ct)
     {
-        ViewBag.Batches = await batchRepo.GetAllAsync(ct);
         ViewBag.Days = Days;
-        if (batchId.HasValue)
+        try
         {
-            var supportsTeacherAboutFields = await TeacherSchemaCompatibility.SupportsAboutPageFieldsAsync(db, ct);
-            var slots = supportsTeacherAboutFields
-                ? await db.TimetableSlots
-                    .Include(s => s.Teacher)
-                    .Where(s => s.BatchId == batchId && s.IsActive)
-                    .OrderBy(s => s.DayOfWeek).ThenBy(s => s.StartTime)
-                    .ToListAsync(ct)
-                : await db.TimetableSlots
-                    .Where(s => s.BatchId == batchId && s.IsActive)
-                    .OrderBy(s => s.DayOfWeek).ThenBy(s => s.StartTime)
-                    .ToListAsync(ct);
-            if (!supportsTeacherAboutFields)
+            ViewBag.Batches = await batchRepo.GetAllAsync(ct);
+            if (batchId.HasValue)
             {
-                var teacherNames = await TeacherSchemaCompatibility.GetTeacherNamesFallbackAsync(db, ct);
-                foreach (var slot in slots.Where(s => s.TeacherId.HasValue))
+                var supportsTeacherAboutFields = await TeacherSchemaCompatibility.SupportsAboutPageFieldsAsync(db, ct);
+                var slots = supportsTeacherAboutFields
+                    ? await db.TimetableSlots
+                        .Include(s => s.Teacher)
+                        .Where(s => s.BatchId == batchId && s.IsActive)
+                        .OrderBy(s => s.DayOfWeek).ThenBy(s => s.StartTime)
+                        .ToListAsync(ct)
+                    : await db.TimetableSlots
+                        .Where(s => s.BatchId == batchId && s.IsActive)
+                        .OrderBy(s => s.DayOfWeek).ThenBy(s => s.StartTime)
+                        .ToListAsync(ct);
+                if (!supportsTeacherAboutFields)
                 {
-                    if (slot.TeacherId.HasValue && teacherNames.TryGetValue(slot.TeacherId.Value, out var teacherName))
-                        slot.Teacher = new Teacher { Id = slot.TeacherId.Value, FullName = teacherName, Mobile = string.Empty };
+                    var teacherNames = await TeacherSchemaCompatibility.GetTeacherNamesFallbackAsync(db, ct);
+                    foreach (var slot in slots.Where(s => s.TeacherId.HasValue))
+                    {
+                        if (slot.TeacherId.HasValue && teacherNames.TryGetValue(slot.TeacherId.Value, out var teacherName))
+                            slot.Teacher = new Teacher { Id = slot.TeacherId.Value, FullName = teacherName, Mobile = string.Empty };
+                    }
                 }
+                ViewBag.Slots = slots;
+                ViewBag.SelectedBatchId = batchId;
             }
-            ViewBag.Slots = slots;
-            ViewBag.SelectedBatchId = batchId;
+        }
+        catch
+        {
+            ViewBag.Batches = Array.Empty<Batch>();
+            ViewBag.Slots = new List<TimetableSlot>();
+            ViewBag.PageLoadWarning = "Timetable data is temporarily unavailable. The page is running in safe mode.";
         }
         return View();
     }
@@ -51,8 +60,17 @@ public sealed class TimetableController(
     [HttpGet("create")]
     public async Task<IActionResult> Create(int batchId, CancellationToken ct)
     {
-        ViewBag.Batch = await batchRepo.GetByIdWithDetailsAsync(batchId, ct);
-        ViewBag.Teachers = await teacherRepo.GetAllAsync(ct);
+        try
+        {
+            ViewBag.Batch = await batchRepo.GetByIdWithDetailsAsync(batchId, ct);
+            ViewBag.Teachers = await teacherRepo.GetAllAsync(ct);
+        }
+        catch
+        {
+            ViewBag.Batch = null;
+            ViewBag.Teachers = Array.Empty<Teacher>();
+            ViewBag.PageLoadWarning = "Batch or teacher data is temporarily unavailable. You can still open the timetable form.";
+        }
         ViewBag.Days = Days;
         return View("Form", new TimetableSlot { BatchId = batchId, Subject = "" });
     }
