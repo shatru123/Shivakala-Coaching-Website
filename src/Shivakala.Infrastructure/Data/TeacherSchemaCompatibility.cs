@@ -21,48 +21,54 @@ public static class TeacherSchemaCompatibility
     public static async Task<IReadOnlyList<Teacher>> GetTeachersFallbackAsync(ShivakalaDbContext db, CancellationToken ct = default)
     {
         var teachers = new List<Teacher>();
-        await using var connection = await OpenConnectionAsync(db, ct);
-        await using var command = connection.CreateCommand();
-        command.CommandText = """
-            SELECT Id, FullName, Mobile, Email, Qualification, Specialisation, PhotoUrl, Address,
-                   EmployeeCode, MonthlySalary, JoiningDate, IsActive, AdminNotes, CreatedDate
-            FROM Teachers
-            ORDER BY FullName
-            """;
+        await WithOpenConnectionAsync(db, ct, async connection =>
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = """
+                SELECT Id, FullName, Mobile, Email, Qualification, Specialisation, PhotoUrl, Address,
+                       EmployeeCode, MonthlySalary, JoiningDate, IsActive, AdminNotes, CreatedDate
+                FROM Teachers
+                ORDER BY FullName
+                """;
 
-        await using var reader = await command.ExecuteReaderAsync(ct);
-        while (await reader.ReadAsync(ct))
-            teachers.Add(MapTeacher(reader));
+            await using var reader = await command.ExecuteReaderAsync(ct);
+            while (await reader.ReadAsync(ct))
+                teachers.Add(MapTeacher(reader));
+        });
 
         return teachers;
     }
 
     public static async Task<Teacher?> GetTeacherFallbackAsync(ShivakalaDbContext db, int id, CancellationToken ct = default)
     {
-        await using var connection = await OpenConnectionAsync(db, ct);
-        await using var command = connection.CreateCommand();
-        command.CommandText = """
-            SELECT Id, FullName, Mobile, Email, Qualification, Specialisation, PhotoUrl, Address,
-                   EmployeeCode, MonthlySalary, JoiningDate, IsActive, AdminNotes, CreatedDate
-            FROM Teachers
-            WHERE Id = @Id
-            """;
-        AddParameter(command, "@Id", id);
+        return await WithOpenConnectionAsync(db, ct, async connection =>
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = """
+                SELECT Id, FullName, Mobile, Email, Qualification, Specialisation, PhotoUrl, Address,
+                       EmployeeCode, MonthlySalary, JoiningDate, IsActive, AdminNotes, CreatedDate
+                FROM Teachers
+                WHERE Id = @Id
+                """;
+            AddParameter(command, "@Id", id);
 
-        await using var reader = await command.ExecuteReaderAsync(ct);
-        return await reader.ReadAsync(ct) ? MapTeacher(reader) : null;
+            await using var reader = await command.ExecuteReaderAsync(ct);
+            return await reader.ReadAsync(ct) ? MapTeacher(reader) : null;
+        });
     }
 
     public static async Task<Dictionary<int, string>> GetTeacherNamesFallbackAsync(ShivakalaDbContext db, CancellationToken ct = default)
     {
         var result = new Dictionary<int, string>();
-        await using var connection = await OpenConnectionAsync(db, ct);
-        await using var command = connection.CreateCommand();
-        command.CommandText = "SELECT Id, FullName FROM Teachers";
+        await WithOpenConnectionAsync(db, ct, async connection =>
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = "SELECT Id, FullName FROM Teachers";
 
-        await using var reader = await command.ExecuteReaderAsync(ct);
-        while (await reader.ReadAsync(ct))
-            result[reader.GetInt32(0)] = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+            await using var reader = await command.ExecuteReaderAsync(ct);
+            while (await reader.ReadAsync(ct))
+                result[reader.GetInt32(0)] = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+        });
 
         return result;
     }
@@ -72,107 +78,136 @@ public static class TeacherSchemaCompatibility
         teacher.CreatedDate = teacher.CreatedDate == default ? DateTime.UtcNow : teacher.CreatedDate;
         teacher.JoiningDate = teacher.JoiningDate == default ? DateTime.UtcNow : teacher.JoiningDate;
 
-        await using var connection = await OpenConnectionAsync(db, ct);
-        await using var command = connection.CreateCommand();
-        command.CommandText = db.Database.IsSqlServer()
-            ? """
-              INSERT INTO Teachers
-                  (FullName, Mobile, Email, Qualification, Specialisation, PhotoUrl, Address,
-                   EmployeeCode, MonthlySalary, JoiningDate, IsActive, AdminNotes, CreatedDate)
-              VALUES
-                  (@FullName, @Mobile, @Email, @Qualification, @Specialisation, @PhotoUrl, @Address,
-                   @EmployeeCode, @MonthlySalary, @JoiningDate, @IsActive, @AdminNotes, @CreatedDate);
-              SELECT CAST(SCOPE_IDENTITY() AS int);
-              """
-            : """
-              INSERT INTO Teachers
-                  (FullName, Mobile, Email, Qualification, Specialisation, PhotoUrl, Address,
-                   EmployeeCode, MonthlySalary, JoiningDate, IsActive, AdminNotes, CreatedDate)
-              VALUES
-                  (@FullName, @Mobile, @Email, @Qualification, @Specialisation, @PhotoUrl, @Address,
-                   @EmployeeCode, @MonthlySalary, @JoiningDate, @IsActive, @AdminNotes, @CreatedDate);
-              SELECT last_insert_rowid();
-              """;
+        var id = await WithOpenConnectionAsync(db, ct, async connection =>
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = db.Database.IsSqlServer()
+                ? """
+                  INSERT INTO Teachers
+                      (FullName, Mobile, Email, Qualification, Specialisation, PhotoUrl, Address,
+                       EmployeeCode, MonthlySalary, JoiningDate, IsActive, AdminNotes, CreatedDate)
+                  VALUES
+                      (@FullName, @Mobile, @Email, @Qualification, @Specialisation, @PhotoUrl, @Address,
+                       @EmployeeCode, @MonthlySalary, @JoiningDate, @IsActive, @AdminNotes, @CreatedDate);
+                  SELECT CAST(SCOPE_IDENTITY() AS int);
+                  """
+                : """
+                  INSERT INTO Teachers
+                      (FullName, Mobile, Email, Qualification, Specialisation, PhotoUrl, Address,
+                       EmployeeCode, MonthlySalary, JoiningDate, IsActive, AdminNotes, CreatedDate)
+                  VALUES
+                      (@FullName, @Mobile, @Email, @Qualification, @Specialisation, @PhotoUrl, @Address,
+                       @EmployeeCode, @MonthlySalary, @JoiningDate, @IsActive, @AdminNotes, @CreatedDate);
+                  SELECT last_insert_rowid();
+                  """;
 
-        PopulateTeacherParameters(command, teacher);
-        var id = Convert.ToInt32(await command.ExecuteScalarAsync(ct));
+            PopulateTeacherParameters(command, teacher);
+            return Convert.ToInt32(await command.ExecuteScalarAsync(ct));
+        });
         teacher.Id = id;
         return id;
     }
 
     public static async Task UpdateTeacherFallbackAsync(ShivakalaDbContext db, Teacher teacher, CancellationToken ct = default)
     {
-        await using var connection = await OpenConnectionAsync(db, ct);
-        await using var command = connection.CreateCommand();
-        command.CommandText = """
-            UPDATE Teachers
-            SET FullName = @FullName,
-                Mobile = @Mobile,
-                Email = @Email,
-                Qualification = @Qualification,
-                Specialisation = @Specialisation,
-                PhotoUrl = @PhotoUrl,
-                Address = @Address,
-                EmployeeCode = @EmployeeCode,
-                MonthlySalary = @MonthlySalary,
-                JoiningDate = @JoiningDate,
-                IsActive = @IsActive,
-                AdminNotes = @AdminNotes
-            WHERE Id = @Id
-            """;
-        PopulateTeacherParameters(command, teacher);
-        AddParameter(command, "@Id", teacher.Id);
-        await command.ExecuteNonQueryAsync(ct);
+        await WithOpenConnectionAsync(db, ct, async connection =>
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = """
+                UPDATE Teachers
+                SET FullName = @FullName,
+                    Mobile = @Mobile,
+                    Email = @Email,
+                    Qualification = @Qualification,
+                    Specialisation = @Specialisation,
+                    PhotoUrl = @PhotoUrl,
+                    Address = @Address,
+                    EmployeeCode = @EmployeeCode,
+                    MonthlySalary = @MonthlySalary,
+                    JoiningDate = @JoiningDate,
+                    IsActive = @IsActive,
+                    AdminNotes = @AdminNotes
+                WHERE Id = @Id
+                """;
+            PopulateTeacherParameters(command, teacher);
+            AddParameter(command, "@Id", teacher.Id);
+            await command.ExecuteNonQueryAsync(ct);
+        });
     }
 
     public static async Task DeleteTeacherFallbackAsync(ShivakalaDbContext db, int id, CancellationToken ct = default)
     {
-        await using var connection = await OpenConnectionAsync(db, ct);
-        await using var command = connection.CreateCommand();
-        command.CommandText = "DELETE FROM Teachers WHERE Id = @Id";
-        AddParameter(command, "@Id", id);
-        await command.ExecuteNonQueryAsync(ct);
+        await WithOpenConnectionAsync(db, ct, async connection =>
+        {
+            await using var command = connection.CreateCommand();
+            command.CommandText = "DELETE FROM Teachers WHERE Id = @Id";
+            AddParameter(command, "@Id", id);
+            await command.ExecuteNonQueryAsync(ct);
+        });
     }
 
     private static async Task<bool> ColumnExistsAsync(ShivakalaDbContext db, string tableName, string columnName, CancellationToken ct)
     {
-        await using var connection = await OpenConnectionAsync(db, ct);
-        await using var command = connection.CreateCommand();
+        return await WithOpenConnectionAsync(db, ct, async connection =>
+        {
+            await using var command = connection.CreateCommand();
 
-        if (db.Database.IsSqlServer())
-        {
-            command.CommandText = """
-                SELECT COUNT(*)
-                FROM INFORMATION_SCHEMA.COLUMNS
-                WHERE TABLE_NAME = @TableName AND COLUMN_NAME = @ColumnName
-                """;
-            AddParameter(command, "@TableName", tableName);
-            AddParameter(command, "@ColumnName", columnName);
-        }
-        else
-        {
+            if (db.Database.IsSqlServer())
+            {
+                command.CommandText = """
+                    SELECT COUNT(*)
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = @TableName AND COLUMN_NAME = @ColumnName
+                    """;
+                AddParameter(command, "@TableName", tableName);
+                AddParameter(command, "@ColumnName", columnName);
+                return Convert.ToInt32(await command.ExecuteScalarAsync(ct)) > 0;
+            }
+
             command.CommandText = $"PRAGMA table_info({tableName})";
-        }
+            await using var reader = await command.ExecuteReaderAsync(ct);
+            while (await reader.ReadAsync(ct))
+            {
+                if (string.Equals(reader["name"]?.ToString(), columnName, StringComparison.OrdinalIgnoreCase))
+                    return true;
+            }
 
-        if (db.Database.IsSqlServer())
-            return Convert.ToInt32(await command.ExecuteScalarAsync(ct)) > 0;
-
-        await using var reader = await command.ExecuteReaderAsync(ct);
-        while (await reader.ReadAsync(ct))
-        {
-            if (string.Equals(reader["name"]?.ToString(), columnName, StringComparison.OrdinalIgnoreCase))
-                return true;
-        }
-
-        return false;
+            return false;
+        });
     }
 
-    private static async Task<DbConnection> OpenConnectionAsync(ShivakalaDbContext db, CancellationToken ct)
+    private static async Task<T> WithOpenConnectionAsync<T>(
+        ShivakalaDbContext db,
+        CancellationToken ct,
+        Func<DbConnection, Task<T>> operation)
     {
         var connection = db.Database.GetDbConnection();
-        if (connection.State != System.Data.ConnectionState.Open)
+        var shouldCloseConnection = connection.State != System.Data.ConnectionState.Open;
+
+        if (shouldCloseConnection)
             await connection.OpenAsync(ct);
-        return connection;
+
+        try
+        {
+            return await operation(connection);
+        }
+        finally
+        {
+            if (shouldCloseConnection)
+                await connection.CloseAsync();
+        }
+    }
+
+    private static async Task WithOpenConnectionAsync(
+        ShivakalaDbContext db,
+        CancellationToken ct,
+        Func<DbConnection, Task> operation)
+    {
+        await WithOpenConnectionAsync<object?>(db, ct, async connection =>
+        {
+            await operation(connection);
+            return null;
+        });
     }
 
     private static Teacher MapTeacher(DbDataReader reader)
