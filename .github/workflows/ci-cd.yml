@@ -94,7 +94,9 @@ jobs:
             --project src/Shivakala.SqlServerMigrations/Shivakala.SqlServerMigrations.csproj `
             --startup-project src/Shivakala.Web/Shivakala.Web.csproj `
             --context ShivakalaDbContext `
-            --verbose
+            --verbose `
+            -- `
+            --provider=SqlServer
 
       - name: Verify production schema is up to date
         shell: pwsh
