@@ -1,0 +1,209 @@
+@model Shivakala.Core.ViewModels.StudentIdCardAdminViewModel
+@{
+    ViewData["Title"] = "Student ID Card | Admin";
+}
+
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--purple))">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="badge-soft">Admin</span>
+            <h1>Student ID Card</h1>
+            <p>Save student profile details and download a print-ready ID card as PNG or PDF.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Registrations" class="toolbar-btn"><i class="fa-solid fa-arrow-left"></i>Back to Students</a>
+            <button type="button" class="toolbar-btn" onclick="window.print()"><i class="fa-solid fa-print"></i>Print</button>
+        </div>
+    </div>
+</section>
+
+<section class="section-shell pt-0">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-xl-5">
+                <div class="glass-card">
+                    <h3 style="margin:0 0 8px;color:var(--navy)">Student Details</h3>
+                    <p style="color:var(--text-mid);margin-bottom:18px">These details are stored in the existing student record and reused for the ID card.</p>
+
+                    <form asp-action="StudentIdCard" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <input asp-for="Id" type="hidden" />
+                        <input asp-for="PhotoUrl" type="hidden" />
+                        <div asp-validation-summary="All" class="text-danger small mb-3"></div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="FullName" class="form-label"></label>
+                                <input asp-for="FullName" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ParentName" class="form-label">Parent / Guardian Name</label>
+                                <input asp-for="ParentName" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="AdmissionNumber" class="form-label"></label>
+                                <input asp-for="AdmissionNumber" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="RollNumber" class="form-label"></label>
+                                <input asp-for="RollNumber" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Standard" class="form-label"></label>
+                                <input asp-for="Standard" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Subject" class="form-label"></label>
+                                <input asp-for="Subject" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Mobile" class="form-label"></label>
+                                <input asp-for="Mobile" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ParentMobile" class="form-label"></label>
+                                <input asp-for="ParentMobile" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="DateOfBirth" class="form-label"></label>
+                                <input asp-for="DateOfBirth" class="form-control" type="date" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="EmergencyContact" class="form-label"></label>
+                                <input asp-for="EmergencyContact" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Board" class="form-label"></label>
+                                <input asp-for="Board" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Medium" class="form-label"></label>
+                                <input asp-for="Medium" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label"></label>
+                                <input asp-for="Email" class="form-control" type="email" />
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="PreviousSchool" class="form-label"></label>
+                                <input asp-for="PreviousSchool" class="form-control" />
+                            </div>
+                            <div class="col-12">
+                                <label asp-for="Address" class="form-label"></label>
+                                <textarea asp-for="Address" class="form-control" rows="2"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Student Photo</label>
+                                <input type="file" name="photo" class="form-control" accept=".jpg,.jpeg,.png,.webp,.gif" />
+                                <div class="form-text">Upload or replace the student's photo for the card.</div>
+                            </div>
+                            <div class="col-12 d-flex gap-2 pt-2 flex-wrap">
+                                <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-save"></i>Save Details</button>
+                                <button type="button" id="downloadPngBtn" class="btn-outline-sk"><i class="fa-solid fa-image"></i>Download PNG</button>
+                                <button type="button" id="downloadPdfBtn" class="btn-outline-sk"><i class="fa-solid fa-file-pdf"></i>Download PDF</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-xl-7">
+                <div class="glass-card">
+                    <div class="mb-3">
+                        <h3 style="margin:0;color:var(--navy)">Print Preview</h3>
+                        <p style="color:var(--text-mid);margin:4px 0 0">This preview is optimized for easy printing and sharing.</p>
+                    </div>
+
+                    <div class="student-id-card-shell">
+                        <div class="student-id-card" id="studentIdCard">
+                            <div class="student-id-card__header">
+                                <div class="student-id-card__brand">
+                                    <img src="~/img/ShivKalaLogo.jpeg" asp-append-version="true" alt="Shivakala Coaching Classes logo" />
+                                    <div>
+                                        <div class="student-id-card__school">Shivakala Coaching Classes</div>
+                                        <div class="student-id-card__tag">Knowledge • Discipline • Success</div>
+                                    </div>
+                                </div>
+                                <div class="student-id-card__pill">Student ID</div>
+                            </div>
+
+                            <div class="student-id-card__body">
+                                <div class="student-id-card__photo-wrap">
+                                    @if (!string.IsNullOrWhiteSpace(Model.PhotoUrl))
+                                    {
+                                        <img class="student-id-card__photo" src="@Model.PhotoUrl" alt="@Model.FullName photo" />
+                                    }
+                                    else
+                                    {
+                                        <div class="student-id-card__photo student-id-card__photo--fallback">
+                                            @(string.IsNullOrWhiteSpace(Model.FullName) ? "SK" : string.Concat(Model.FullName.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(x => char.ToUpperInvariant(x[0]))))
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="student-id-card__details">
+                                    <div class="student-id-card__name">@Model.FullName</div>
+                                    <div class="student-id-card__meta">@Model.Standard • @Model.Subject</div>
+
+                                    <div class="student-id-card__grid">
+                                        <div><span>Admission No.</span><strong>@(Model.AdmissionNumber ?? "—")</strong></div>
+                                        <div><span>Roll No.</span><strong>@(Model.RollNumber ?? "—")</strong></div>
+                                        <div><span>Mobile</span><strong>@Model.Mobile</strong></div>
+                                        <div><span>DOB</span><strong>@(Model.DateOfBirth ?? "—")</strong></div>
+                                        <div><span>Parent</span><strong>@(Model.ParentName ?? "—")</strong></div>
+                                        <div><span>Emergency</span><strong>@(Model.EmergencyContact ?? Model.ParentMobile ?? "—")</strong></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="student-id-card__footer">
+                                <div>
+                                    <div class="student-id-card__footer-label">Address</div>
+                                    <div>@Model.Address</div>
+                                </div>
+                                <div class="student-id-card__footer-side">
+                                    <div class="student-id-card__footer-label">Issued</div>
+                                    <div>@Model.CreatedDate.ToLocalTime().ToString("dd MMM yyyy")</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
+    <script>
+        async function renderStudentCardCanvas() {
+            return await html2canvas(document.getElementById('studentIdCard'), {
+                scale: 2,
+                backgroundColor: null,
+                useCORS: true
+            });
+        }
+
+        document.getElementById('downloadPngBtn').addEventListener('click', async function () {
+            const canvas = await renderStudentCardCanvas();
+            const link = document.createElement('a');
+            link.download = 'student-id-card-@(Model.Id).png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        document.getElementById('downloadPdfBtn').addEventListener('click', async function () {
+            const canvas = await renderStudentCardCanvas();
+            const pdf = new window.jspdf.jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: [54, 86]
+            });
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, 86, 54);
+            pdf.save('student-id-card-@(Model.Id).pdf');
+        });
+    </script>
+}

@@ -1,0 +1,120 @@
+@model Shivakala.Core.ViewModels.AboutPageContentAdminViewModel
+@{
+    ViewData["Title"] = "About Page Content | Admin";
+}
+
+<section class="page-hero" style="background:linear-gradient(135deg,var(--navy-dark),var(--navy-mid))">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="badge-soft">Admin</span>
+            <h1>About Page Content</h1>
+            <p>Manage the About page stats, faculty visibility, and location details.</p>
+        </div>
+        <a asp-controller="Teacher" asp-action="Index" class="toolbar-btn"><i class="fa-solid fa-chalkboard-user"></i>Manage Teachers</a>
+    </div>
+</section>
+
+<section class="section-shell pt-0">
+    <div class="container" style="max-width:980px">
+        <form asp-action="AboutPageContent" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="glass-card mb-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <div>
+                        <h3 style="margin:0;color:var(--navy)">About Page Stats</h3>
+                        <p style="margin:4px 0 0;color:var(--text-mid)">Control the number cards shown on the About page.</p>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input asp-for="ShowStatisticsSection" class="form-check-input" type="checkbox" id="showAboutStatisticsSection" />
+                        <label class="form-check-label" for="showAboutStatisticsSection">Show on about page</label>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Stat 1 Value</label>
+                        <input asp-for="Stat1Value" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Label (English)</label>
+                        <input asp-for="Stat1Label" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Label (Marathi)</label>
+                        <input asp-for="Stat1LabelMarathi" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Stat 2 Value</label>
+                        <input asp-for="Stat2Value" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Label (English)</label>
+                        <input asp-for="Stat2Label" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Label (Marathi)</label>
+                        <input asp-for="Stat2LabelMarathi" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Stat 3 Value</label>
+                        <input asp-for="Stat3Value" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Label (English)</label>
+                        <input asp-for="Stat3Label" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Label (Marathi)</label>
+                        <input asp-for="Stat3LabelMarathi" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Stat 4 Value</label>
+                        <input asp-for="Stat4Value" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Label (English)</label>
+                        <input asp-for="Stat4Label" class="form-control" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Label (Marathi)</label>
+                        <input asp-for="Stat4LabelMarathi" class="form-control" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card mb-4">
+                <div class="mb-3">
+                    <h3 style="margin:0;color:var(--navy)">Address & Map</h3>
+                    <p style="margin:4px 0 0;color:var(--text-mid)">Shown on the About page location section.</p>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Address (English)</label>
+                        <textarea asp-for="Address" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Address (Marathi)</label>
+                        <textarea asp-for="AddressMarathi" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Google Map Embed URL</label>
+                        <textarea asp-for="MapEmbedUrl" class="form-control" rows="3" placeholder="https://www.google.com/maps/embed?..."></textarea>
+                    </div>
+                </div>
+
+                <div class="alert alert-light mt-3 mb-0">
+                    Use the <a asp-controller="Teacher" asp-action="Index">Teachers</a> page to choose which faculty members appear on the About page.
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-save"></i>Save About Settings</button>
+                <a asp-controller="About" asp-action="Index" target="_blank" class="btn-outline-sk"><i class="fa-solid fa-globe"></i>Preview About Page</a>
+            </div>
+        </form>
+    </div>
+</section>

@@ -52,6 +52,37 @@ public static class DatabaseInitializer
                 logger?.LogInformation("✅  Homepage content settings created.");
             }
 
+            var homeSettings = await db.HomePageSectionSettings.FirstOrDefaultAsync();
+            if (homeSettings is not null)
+            {
+                var updated = false;
+                if (string.IsNullOrWhiteSpace(homeSettings.HeroBannerImageUrl)) { homeSettings.HeroBannerImageUrl = "/img/Banner.jpeg"; updated = true; }
+                if (string.IsNullOrWhiteSpace(homeSettings.HeroBannerAltText)) { homeSettings.HeroBannerAltText = "Shivakala Classes admissions banner"; updated = true; }
+                if (string.IsNullOrWhiteSpace(homeSettings.TrendingEyebrow)) { homeSettings.TrendingEyebrow = "Trending Now"; updated = true; }
+                if (string.IsNullOrWhiteSpace(homeSettings.TrendingEyebrowMarathi)) { homeSettings.TrendingEyebrowMarathi = "नवीन अपडेट"; updated = true; }
+                if (string.IsNullOrWhiteSpace(homeSettings.TrendingTitle)) { homeSettings.TrendingTitle = "Admissions open for the new academic year"; updated = true; }
+                if (string.IsNullOrWhiteSpace(homeSettings.TrendingTitleMarathi)) { homeSettings.TrendingTitleMarathi = "नवीन शैक्षणिक वर्षासाठी प्रवेश सुरू"; updated = true; }
+                if (string.IsNullOrWhiteSpace(homeSettings.TrendingDescription)) { homeSettings.TrendingDescription = "Highlight important announcements, batches, offers, or events right from the admin panel."; updated = true; }
+                if (string.IsNullOrWhiteSpace(homeSettings.TrendingDescriptionMarathi)) { homeSettings.TrendingDescriptionMarathi = "महत्त्वाच्या घोषणा, बॅचेस, ऑफर्स किंवा इव्हेंट्स अॅडमिन पॅनलमधून लगेच दाखवा."; updated = true; }
+                if (string.IsNullOrWhiteSpace(homeSettings.TrendingImageUrl)) { homeSettings.TrendingImageUrl = "/img/Banner.jpeg"; updated = true; }
+                if (string.IsNullOrWhiteSpace(homeSettings.TrendingAltText)) { homeSettings.TrendingAltText = "Trending banner for Shivakala Coaching Classes"; updated = true; }
+                if (string.IsNullOrWhiteSpace(homeSettings.TrendingLinkText)) { homeSettings.TrendingLinkText = "Explore Now"; updated = true; }
+                if (string.IsNullOrWhiteSpace(homeSettings.TrendingLinkTextMarathi)) { homeSettings.TrendingLinkTextMarathi = "अधिक जाणून घ्या"; updated = true; }
+                if (string.IsNullOrWhiteSpace(homeSettings.TrendingLinkUrl)) { homeSettings.TrendingLinkUrl = "/registration"; updated = true; }
+                if (updated)
+                {
+                    await db.SaveChangesAsync();
+                    logger?.LogInformation("✅  Homepage banner defaults normalized.");
+                }
+            }
+
+            if (!await db.AboutPageSectionSettings.AnyAsync())
+            {
+                db.AboutPageSectionSettings.Add(new Core.Entities.AboutPageSectionSettings());
+                await db.SaveChangesAsync();
+                logger?.LogInformation("✅  About page content settings created.");
+            }
+
             // ── Step 3: ensure teacher/parent portal accounts exist ───────────────
             var portalUsers = scope.ServiceProvider.GetRequiredService<IPortalUserService>();
             var adminCredentials = scope.ServiceProvider
@@ -172,4 +203,5 @@ public static class DatabaseInitializer
             return false; // table or DB doesn't exist → fresh DB
         }
     }
+
 }

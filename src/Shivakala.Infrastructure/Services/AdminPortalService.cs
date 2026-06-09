@@ -44,7 +44,8 @@ public sealed class AdminPortalService(
         {
             Id = x.Id, FullName = x.FullName, ParentName = x.ParentName, Mobile = x.Mobile,
             Email = x.Email, Standard = x.Standard, Subject = x.Subject, Address = x.Address,
-            Board = x.Board, Medium = x.Medium, Status = x.Status, AdminNotes = x.AdminNotes,
+            Board = x.Board, Medium = x.Medium, AdmissionNumber = x.AdmissionNumber, PhotoUrl = x.PhotoUrl,
+            Status = x.Status, AdminNotes = x.AdminNotes,
             CreatedDate = x.CreatedDate
         }).ToList();
     }

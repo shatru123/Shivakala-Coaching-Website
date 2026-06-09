@@ -17,6 +17,80 @@ namespace Shivakala.Infrastructure.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.11");
 
+            modelBuilder.Entity("Shivakala.Core.Entities.AboutPageSectionSettings", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AddressMarathi")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MapEmbedUrl")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("ShowStatisticsSection")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Stat1Label")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Stat1LabelMarathi")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Stat1Value")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Stat2Label")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Stat2LabelMarathi")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Stat2Value")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Stat3Label")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Stat3LabelMarathi")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Stat3Value")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Stat4Label")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Stat4LabelMarathi")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Stat4Value")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AboutPageSectionSettings");
+                });
+
             modelBuilder.Entity("Shivakala.Core.Entities.AppUser", b =>
                 {
                     b.Property<int>("Id")
@@ -545,6 +619,7 @@ namespace Shivakala.Infrastructure.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<decimal>("Amount")
+                        .HasPrecision(10, 2)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedDate")
@@ -607,10 +682,21 @@ namespace Shivakala.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("HeroBannerAltText")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HeroBannerImageUrl")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("ShowStatisticsSection")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("ShowTestimonialsSection")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("ShowTrendingBanner")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Stat1Label")
@@ -674,6 +760,50 @@ namespace Shivakala.Infrastructure.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("TestimonialsTitleMarathi")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TrendingAltText")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TrendingDescription")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TrendingDescriptionMarathi")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TrendingEyebrow")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TrendingEyebrowMarathi")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TrendingImageUrl")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TrendingLinkText")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TrendingLinkTextMarathi")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TrendingLinkUrl")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TrendingTitle")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TrendingTitleMarathi")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -1107,8 +1237,23 @@ namespace Shivakala.Infrastructure.Data.Migrations
                     b.Property<string>("PhotoUrl")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("PublicDesignation")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PublicDesignationMarathi")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PublicExperience")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PublicExperienceMarathi")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Qualification")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("ShowOnAboutPage")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Specialisation")
                         .HasColumnType("TEXT");

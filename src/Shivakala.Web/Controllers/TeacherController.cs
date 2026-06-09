@@ -67,6 +67,11 @@ public sealed class TeacherController(
         existing.Specialisation = model.Specialisation; existing.Address = model.Address;
         existing.EmployeeCode = model.EmployeeCode; existing.MonthlySalary = model.MonthlySalary;
         existing.JoiningDate = model.JoiningDate; existing.IsActive = model.IsActive;
+        existing.ShowOnAboutPage = model.ShowOnAboutPage;
+        existing.PublicDesignation = model.PublicDesignation;
+        existing.PublicDesignationMarathi = model.PublicDesignationMarathi;
+        existing.PublicExperience = model.PublicExperience;
+        existing.PublicExperienceMarathi = model.PublicExperienceMarathi;
         existing.AdminNotes = model.AdminNotes;
 
         await repo.UpdateAsync(existing, ct);

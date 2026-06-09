@@ -12,6 +12,8 @@ public sealed class StudentAdminViewModel
     public string Address { get; set; } = string.Empty;
     public string? Board { get; set; }
     public string? Medium { get; set; }
+    public string? AdmissionNumber { get; set; }
+    public string? PhotoUrl { get; set; }
     public string Status { get; set; } = "Pending";
     public string? AdminNotes { get; set; }
     public DateTime CreatedDate { get; set; }

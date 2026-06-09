@@ -13,6 +13,11 @@ public sealed class Teacher : BaseEntity
     public decimal?  MonthlySalary        { get; set; }
     public DateTime  JoiningDate          { get; set; } = DateTime.UtcNow;
     public bool      IsActive             { get; set; } = true;
+    public bool      ShowOnAboutPage      { get; set; } = true;
+    public string?   PublicDesignation    { get; set; }
+    public string?   PublicDesignationMarathi { get; set; }
+    public string?   PublicExperience     { get; set; }
+    public string?   PublicExperienceMarathi { get; set; }
     public string?   AdminNotes           { get; set; }
     public DateTime  CreatedDate          { get; set; } = DateTime.UtcNow;
 }
