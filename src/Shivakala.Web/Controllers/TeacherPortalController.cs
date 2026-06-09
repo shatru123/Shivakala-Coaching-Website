@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shivakala.Core.Common;
+using Shivakala.Core.Interfaces;
 using Shivakala.Core.Services;
 using Shivakala.Core.ViewModels;
 using Shivakala.Infrastructure.Data;
@@ -14,6 +15,7 @@ namespace Shivakala.Web.Controllers;
 [Route("teacher")]
 public sealed class TeacherPortalController(
     ShivakalaDbContext db,
+    ITeacherRepository teacherRepo,
     IPortalUserService portalUsers,
     ILogger<TeacherPortalController> logger) : Controller
 {
@@ -95,7 +97,7 @@ public sealed class TeacherPortalController(
     {
         var tid = GetTeacherId();
         var todayUtc = UtcDateTime.StartOfToday();
-        ViewBag.Teacher = tid > 0 ? await db.Teachers.FindAsync([tid], ct) : null;
+        ViewBag.Teacher = tid > 0 ? await teacherRepo.GetByIdAsync(tid, ct) : null;
 
         ViewBag.MyBatches = await db.BatchSubjects
             .Include(bs => bs.Batch)

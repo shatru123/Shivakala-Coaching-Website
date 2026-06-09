@@ -23,22 +23,35 @@ public sealed class TeacherController(
         ViewBag.PortalUsernames = await db.AppUsers
             .Where(u => u.Role == "Teacher" && u.TeacherId != null)
             .ToDictionaryAsync(u => u.TeacherId!.Value, u => u.Username, ct);
+        await PopulateSchemaWarningAsync(ct);
         return View(await repo.GetAllAsync(ct));
     }
 
     [HttpGet("create")]
-    public IActionResult Create() => View("Form", new Teacher { FullName = "", Mobile = "" });
+    public async Task<IActionResult> Create(CancellationToken ct)
+    {
+        await PopulateSchemaWarningAsync(ct);
+        return View("Form", new Teacher { FullName = "", Mobile = "" });
+    }
 
     [HttpPost("create"), ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(Teacher model, IFormFile? photo, string? portalUsername, string? portalPassword, CancellationToken ct)
     {
-        if (!ModelState.IsValid) return View("Form", model);
+        if (!ModelState.IsValid)
+        {
+            await PopulateSchemaWarningAsync(ct);
+            return View("Form", model);
+        }
+
+        var supportsAboutPageFields = await TeacherSchemaCompatibility.SupportsAboutPageFieldsAsync(db, ct);
         model.PhotoUrl = await SavePhotoAsync(photo);
         await repo.AddAsync(model, ct);
         var portalUser = await portalUsers.EnsureTeacherAccountAsync(model.Id, portalUsername, portalPassword, ct);
         await audit.LogAsync("Created", "Teacher", model.Id, null,
             $"{{Name:{model.FullName}}}", User.Identity?.Name, HttpContext.Connection.RemoteIpAddress?.ToString(), ct);
         TempData["SuccessMessage"] = $"Teacher added. Portal login — username: {portalUser.Username}, password: {(string.IsNullOrWhiteSpace(portalPassword) ? "last 4 digits of mobile" : "(as set)")}.";
+        if (!supportsAboutPageFields)
+            TempData["WarningMessage"] = "Teacher saved, but About page display fields will start saving after the production teacher migration finishes.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -47,15 +60,21 @@ public sealed class TeacherController(
     {
         var t = await repo.GetByIdAsync(id, ct);
         if (t is null) return NotFound();
+        await PopulateSchemaWarningAsync(ct);
         return View("Form", t);
     }
 
     [HttpPost("{id}/edit"), ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, Teacher model, IFormFile? photo, CancellationToken ct)
     {
-        if (!ModelState.IsValid) return View("Form", model);
+        if (!ModelState.IsValid)
+        {
+            await PopulateSchemaWarningAsync(ct);
+            return View("Form", model);
+        }
         var existing = await repo.GetByIdAsync(id, ct);
         if (existing is null) return NotFound();
+        var supportsAboutPageFields = await TeacherSchemaCompatibility.SupportsAboutPageFieldsAsync(db, ct);
 
         if (photo is { Length: > 0 })
         {
@@ -78,6 +97,8 @@ public sealed class TeacherController(
         await audit.LogAsync("Updated", "Teacher", id, null, null, User.Identity?.Name,
             HttpContext.Connection.RemoteIpAddress?.ToString(), ct);
         TempData["SuccessMessage"] = "Teacher updated.";
+        if (!supportsAboutPageFields)
+            TempData["WarningMessage"] = "Teacher updated, but About page display fields will start saving after the production teacher migration finishes.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -106,5 +127,11 @@ public sealed class TeacherController(
         if (string.IsNullOrWhiteSpace(url)) return;
         var path = Path.Combine(env.WebRootPath, url.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
         if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+    }
+
+    private async Task PopulateSchemaWarningAsync(CancellationToken ct)
+    {
+        if (!await TeacherSchemaCompatibility.SupportsAboutPageFieldsAsync(db, ct))
+            ViewBag.SchemaWarning = "Teacher management is running in compatibility mode. Core teacher details still work, but About page display fields will start saving after the production teacher migration finishes.";
     }
 }

@@ -9,6 +9,7 @@ namespace Shivakala.Infrastructure.Services;
 
 public sealed class PortalUserService(
     ShivakalaDbContext db,
+    Shivakala.Core.Interfaces.ITeacherRepository teacherRepo,
     ILogger<PortalUserService> logger) : IPortalUserService
 {
     public async Task<AppUser?> ValidateCredentialsAsync(string username, string password, string role, CancellationToken ct = default)
@@ -48,7 +49,7 @@ public sealed class PortalUserService(
             if (user is not null) return user;
         }
 
-        var teachers = await db.Teachers.Where(t => t.IsActive).ToListAsync(ct);
+        var teachers = (await teacherRepo.GetAllAsync(ct)).Where(t => t.IsActive).ToList();
         var teacher = teachers.FirstOrDefault(t =>
             (!string.IsNullOrWhiteSpace(t.EmployeeCode)
                 && string.Equals(t.EmployeeCode.Trim(), login.Trim(), StringComparison.OrdinalIgnoreCase))
@@ -63,7 +64,7 @@ public sealed class PortalUserService(
 
     public async Task<AppUser> EnsureTeacherAccountAsync(int teacherId, string? username = null, string? password = null, CancellationToken ct = default)
     {
-        var teacher = await db.Teachers.FindAsync([teacherId], ct)
+        var teacher = await teacherRepo.GetByIdAsync(teacherId, ct)
             ?? throw new InvalidOperationException($"Teacher #{teacherId} not found.");
 
         var existing = await db.AppUsers.FirstOrDefaultAsync(
@@ -234,7 +235,7 @@ public sealed class PortalUserService(
 
     public async Task SyncMissingPortalAccountsAsync(CancellationToken ct = default)
     {
-        var teachers = await db.Teachers.Where(t => t.IsActive).ToListAsync(ct);
+        var teachers = (await teacherRepo.GetAllAsync(ct)).Where(t => t.IsActive).ToList();
         foreach (var teacher in teachers)
         {
             if (await db.AppUsers.AnyAsync(u => u.TeacherId == teacher.Id && u.Role == "Teacher", ct))

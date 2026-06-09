@@ -23,6 +23,7 @@ public sealed class AdminController(
     IAdminAuthenticationService authService,
     IPortalUserService portalUsers,
     IAdminPortalService portalService,
+    ITeacherRepository teacherRepo,
     ICourseRepository courseRepo,
     INoticeRepository noticeRepo,
     ITestResultRepository resultRepo,
@@ -811,8 +812,8 @@ public sealed class AdminController(
             .ThenBy(u => u.FullName)
             .ToListAsync(ct);
 
-        var teachers = await db.Teachers
-            .ToDictionaryAsync(t => t.Id, t => t.FullName, ct);
+        var teachers = (await teacherRepo.GetAllAsync(ct))
+            .ToDictionary(t => t.Id, t => t.FullName);
         var students = await db.Students
             .ToDictionaryAsync(s => s.Id, s => s.FullName, ct);
 

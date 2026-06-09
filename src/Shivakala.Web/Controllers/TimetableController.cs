@@ -22,11 +22,26 @@ public sealed class TimetableController(
         ViewBag.Days = Days;
         if (batchId.HasValue)
         {
-            var slots = await db.TimetableSlots
-                .Include(s => s.Teacher)
-                .Where(s => s.BatchId == batchId && s.IsActive)
-                .OrderBy(s => s.DayOfWeek).ThenBy(s => s.StartTime)
-                .ToListAsync(ct);
+            var supportsTeacherAboutFields = await TeacherSchemaCompatibility.SupportsAboutPageFieldsAsync(db, ct);
+            var slots = supportsTeacherAboutFields
+                ? await db.TimetableSlots
+                    .Include(s => s.Teacher)
+                    .Where(s => s.BatchId == batchId && s.IsActive)
+                    .OrderBy(s => s.DayOfWeek).ThenBy(s => s.StartTime)
+                    .ToListAsync(ct)
+                : await db.TimetableSlots
+                    .Where(s => s.BatchId == batchId && s.IsActive)
+                    .OrderBy(s => s.DayOfWeek).ThenBy(s => s.StartTime)
+                    .ToListAsync(ct);
+            if (!supportsTeacherAboutFields)
+            {
+                var teacherNames = await TeacherSchemaCompatibility.GetTeacherNamesFallbackAsync(db, ct);
+                foreach (var slot in slots.Where(s => s.TeacherId.HasValue))
+                {
+                    if (slot.TeacherId.HasValue && teacherNames.TryGetValue(slot.TeacherId.Value, out var teacherName))
+                        slot.Teacher = new Teacher { Id = slot.TeacherId.Value, FullName = teacherName, Mobile = string.Empty };
+                }
+            }
             ViewBag.Slots = slots;
             ViewBag.SelectedBatchId = batchId;
         }

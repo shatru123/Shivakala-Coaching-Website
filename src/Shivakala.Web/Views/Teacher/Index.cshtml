@@ -16,6 +16,10 @@
     <div class="container">
         @if (TempData["SuccessMessage"] is string msg)
         { <div class="alert alert-success">@msg</div> }
+        @if (TempData["WarningMessage"] is string warning)
+        { <div class="alert alert-warning">@warning</div> }
+        @if (ViewBag.SchemaWarning is string schemaWarning)
+        { <div class="alert alert-warning">@schemaWarning</div> }
 
         <div class="glass-card">
             <div class="table-responsive">
