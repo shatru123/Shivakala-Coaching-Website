@@ -7,10 +7,15 @@ using Shivakala.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 var appDataPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data");
+var dataProtectionPath = Path.Combine(appDataPath, "DataProtection-Keys");
+var startupLogPath = Path.Combine(appDataPath, "startup-errors.log");
+
+EnsureDirectory(appDataPath);
+EnsureDirectory(dataProtectionPath);
 
 builder.Services
     .AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(appDataPath, "DataProtection-Keys")))
+    .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionPath))
     .SetApplicationName("ShivakalaCoaching");
 
 builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(x =>
@@ -109,6 +114,7 @@ var wwwroot = app.Environment.WebRootPath;
 var directories = new List<string>
 {
     appDataPath,
+    dataProtectionPath,
     Path.Combine(wwwroot, "uploads", "students"),
     Path.Combine(wwwroot, "uploads", "teachers"),
     Path.Combine(wwwroot, "uploads", "homework"),
@@ -117,7 +123,7 @@ var directories = new List<string>
 };
 
 foreach (var dir in directories)
-    Directory.CreateDirectory(dir);
+    EnsureDirectory(dir);
 
 if (!app.Environment.IsDevelopment())
 {
@@ -137,5 +143,50 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
 
-await DatabaseInitializer.InitializeAsync(app.Services);
+try
+{
+    await DatabaseInitializer.InitializeAsync(app.Services);
+}
+catch (Exception ex) when (!app.Environment.IsDevelopment())
+{
+    WriteStartupError(startupLogPath, ex);
+}
+
 await app.RunAsync();
+
+static void EnsureDirectory(string path)
+{
+    try
+    {
+        Directory.CreateDirectory(path);
+    }
+    catch
+    {
+        // Best effort only; production hosts can have restrictive filesystem permissions.
+    }
+}
+
+static void WriteStartupError(string startupLogPath, Exception exception)
+{
+    var lines = new[]
+    {
+        $"[{DateTime.UtcNow:O}] Startup initialization failed",
+        exception.ToString(),
+        string.Empty
+    };
+
+    try
+    {
+        var directory = Path.GetDirectoryName(startupLogPath);
+        if (!string.IsNullOrWhiteSpace(directory))
+            Directory.CreateDirectory(directory);
+
+        File.AppendAllLines(startupLogPath, lines);
+    }
+    catch
+    {
+        // Do not let fallback logging take the site down.
+    }
+
+    Console.Error.WriteLine(exception);
+}
