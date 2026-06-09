@@ -45,10 +45,18 @@ public sealed class ExamController(
     [HttpGet("{id}/marks")]
     public async Task<IActionResult> Marks(int id, CancellationToken ct)
     {
-        var exam = await examRepo.GetByIdWithResultsAsync(id, ct);
-        if (exam is null) return NotFound();
-        ViewBag.Exam = exam;
-        return View(exam.Results);
+        try
+        {
+            var exam = await examRepo.GetByIdWithResultsAsync(id, ct);
+            if (exam is null) return NotFound();
+            ViewBag.Exam = exam;
+            return View(exam.Results);
+        }
+        catch
+        {
+            TempData["WarningMessage"] = "Exam marks could not be loaded right now.";
+            return RedirectToAction(nameof(Index));
+        }
     }
 
     [HttpPost("{id}/marks"), ValidateAntiForgeryToken]
