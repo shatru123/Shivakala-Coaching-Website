@@ -1,5 +1,6 @@
 using System.Globalization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Shivakala.Core.Common;
 using Shivakala.Core.Entities;
 using Shivakala.Core.Services;
@@ -12,7 +13,8 @@ namespace Shivakala.Infrastructure.Services;
 public sealed class HomePageService(
     ICourseService courseService,
     ShivakalaDbContext db,
-    ITestimonialRepository testimonialRepo) : IHomePageService
+    ITestimonialRepository testimonialRepo,
+    ILogger<HomePageService> logger) : IHomePageService
 {
     public async Task<HomePageViewModel> GetHomePageAsync(CancellationToken cancellationToken = default)
     {
@@ -94,12 +96,21 @@ public sealed class HomePageService(
 
     private async Task<HomePageSectionSettings> GetSettingsAsync(CancellationToken cancellationToken)
     {
-        var settings = await db.HomePageSectionSettings.FirstOrDefaultAsync(cancellationToken);
-        if (settings is not null) return settings;
+        try
+        {
+            var settings = await db.HomePageSectionSettings.FirstOrDefaultAsync(cancellationToken);
+            if (settings is not null) return settings;
 
-        settings = new HomePageSectionSettings();
-        db.HomePageSectionSettings.Add(settings);
-        await db.SaveChangesAsync(cancellationToken);
-        return settings;
+            settings = new HomePageSectionSettings();
+            db.HomePageSectionSettings.Add(settings);
+            await db.SaveChangesAsync(cancellationToken);
+            return settings;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex,
+                "Falling back to in-code homepage defaults because homepage content settings are unavailable.");
+            return new HomePageSectionSettings();
+        }
     }
 }

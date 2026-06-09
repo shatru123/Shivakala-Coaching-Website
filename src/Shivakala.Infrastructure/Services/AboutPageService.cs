@@ -1,5 +1,6 @@
 using System.Globalization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Shivakala.Core.Common;
 using Shivakala.Core.Entities;
 using Shivakala.Core.Services;
@@ -8,27 +9,15 @@ using Shivakala.Infrastructure.Data;
 
 namespace Shivakala.Infrastructure.Services;
 
-public sealed class AboutPageService(ShivakalaDbContext db) : IAboutPageService
+public sealed class AboutPageService(
+    ShivakalaDbContext db,
+    ILogger<AboutPageService> logger) : IAboutPageService
 {
     public async Task<AboutPageViewModel> GetAboutPageAsync(CancellationToken cancellationToken = default)
     {
         var isMarathi = CultureInfo.CurrentUICulture.IsMarathi();
         var settings = await GetSettingsAsync(cancellationToken);
-        var facultyMembers = await db.Teachers
-            .Where(t => t.IsActive && t.ShowOnAboutPage)
-            .OrderBy(t => t.JoiningDate)
-            .ThenBy(t => t.FullName)
-            .Select(t => new FacultyMemberViewModel
-            {
-                Name = t.FullName,
-                PhotoUrl = t.PhotoUrl ?? string.Empty,
-                Designation = isMarathi
-                    ? (t.PublicDesignationMarathi ?? t.PublicDesignation ?? t.Qualification ?? "शिक्षक")
-                    : (t.PublicDesignation ?? t.Qualification ?? "Faculty Mentor"),
-                Experience = ResolveExperience(t, isMarathi),
-                Speciality = t.Specialisation ?? string.Empty
-            })
-            .ToListAsync(cancellationToken);
+        var facultyMembers = await GetFacultyMembersAsync(isMarathi, cancellationToken);
 
         return new AboutPageViewModel
         {
@@ -60,13 +49,73 @@ public sealed class AboutPageService(ShivakalaDbContext db) : IAboutPageService
 
     private async Task<AboutPageSectionSettings> GetSettingsAsync(CancellationToken cancellationToken)
     {
-        var settings = await db.Set<AboutPageSectionSettings>().FirstOrDefaultAsync(cancellationToken);
-        if (settings is not null) return settings;
+        try
+        {
+            var settings = await db.Set<AboutPageSectionSettings>().FirstOrDefaultAsync(cancellationToken);
+            if (settings is not null) return settings;
 
-        settings = new AboutPageSectionSettings();
-        db.Add(settings);
-        await db.SaveChangesAsync(cancellationToken);
-        return settings;
+            settings = new AboutPageSectionSettings();
+            db.Add(settings);
+            await db.SaveChangesAsync(cancellationToken);
+            return settings;
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex,
+                "Falling back to in-code About page defaults because About page settings are unavailable.");
+            return new AboutPageSectionSettings();
+        }
+    }
+
+    private async Task<IReadOnlyList<FacultyMemberViewModel>> GetFacultyMembersAsync(bool isMarathi, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await db.Teachers
+                .Where(t => t.IsActive && t.ShowOnAboutPage)
+                .OrderBy(t => t.JoiningDate)
+                .ThenBy(t => t.FullName)
+                .Select(t => new FacultyMemberViewModel
+                {
+                    Name = t.FullName,
+                    PhotoUrl = t.PhotoUrl ?? string.Empty,
+                    Designation = isMarathi
+                        ? (t.PublicDesignationMarathi ?? t.PublicDesignation ?? t.Qualification ?? "शिक्षक")
+                        : (t.PublicDesignation ?? t.Qualification ?? "Faculty Mentor"),
+                    Experience = ResolveExperience(t, isMarathi),
+                    Speciality = t.Specialisation ?? string.Empty
+                })
+                .ToListAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex,
+                "Falling back to default faculty content because About page faculty fields are unavailable.");
+            return
+            [
+                new FacultyMemberViewModel
+                {
+                    Name = "Prof. Shrikant Sir",
+                    Designation = isMarathi ? "संस्थापक आणि गणित मार्गदर्शक" : "Founder & Mathematics Mentor",
+                    Experience = isMarathi ? "15+ वर्षे" : "15+ years",
+                    Speciality = isMarathi ? "बोर्ड, स्कॉलरशिप, ऑलिंपियाड" : "Boards, scholarships, olympiads"
+                },
+                new FacultyMemberViewModel
+                {
+                    Name = "Mrs. Kavita Ma'am",
+                    Designation = isMarathi ? "सायन्स तज्ज्ञ" : "Science Specialist",
+                    Experience = isMarathi ? "12+ वर्षे" : "12+ years",
+                    Speciality = isMarathi ? "प्रायोगिक संकल्पना आणि रिव्हिजन" : "Practical concepts and revision strategy"
+                },
+                new FacultyMemberViewModel
+                {
+                    Name = "Mr. Nilesh Sir",
+                    Designation = isMarathi ? "इंग्रजी आणि टेस्ट स्ट्रॅटेजी" : "English & Test Strategy",
+                    Experience = isMarathi ? "10+ वर्षे" : "10+ years",
+                    Speciality = isMarathi ? "भाषिक कौशल्य आणि लेखन" : "Language skills and writing improvement"
+                }
+            ];
+        }
     }
 
     private static string ResolveExperience(Teacher teacher, bool isMarathi)
