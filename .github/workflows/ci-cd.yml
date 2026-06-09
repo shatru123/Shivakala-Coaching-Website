@@ -87,6 +87,7 @@ jobs:
         env:
           ASPNETCORE_ENVIRONMENT: Production
           Database__Provider: SqlServer
+          SHIVAKALA_DB_PROVIDER: SqlServer
           ConnectionStrings__SqlServer: ${{ secrets.PROD_SQLSERVER_CONNECTION_STRING }}
         run: |
           Write-Host 'Applying latest SQL Server migrations to production...'
@@ -94,15 +95,14 @@ jobs:
             --project src/Shivakala.SqlServerMigrations/Shivakala.SqlServerMigrations.csproj `
             --startup-project src/Shivakala.Web/Shivakala.Web.csproj `
             --context ShivakalaDbContext `
-            --verbose `
-            -- `
-            --provider=SqlServer
+            --verbose
 
       - name: Verify production schema is up to date
         shell: pwsh
         env:
           ASPNETCORE_ENVIRONMENT: Production
           Database__Provider: SqlServer
+          SHIVAKALA_DB_PROVIDER: SqlServer
           ConnectionStrings__SqlServer: ${{ secrets.PROD_SQLSERVER_CONNECTION_STRING }}
         run: |
           Add-Type -AssemblyName System.Data
