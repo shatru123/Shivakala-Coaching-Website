@@ -51,20 +51,90 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Apply production SQL Server migrations
-        if: ${{ secrets.PROD_SQLSERVER_CONNECTION_STRING != '' }}
+      - name: Validate production configuration
         shell: pwsh
         env:
+          PROD_SQLSERVER_CONNECTION_STRING: ${{ secrets.PROD_SQLSERVER_CONNECTION_STRING }}
+          PROD_WHATSAPP_BASE_URL: ${{ secrets.PROD_WHATSAPP_BASE_URL }}
+          PROD_WHATSAPP_API_KEY: ${{ secrets.PROD_WHATSAPP_API_KEY }}
+        run: |
+          $missing = @()
+
+          if ([string]::IsNullOrWhiteSpace($env:PROD_SQLSERVER_CONNECTION_STRING)) {
+            $missing += 'PROD_SQLSERVER_CONNECTION_STRING'
+          }
+
+          if ([string]::IsNullOrWhiteSpace($env:PROD_WHATSAPP_API_KEY)) {
+            $missing += 'PROD_WHATSAPP_API_KEY'
+          }
+
+          if ($missing.Count -gt 0) {
+            throw "Production deploy requires these GitHub secrets: $($missing -join ', ')"
+          }
+
+          if ([string]::IsNullOrWhiteSpace($env:PROD_WHATSAPP_BASE_URL)) {
+            Write-Warning 'PROD_WHATSAPP_BASE_URL is empty. The workflow will use the default WhatsApp sidecar URL.'
+          }
+
+      - name: Restore solution for deploy
+        run: dotnet restore ShivakalaCoaching.sln
+
+      - name: Apply production SQL Server migrations
+        shell: pwsh
+        env:
+          ASPNETCORE_ENVIRONMENT: Production
           Database__Provider: SqlServer
           ConnectionStrings__SqlServer: ${{ secrets.PROD_SQLSERVER_CONNECTION_STRING }}
         run: |
+          Write-Host 'Applying latest SQL Server migrations to production...'
           dotnet ef database update `
             --project src/Shivakala.SqlServerMigrations/Shivakala.SqlServerMigrations.csproj `
             --startup-project src/Shivakala.Web/Shivakala.Web.csproj `
-            --context ShivakalaDbContext
+            --context ShivakalaDbContext `
+            --verbose
+
+      - name: Verify production schema is up to date
+        shell: pwsh
+        env:
+          ASPNETCORE_ENVIRONMENT: Production
+          Database__Provider: SqlServer
+          ConnectionStrings__SqlServer: ${{ secrets.PROD_SQLSERVER_CONNECTION_STRING }}
+        run: |
+          Add-Type -AssemblyName System.Data
+
+          $connection = New-Object System.Data.SqlClient.SqlConnection($env:ConnectionStrings__SqlServer)
+          $connection.Open()
+
+          try {
+            $command = $connection.CreateCommand()
+            $command.CommandText = "SELECT TOP 1 MigrationId FROM __EFMigrationsHistory ORDER BY MigrationId DESC"
+            $latestApplied = [string]$command.ExecuteScalar()
+
+            if ([string]::IsNullOrWhiteSpace($latestApplied)) {
+              throw 'No migrations were found in __EFMigrationsHistory after running database update.'
+            }
+
+            $latestExpected = Get-ChildItem 'src/Shivakala.SqlServerMigrations/Migrations' -Filter '*.cs' |
+              Where-Object { $_.BaseName -match '^\d+_.+' -and $_.Name -notlike '*.Designer.cs' } |
+              Sort-Object BaseName |
+              Select-Object -Last 1 -ExpandProperty BaseName
+
+            if ([string]::IsNullOrWhiteSpace($latestExpected)) {
+              throw 'Could not determine the latest SQL Server migration from source control.'
+            }
+
+            if ($latestApplied -ne $latestExpected) {
+              throw "Production schema is not fully updated. Latest applied migration: '$latestApplied'. Latest expected migration: '$latestExpected'."
+            }
+
+            Write-Host "Production schema is up to date at migration $latestApplied."
+          }
+          finally {
+            $connection.Dispose()
+          }
 
       - name: Publish MVC app
-        run: dotnet publish src/Shivakala.Web/Shivakala.Web.csproj --configuration Release --output "${{ github.workspace }}\\artifacts\\web"
+        run: dotnet publish src/Shivakala.Web/Shivakala.Web.csproj --configuration Release --no-restore --output "${{ github.workspace }}\\artifacts\\web"
 
       - name: Prepare production appsettings
         shell: pwsh
