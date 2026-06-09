@@ -51,6 +51,18 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      - name: Apply production SQL Server migrations
+        if: ${{ secrets.PROD_SQLSERVER_CONNECTION_STRING != '' }}
+        shell: pwsh
+        env:
+          Database__Provider: SqlServer
+          ConnectionStrings__SqlServer: ${{ secrets.PROD_SQLSERVER_CONNECTION_STRING }}
+        run: |
+          dotnet ef database update `
+            --project src/Shivakala.SqlServerMigrations/Shivakala.SqlServerMigrations.csproj `
+            --startup-project src/Shivakala.Web/Shivakala.Web.csproj `
+            --context ShivakalaDbContext
+
       - name: Publish MVC app
         run: dotnet publish src/Shivakala.Web/Shivakala.Web.csproj --configuration Release --output "${{ github.workspace }}\\artifacts\\web"
 
