@@ -30,6 +30,7 @@ public sealed class ResultsPageViewModel
 public sealed class TestResultFormViewModel
 {
     public int Id { get; set; }
+    public int? SelectedStudentId { get; set; }
     public string StudentName { get; set; } = string.Empty;
     public string Standard { get; set; } = string.Empty;
     public string Subject { get; set; } = string.Empty;
@@ -40,4 +41,14 @@ public sealed class TestResultFormViewModel
     public string? Remarks { get; set; }
     public DateTime TestDate { get; set; } = UtcDateTime.StartOfToday();
     public string TestTitle { get; set; } = string.Empty;
+    public IReadOnlyList<TestResultStudentOptionViewModel> AvailableStudents { get; set; } = [];
+}
+
+public sealed class TestResultStudentOptionViewModel
+{
+    public int Id { get; set; }
+    public string FullName { get; set; } = string.Empty;
+    public string Standard { get; set; } = string.Empty;
+    public string? AdmissionNumber { get; set; }
+    public string Mobile { get; set; } = string.Empty;
 }

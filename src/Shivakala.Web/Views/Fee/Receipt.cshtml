@@ -104,6 +104,12 @@
     <button onclick="window.print()" style="padding:10px 24px;background:#1a3a6b;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.9rem">
         🖨️ Print Receipt
     </button>
+    <form asp-action="SendReceiptOnWhatsApp" asp-route-id="@Model.Id" method="post" style="display:inline">
+        @Html.AntiForgeryToken()
+        <button type="submit" style="padding:10px 24px;background:#075e54;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:.9rem">
+            <i class="fa-brands fa-whatsapp"></i> Send on WhatsApp
+        </button>
+    </form>
     <a href="/admin/fees" style="padding:10px 24px;background:#f0f0f0;color:#333;border:none;border-radius:8px;text-decoration:none;font-size:.9rem">
         ← Back to Fees
     </a>

@@ -106,6 +106,40 @@ public sealed class WhatsAppService : IWhatsAppService, IDisposable
         return success;
     }
 
+    public async Task<bool> DisconnectAsync(CancellationToken ct)
+    {
+        if (!TryConfigureClient(out var baseUris))
+            return false;
+
+        foreach (var baseUri in baseUris)
+        {
+            try
+            {
+                var resp = await _http.PostAsync(new Uri(baseUri, "/disconnect"), content: null, ct);
+                if (resp.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    _authenticated = false;
+                    _logger.LogWarning("WhatsApp sidecar rejected the disconnect request at {BaseUrl}. Check that WhatsApp:ApiKey matches WHATSAPP_API_KEY.", baseUri);
+                    return false;
+                }
+
+                if (!resp.IsSuccessStatusCode)
+                    continue;
+
+                _authenticated = false;
+                _configuredBaseUrl = baseUri.ToString().TrimEnd('/');
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _authenticated = false;
+                _logger.LogWarning(ex, "WhatsApp disconnect failed via {BaseUrl}", baseUri);
+            }
+        }
+
+        return false;
+    }
+
     public void Dispose() => _http.Dispose();
 
     private bool TryConfigureClient(out IReadOnlyList<Uri> baseUris)

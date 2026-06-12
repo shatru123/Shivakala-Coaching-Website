@@ -47,6 +47,16 @@ public sealed class WhatsAppController(
     [HttpGet("status")]
     public IActionResult Status() => Json(new { authenticated = wa.IsAuthenticated });
 
+    [HttpPost("disconnect"), ValidateAntiForgeryToken]
+    public async Task<IActionResult> Disconnect(CancellationToken ct)
+    {
+        var disconnected = await wa.DisconnectAsync(ct);
+        TempData["SuccessMessage"] = disconnected
+            ? "WhatsApp disconnected. You can now scan the QR with a different account."
+            : "Could not disconnect WhatsApp right now. Please verify the sidecar is running and reachable.";
+        return RedirectToAction(nameof(Index));
+    }
+
     [HttpPost("broadcast"), ValidateAntiForgeryToken]
     public async Task<IActionResult> Broadcast(
         string audience, string message, string? batchId, CancellationToken ct)

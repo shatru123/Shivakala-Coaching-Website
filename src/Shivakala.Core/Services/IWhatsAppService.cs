@@ -7,4 +7,5 @@ public interface IWhatsAppService
     bool IsAuthenticated { get; }
     Task<bool> SendMessageAsync(string mobile, string message, CancellationToken ct = default);
     Task<int> BroadcastAsync(IEnumerable<string> mobiles, string message, CancellationToken ct = default);
+    Task<bool> DisconnectAsync(CancellationToken ct = default);
 }

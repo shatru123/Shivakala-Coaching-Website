@@ -15,6 +15,7 @@ const executablePath = resolveExecutablePath();
 let qrBase64 = null;
 let isAuthenticated = false;
 let lastInitError = '';
+let restartInProgress = false;
 const messageQueue = [];
 const puppeteerOptions = {
     headless: (process.env.WHATSAPP_PUPPETEER_HEADLESS || 'true') !== 'false',
@@ -25,10 +26,7 @@ if (executablePath) {
     puppeteerOptions.executablePath = executablePath;
 }
 
-const client = new Client({
-    authStrategy: new LocalAuth({ dataPath: authPath }),
-    puppeteer: puppeteerOptions
-});
+let client = createClient();
 
 app.use((req, res, next) => {
     if (req.path === '/healthz') {
@@ -46,32 +44,8 @@ app.use((req, res, next) => {
     next();
 });
 
-client.on('qr', async (qr) => {
-    isAuthenticated = false;
-    qrBase64 = await QRCode.toDataURL(qr);
-    console.log('[WA] QR received — scan with WhatsApp');
-});
-
-client.on('ready', () => {
-    isAuthenticated = true;
-    qrBase64 = null;
-    lastInitError = '';
-    console.log('[WA] Client ready');
-    // Flush queued messages
-    messageQueue.splice(0).forEach(({ mobile, message, resolve }) => {
-        sendMsg(mobile, message).then(resolve).catch(() => resolve(false));
-    });
-});
-
-client.on('disconnected', () => {
-    isAuthenticated = false;
-    console.log('[WA] Disconnected');
-});
-
-client.initialize().catch(err => {
-    lastInitError = err && err.message ? err.message : String(err);
-    console.error('[WA] Init error:', err);
-});
+attachClientHandlers(client);
+initializeClient();
 
 async function sendMsg(mobile, message) {
     const number = mobile.replace(/\D/g, '');
@@ -98,7 +72,8 @@ app.get('/status', (req, res) => {
         authenticated: isAuthenticated,
         queueLength: messageQueue.length,
         browserConfigured: Boolean(executablePath),
-        lastInitError
+        lastInitError,
+        restartInProgress
     });
 });
 
@@ -141,8 +116,94 @@ app.post('/broadcast', async (req, res) => {
     res.json({ sent, failed, total: mobiles.length });
 });
 
+// POST /disconnect
+app.post('/disconnect', async (_req, res) => {
+    try {
+        await restartClient(true);
+        res.json({ success: true, authenticated: isAuthenticated });
+    } catch (error) {
+        console.error('[WA] Disconnect error:', error);
+        res.status(500).json({ error: 'Failed to disconnect WhatsApp session' });
+    }
+});
+
 const PORT = process.env.PORT || 3500;
 app.listen(PORT, () => console.log(`[WA Sidecar] listening on :${PORT} | auth path: ${authPath}`));
+
+function createClient() {
+    return new Client({
+        authStrategy: new LocalAuth({ dataPath: authPath }),
+        puppeteer: puppeteerOptions
+    });
+}
+
+function attachClientHandlers(currentClient) {
+    currentClient.on('qr', async (qr) => {
+        isAuthenticated = false;
+        qrBase64 = await QRCode.toDataURL(qr);
+        lastInitError = '';
+        restartInProgress = false;
+        console.log('[WA] QR received — scan with WhatsApp');
+    });
+
+    currentClient.on('ready', () => {
+        isAuthenticated = true;
+        qrBase64 = null;
+        lastInitError = '';
+        restartInProgress = false;
+        console.log('[WA] Client ready');
+        messageQueue.splice(0).forEach(({ mobile, message, resolve }) => {
+            sendMsg(mobile, message).then(resolve).catch(() => resolve(false));
+        });
+    });
+
+    currentClient.on('disconnected', () => {
+        isAuthenticated = false;
+        console.log('[WA] Disconnected');
+    });
+}
+
+function initializeClient() {
+    client.initialize().catch(err => {
+        restartInProgress = false;
+        lastInitError = err && err.message ? err.message : String(err);
+        console.error('[WA] Init error:', err);
+    });
+}
+
+async function restartClient(clearSession) {
+    if (restartInProgress) {
+        throw new Error('WhatsApp restart already in progress');
+    }
+
+    restartInProgress = true;
+    isAuthenticated = false;
+    qrBase64 = null;
+    lastInitError = '';
+
+    try {
+        try {
+            await client.logout();
+        } catch {
+        }
+
+        try {
+            await client.destroy();
+        } catch {
+        }
+
+        if (clearSession && fs.existsSync(authPath)) {
+            fs.rmSync(authPath, { recursive: true, force: true });
+        }
+
+        client = createClient();
+        attachClientHandlers(client);
+        initializeClient();
+    } catch (error) {
+        restartInProgress = false;
+        throw error;
+    }
+}
 
 function readSetting(name) {
     const value = process.env[name];

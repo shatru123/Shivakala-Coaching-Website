@@ -105,6 +105,11 @@ public sealed class AdminController(
         ViewBag.PendingFees     = (decimal)(await db.FeePayments
             .Where(f => f.Status == "Pending")
             .SumAsync(f => (double?)f.Amount - (double?)f.PaidAmount, ct) ?? 0);
+        ViewBag.AttendanceToday = await db.Attendances
+            .Where(a => a.Date == UtcDateTime.Today())
+            .Select(a => a.StudentId)
+            .Distinct()
+            .CountAsync(ct);
         ViewBag.UpcomingExams   = await db.Exams
             .Where(e => e.ExamDate >= todayUtc && !e.IsPublished).CountAsync(ct);
         ViewBag.PendingHomework = await db.Homeworks
@@ -394,12 +399,46 @@ public sealed class AdminController(
     public async Task<IActionResult> Results(CancellationToken ct) => View(await resultRepo.GetAllAdminAsync(ct));
 
     [HttpGet]
-    public IActionResult CreateResult() => View("ResultForm", new TestResultFormViewModel { TestDate = UtcDateTime.StartOfToday(), TotalMarks = 100 });
+    public async Task<IActionResult> CreateResult(CancellationToken ct)
+    {
+        var vm = new TestResultFormViewModel
+        {
+            TestDate = UtcDateTime.StartOfToday(),
+            TotalMarks = 100
+        };
+        await PopulateResultFormAsync(vm, ct);
+        return View("ResultForm", vm);
+    }
 
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> CreateResult(TestResultFormViewModel vm, CancellationToken ct)
     {
-        if (!ModelState.IsValid) return View("ResultForm", vm);
+        if (!vm.SelectedStudentId.HasValue)
+        {
+            ModelState.AddModelError(nameof(vm.SelectedStudentId), "Please select a student.");
+        }
+
+        var student = vm.SelectedStudentId.HasValue
+            ? await db.Students.AsNoTracking().FirstOrDefaultAsync(s => s.Id == vm.SelectedStudentId.Value, ct)
+            : null;
+
+        if (vm.SelectedStudentId.HasValue && student is null)
+        {
+            ModelState.AddModelError(nameof(vm.SelectedStudentId), "The selected student could not be found.");
+        }
+
+        if (student is not null)
+        {
+            vm.StudentName = student.FullName;
+            vm.Standard = student.Standard;
+        }
+
+        if (!ModelState.IsValid)
+        {
+            await PopulateResultFormAsync(vm, ct);
+            return View("ResultForm", vm);
+        }
+
         vm.TestDate = UtcDateTime.EnsureUtc(vm.TestDate);
         var grade = vm.TotalMarks > 0 ? (int)(vm.Score * 100.0 / vm.TotalMarks) switch {
             >= 90 => "A+", >= 80 => "A", >= 70 => "B+", >= 60 => "B", >= 50 => "C", _ => "D"
@@ -419,6 +458,23 @@ public sealed class AdminController(
         await resultRepo.DeleteAsync(id, ct);
         TempData["SuccessMessage"] = "Result deleted.";
         return RedirectToAction(nameof(Results));
+    }
+
+    private async Task PopulateResultFormAsync(TestResultFormViewModel vm, CancellationToken ct)
+    {
+        vm.AvailableStudents = await db.Students
+            .AsNoTracking()
+            .OrderBy(s => s.Standard)
+            .ThenBy(s => s.FullName)
+            .Select(s => new TestResultStudentOptionViewModel
+            {
+                Id = s.Id,
+                FullName = s.FullName,
+                Standard = s.Standard,
+                AdmissionNumber = s.AdmissionNumber,
+                Mobile = s.Mobile
+            })
+            .ToListAsync(ct);
     }
 
     // ═══ STUDY MATERIALS ══════════════════════════════════════════════════════

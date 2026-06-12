@@ -66,10 +66,19 @@
                         <label class="form-label fw-600">Remarks</label>
                         <input asp-for="Remarks" class="form-control" />
                     </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="sendReceiptOnWhatsApp" id="sendReceiptOnWhatsApp" value="true" />
+                            <label class="form-check-label" for="sendReceiptOnWhatsApp">
+                                Send fee receipt confirmation to parent's WhatsApp after collection
+                            </label>
+                        </div>
+                        <div class="form-text">If the parent's WhatsApp number is available and the WhatsApp sidecar is connected, the receipt summary will be sent automatically.</div>
+                    </div>
                 </div>
 
                 <div class="d-flex gap-2 mt-4">
-                    <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-receipt"></i>Collect & Print Receipt</button>
+                    <button type="submit" class="btn-primary-sk"><i class="fa-solid fa-receipt"></i>Collect & Open Receipt</button>
                     <a asp-action="Index" class="btn-outline-sk">Cancel</a>
                 </div>
             </form>

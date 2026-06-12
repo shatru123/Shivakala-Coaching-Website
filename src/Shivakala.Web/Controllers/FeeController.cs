@@ -11,8 +11,10 @@ namespace Shivakala.Web.Controllers;
 public sealed class FeeController(
     IFeeRepository feeRepo,
     IStudentRepository studentRepo,
-    IAuditService audit) : Controller
+    IAuditService audit,
+    IWhatsAppService whatsAppService) : Controller
 {
+
     [HttpGet("")]
     public async Task<IActionResult> Index(string? month, string? status, CancellationToken ct)
     {
@@ -42,7 +44,7 @@ public sealed class FeeController(
     }
 
     [HttpPost("collect"), ValidateAntiForgeryToken]
-    public async Task<IActionResult> Collect(FeePayment model, CancellationToken ct)
+    public async Task<IActionResult> Collect(FeePayment model, bool sendReceiptOnWhatsApp, CancellationToken ct)
     {
         if (!ModelState.IsValid)
         {
@@ -57,7 +59,23 @@ public sealed class FeeController(
         await audit.LogAsync("Created", "FeePayment", model.Id,
             null, $"Receipt:{model.ReceiptNumber}", User.Identity?.Name,
             HttpContext.Connection.RemoteIpAddress?.ToString(), ct);
-        TempData["SuccessMessage"] = $"Fee collected. Receipt: {model.ReceiptNumber}";
+        model = await feeRepo.GetByIdAsync(model.Id, ct) ?? model;
+
+        var successMessage = $"Fee collected. Receipt: {model.ReceiptNumber}";
+        if (sendReceiptOnWhatsApp)
+        {
+            var receiptSent = await TrySendReceiptOnWhatsAppAsync(model, ct);
+            if (receiptSent)
+            {
+                successMessage += " Receipt sent on WhatsApp.";
+            }
+            else
+            {
+                TempData["WarningMessage"] = "Fee was collected, but the receipt could not be sent on WhatsApp. You can still print the receipt.";
+            }
+        }
+
+        TempData["SuccessMessage"] = successMessage;
         return RedirectToAction(nameof(Receipt), new { id = model.Id });
     }
 
@@ -67,6 +85,24 @@ public sealed class FeeController(
         var p = await feeRepo.GetByIdAsync(id, ct);
         if (p is null) return NotFound();
         return View(p);
+    }
+
+    [HttpPost("{id}/send-whatsapp"), ValidateAntiForgeryToken]
+    public async Task<IActionResult> SendReceiptOnWhatsApp(int id, CancellationToken ct)
+    {
+        var payment = await feeRepo.GetByIdAsync(id, ct);
+        if (payment is null) return NotFound();
+
+        if (await TrySendReceiptOnWhatsAppAsync(payment, ct))
+        {
+            TempData["SuccessMessage"] = $"Receipt {payment.ReceiptNumber} sent on WhatsApp.";
+        }
+        else
+        {
+            TempData["WarningMessage"] = "Receipt could not be sent on WhatsApp right now. Please verify the parent's mobile number and WhatsApp connection.";
+        }
+
+        return RedirectToAction(nameof(Receipt), new { id });
     }
 
     [HttpPost("{id}/delete"), ValidateAntiForgeryToken]
@@ -96,5 +132,57 @@ public sealed class FeeController(
         await feeRepo.DeleteFeeStructureAsync(id, ct);
         TempData["SuccessMessage"] = "Fee structure deleted.";
         return RedirectToAction(nameof(Structure));
+    }
+
+    private async Task<bool> TrySendReceiptOnWhatsAppAsync(FeePayment payment, CancellationToken ct)
+    {
+        var mobile = payment.Student?.ParentMobile;
+        if (string.IsNullOrWhiteSpace(mobile))
+            mobile = payment.Student?.Mobile;
+
+        var normalizedMobile = NormalizeIndianMobile(mobile);
+        if (string.IsNullOrWhiteSpace(normalizedMobile))
+            return false;
+
+        var message = BuildReceiptWhatsAppMessage(payment);
+        return await whatsAppService.SendMessageAsync(normalizedMobile, message, ct);
+    }
+
+    private static string BuildReceiptWhatsAppMessage(FeePayment payment)
+    {
+        var paidDate = payment.PaidDate == default
+            ? UtcDateTime.NowInAppTimeZone().ToString("dd MMM yyyy")
+            : payment.PaidDate.ToLocalTime().ToString("dd MMM yyyy");
+
+        return string.Join('\n', new[]
+        {
+            "Shivakala Coaching Classes",
+            "Fee Receipt Confirmation",
+            $"Receipt No: {payment.ReceiptNumber}",
+            $"Student: {payment.Student?.FullName ?? "Student"}",
+            $"Standard: {payment.Student?.Standard ?? "-"}",
+            $"Fee Type: {payment.FeeType}",
+            $"Month: {payment.Month}",
+            $"Amount Paid: ₹{payment.PaidAmount:N2}",
+            $"Payment Mode: {payment.PaymentMode}",
+            $"Date: {paidDate}",
+            string.IsNullOrWhiteSpace(payment.TransactionRef) ? string.Empty : $"Transaction Ref: {payment.TransactionRef}",
+            "Thank you."
+        }.Where(static line => !string.IsNullOrWhiteSpace(line)));
+    }
+
+    private static string? NormalizeIndianMobile(string? mobile)
+    {
+        if (string.IsNullOrWhiteSpace(mobile))
+            return null;
+
+        var digits = new string(mobile.Where(char.IsDigit).ToArray());
+        if (digits.Length == 10)
+            return $"91{digits}";
+
+        if (digits.Length == 12 && digits.StartsWith("91", StringComparison.Ordinal))
+            return digits;
+
+        return digits.Length >= 10 ? digits : null;
     }
 }

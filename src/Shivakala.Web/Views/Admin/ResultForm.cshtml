@@ -6,21 +6,39 @@
         <div class="glass-card">
             <form asp-action="CreateResult" method="post">
                 @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
                 <div class="row g-3">
                     <div class="col-12">
                         <label class="form-label">Test Title *</label>
                         <input asp-for="TestTitle" class="form-control" required placeholder="e.g. Weekly Test – Week 22 June 2026" />
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Student Name *</label>
-                        <input asp-for="StudentName" class="form-control" required />
-                    </div>
                     <div class="col-md-3">
                         <label class="form-label">Standard *</label>
-                        <select asp-for="Standard" class="form-select">
+                        <select asp-for="Standard" class="form-select" id="result-standard-select">
+                            <option value="">-- Select standard --</option>
                             @foreach (var s in new[]{"KG1","KG2","1st","2nd","3rd","4th","5th","6th","7th","8th","9th","10th"})
                             { <option value="@s">@s</option> }
                         </select>
+                    </div>
+                    <div class="col-md-9">
+                        <label class="form-label">Student *</label>
+                        <input type="search" id="student-search-input" class="form-control mb-2" placeholder="Search by student name, mobile or admission number" autocomplete="off" />
+                        <select asp-for="SelectedStudentId" class="form-select" id="student-select" size="8" required>
+                            <option value="">-- Select student --</option>
+                            @foreach (var student in Model.AvailableStudents)
+                            {
+                                var extra = string.IsNullOrWhiteSpace(student.AdmissionNumber)
+                                    ? student.Mobile
+                                    : $"{student.AdmissionNumber} • {student.Mobile}";
+                                <option value="@student.Id"
+                                        data-standard="@student.Standard"
+                                        data-search="@($"{student.FullName} {student.Mobile} {student.AdmissionNumber} {student.Standard}".ToLowerInvariant())">
+                                    @student.FullName (@extra)
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="SelectedStudentId" class="text-danger small"></span>
+                        <div class="form-text">Choose a standard first, then search and select the student from the list.</div>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Subject</label>
@@ -58,3 +76,41 @@
         </div>
     </div>
 </section>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (() => {
+            const standardSelect = document.getElementById('result-standard-select');
+            const studentSearchInput = document.getElementById('student-search-input');
+            const studentSelect = document.getElementById('student-select');
+            if (!standardSelect || !studentSearchInput || !studentSelect) return;
+
+            const options = Array.from(studentSelect.options).filter(option => option.value);
+
+            function filterStudents() {
+                const standard = standardSelect.value.trim().toLowerCase();
+                const query = studentSearchInput.value.trim().toLowerCase();
+                let visibleCount = 0;
+
+                for (const option of options) {
+                    const matchesStandard = !standard || (option.dataset.standard || '').toLowerCase() === standard;
+                    const matchesQuery = !query || (option.dataset.search || '').includes(query);
+                    const isVisible = matchesStandard && matchesQuery;
+                    option.hidden = !isVisible;
+                    if (isVisible) visibleCount++;
+                }
+
+                const selectedOption = studentSelect.selectedOptions[0];
+                if (selectedOption && selectedOption.hidden) {
+                    studentSelect.value = '';
+                }
+
+                studentSelect.size = Math.min(Math.max(visibleCount, 4), 8);
+            }
+
+            standardSelect.addEventListener('change', filterStudents);
+            studentSearchInput.addEventListener('input', filterStudents);
+            filterStudents();
+        })();
+    </script>
+}

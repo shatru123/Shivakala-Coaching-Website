@@ -23,6 +23,16 @@
 
         </span>
 
+        @if ((bool)ViewBag.IsSidecarConfigured)
+        {
+            <form asp-action="Disconnect" method="post" class="ms-2">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-sm btn-light" style="border-radius:999px">
+                    <i class="fa-solid fa-link-slash me-1"></i> Disconnect WhatsApp
+                </button>
+            </form>
+        }
+
     </div>
 </section>
 

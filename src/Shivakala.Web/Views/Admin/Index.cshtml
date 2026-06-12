@@ -24,12 +24,12 @@
             @{
                 var stats = new (string Icon, string Label, string Value, string Color)[]
                 {
-                    ("fa-users",            "Total Students",    "—", "var(--blue)"),
-                    ("fa-chalkboard-teacher","Teachers",         "—", "var(--green)"),
-                    ("fa-layer-group",      "Active Batches",    "—", "var(--gold)"),
-                    ("fa-indian-rupee-sign","Fees This Month",   "—", "var(--teal)"),
-                    ("fa-triangle-exclamation","Pending Fees",   "—", "var(--red)"),
-                    ("fa-calendar-check",   "Attendance Today",  "—", "var(--purple)"),
+                    ("fa-users",            "Total Students",    $"{ViewBag.TotalStudents ?? 0}", "var(--blue)"),
+                    ("fa-chalkboard-teacher","Teachers",         $"{ViewBag.TotalTeachers ?? 0}", "var(--green)"),
+                    ("fa-layer-group",      "Active Batches",    $"{ViewBag.TotalBatches ?? 0}", "var(--gold)"),
+                    ("fa-indian-rupee-sign","Fees This Month",   $"₹ {((decimal?)(ViewBag.FeeThisMonth) ?? 0m):N0}", "var(--teal)"),
+                    ("fa-triangle-exclamation","Pending Fees",   $"₹ {((decimal?)(ViewBag.PendingFees) ?? 0m):N0}", "var(--red)"),
+                    ("fa-calendar-check",   "Attendance Today",  $"{ViewBag.AttendanceToday ?? 0}", "var(--purple)"),
                 };
             }
             @foreach (var s in stats)
