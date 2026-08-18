@@ -60,14 +60,20 @@
 
         <div class="mb-3">
             <label class="form-label fw-600" for="msgBox">Message *</label>
-            <textarea name="message" id="msgBox" class="form-control" rows="6" required
+            <textarea name="message" id="msgBox" class="form-control" rows="5" required
                       placeholder="Type your broadcast message here…"></textarea>
         </div>
 
-        <button type="submit" class="btn-primary-sk w-100" style="background:#075e54">
-            <i class="fa-brands fa-whatsapp"></i>
-            Send Broadcast
-        </button>
+        <div class="d-flex flex-wrap gap-2">
+            <button type="submit" class="btn-primary-sk flex-grow-1" style="background:#075e54">
+                <i class="fa-brands fa-whatsapp me-1"></i>
+                Send Automatic Broadcast
+            </button>
+            <button type="button" onclick="generateDirectLinks()" class="btn btn-outline-success flex-grow-1" style="border-radius:999px;padding:12px 24px;font-weight:600">
+                <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>
+                1-Click Direct Dispatch Links
+            </button>
+        </div>
     </form>
 </div>
 
