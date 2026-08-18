@@ -19,7 +19,7 @@ public sealed class WhatsAppController(
     [HttpGet("")]
     public async Task<IActionResult> Index(CancellationToken ct)
     {
-        ViewBag.IsAuthenticated = wa.IsAuthenticated;
+        ViewBag.IsAuthenticated = await wa.CheckStatusAsync(ct);
         ViewBag.IsSidecarConfigured = !string.IsNullOrWhiteSpace(whatsAppOptions.Value.BaseUrl);
         ViewBag.SidecarBaseUrl = whatsAppOptions.Value.BaseUrl?.Trim();
         try
@@ -45,7 +45,11 @@ public sealed class WhatsAppController(
     }
 
     [HttpGet("status")]
-    public IActionResult Status() => Json(new { authenticated = wa.IsAuthenticated });
+    public async Task<IActionResult> Status(CancellationToken ct)
+    {
+        var isAuth = await wa.CheckStatusAsync(ct);
+        return Json(new { authenticated = isAuth });
+    }
 
     [HttpPost("disconnect"), ValidateAntiForgeryToken]
     public async Task<IActionResult> Disconnect(CancellationToken ct)
@@ -61,6 +65,7 @@ public sealed class WhatsAppController(
     public async Task<IActionResult> Broadcast(
         string audience, string message, string? batchId, CancellationToken ct)
     {
+        var isAuthenticated = await wa.CheckStatusAsync(ct);
         IReadOnlyList<string> mobiles;
 
         if (audience == "batch" && int.TryParse(batchId, out var bid))
@@ -78,7 +83,7 @@ public sealed class WhatsAppController(
         }
 
         int sent = 0;
-        if (wa.IsAuthenticated)
+        if (isAuthenticated)
             sent = await wa.BroadcastAsync(mobiles, message, ct);
 
         var notif = await notifRepo.AddAsync(new Notification
@@ -87,13 +92,13 @@ public sealed class WhatsAppController(
             Message = message,
             Channel = "WhatsApp",
             Audience = audience,
-            Status = wa.IsAuthenticated ? "Sent" : "Failed",
+            Status = isAuthenticated ? "Sent" : "Failed",
             DeliveredCount = sent,
             FailedCount = mobiles.Count - sent,
             SentAt = DateTime.UtcNow
         }, ct);
 
-        TempData["SuccessMessage"] = wa.IsAuthenticated
+        TempData["SuccessMessage"] = isAuthenticated
             ? $"Broadcast sent to {sent}/{mobiles.Count} contacts."
             : "WhatsApp not authenticated — please scan the QR first.";
         return RedirectToAction(nameof(Index));

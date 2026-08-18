@@ -23,10 +23,48 @@ public sealed class WhatsAppService : IWhatsAppService, IDisposable
     {
         _logger = logger;
         _options = options;
-        _http = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
+        _http = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
     }
 
-    public async Task<byte[]?> GetQrCodeAsync(CancellationToken ct)
+    public async Task<bool> CheckStatusAsync(CancellationToken ct = default)
+    {
+        if (!TryConfigureClient(out var baseUris))
+        {
+            _authenticated = false;
+            return false;
+        }
+
+        foreach (var baseUri in baseUris)
+        {
+            try
+            {
+                using var req = CreateRequest(HttpMethod.Get, new Uri(baseUri, "/status"));
+                using var resp = await _http.SendAsync(req, ct);
+                if (resp.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    _authenticated = false;
+                    _logger.LogWarning("WhatsApp sidecar rejected status request at {BaseUrl}. Check WhatsApp:ApiKey matches WHATSAPP_API_KEY.", baseUri);
+                    return false;
+                }
+
+                if (!resp.IsSuccessStatusCode)
+                    continue;
+
+                _configuredBaseUrl = baseUri.ToString().TrimEnd('/');
+                var status = await resp.Content.ReadFromJsonAsync<StatusPayload>(ct);
+                _authenticated = status?.Authenticated == true;
+                return _authenticated;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "WhatsApp sidecar status check failed at {BaseUrl}", baseUri);
+            }
+        }
+
+        return _authenticated;
+    }
+
+    public async Task<byte[]?> GetQrCodeAsync(CancellationToken ct = default)
     {
         if (!TryConfigureClient(out var baseUris))
             return null;
@@ -35,7 +73,8 @@ public sealed class WhatsAppService : IWhatsAppService, IDisposable
         {
             try
             {
-                var resp = await _http.GetAsync(new Uri(baseUri, "/qr"), ct);
+                using var req = CreateRequest(HttpMethod.Get, new Uri(baseUri, "/qr"));
+                using var resp = await _http.SendAsync(req, ct);
                 if (resp.StatusCode == HttpStatusCode.Unauthorized)
                 {
                     _authenticated = false;
@@ -48,13 +87,19 @@ public sealed class WhatsAppService : IWhatsAppService, IDisposable
 
                 _configuredBaseUrl = baseUri.ToString().TrimEnd('/');
                 var payload = await resp.Content.ReadFromJsonAsync<QrPayload>(ct);
-                if (payload?.Authenticated == true) { _authenticated = true; return null; }
-                if (string.IsNullOrWhiteSpace(payload?.QrBase64)) return null;
+                if (payload?.Authenticated == true)
+                {
+                    _authenticated = true;
+                    return null;
+                }
+
+                if (string.IsNullOrWhiteSpace(payload?.QrBase64))
+                    return null;
+
                 return Convert.FromBase64String(payload.QrBase64.Split(',').Last());
             }
             catch (Exception ex)
             {
-                _authenticated = false;
                 _logger.LogWarning(ex, "WhatsApp sidecar unreachable at {BaseUrl} — QR fetch failed", baseUri);
             }
         }
@@ -62,7 +107,7 @@ public sealed class WhatsAppService : IWhatsAppService, IDisposable
         return null;
     }
 
-    public async Task<bool> SendMessageAsync(string mobile, string message, CancellationToken ct)
+    public async Task<bool> SendMessageAsync(string mobile, string message, CancellationToken ct = default)
     {
         if (!TryConfigureClient(out var baseUris))
             return false;
@@ -71,7 +116,9 @@ public sealed class WhatsAppService : IWhatsAppService, IDisposable
         {
             try
             {
-                var resp = await _http.PostAsJsonAsync(new Uri(baseUri, "/send"), new { mobile, message }, ct);
+                using var req = CreateRequest(HttpMethod.Post, new Uri(baseUri, "/send"));
+                req.Content = JsonContent.Create(new { mobile, message });
+                using var resp = await _http.SendAsync(req, ct);
                 if (resp.StatusCode == HttpStatusCode.Unauthorized)
                 {
                     _authenticated = false;
@@ -82,12 +129,12 @@ public sealed class WhatsAppService : IWhatsAppService, IDisposable
                 if (!resp.IsSuccessStatusCode)
                     continue;
 
+                _authenticated = true;
                 _configuredBaseUrl = baseUri.ToString().TrimEnd('/');
                 return true;
             }
             catch (Exception ex)
             {
-                _authenticated = false;
                 _logger.LogWarning(ex, "WhatsApp send failed to {Mobile} via {BaseUrl}", mobile, baseUri);
             }
         }
@@ -95,10 +142,37 @@ public sealed class WhatsAppService : IWhatsAppService, IDisposable
         return false;
     }
 
-    public async Task<int> BroadcastAsync(IEnumerable<string> mobiles, string message, CancellationToken ct)
+    public async Task<int> BroadcastAsync(IEnumerable<string> mobiles, string message, CancellationToken ct = default)
     {
+        var mobileList = mobiles.Where(m => !string.IsNullOrWhiteSpace(m)).Distinct().ToList();
+        if (mobileList.Count == 0) return 0;
+
+        if (TryConfigureClient(out var baseUris))
+        {
+            foreach (var baseUri in baseUris)
+            {
+                try
+                {
+                    using var req = CreateRequest(HttpMethod.Post, new Uri(baseUri, "/broadcast"));
+                    req.Content = JsonContent.Create(new { mobiles = mobileList, message });
+                    using var resp = await _http.SendAsync(req, ct);
+                    if (resp.IsSuccessStatusCode)
+                    {
+                        var result = await resp.Content.ReadFromJsonAsync<BroadcastPayload>(ct);
+                        _authenticated = true;
+                        _configuredBaseUrl = baseUri.ToString().TrimEnd('/');
+                        if (result != null) return result.Sent;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "WhatsApp bulk broadcast request failed via {BaseUrl}, falling back to per-recipient send", baseUri);
+                }
+            }
+        }
+
         int success = 0;
-        foreach (var m in mobiles)
+        foreach (var m in mobileList)
         {
             if (await SendMessageAsync(m, message, ct)) success++;
             await Task.Delay(800, ct); // polite delay — avoid WA ban
@@ -106,7 +180,7 @@ public sealed class WhatsAppService : IWhatsAppService, IDisposable
         return success;
     }
 
-    public async Task<bool> DisconnectAsync(CancellationToken ct)
+    public async Task<bool> DisconnectAsync(CancellationToken ct = default)
     {
         if (!TryConfigureClient(out var baseUris))
             return false;
@@ -115,7 +189,8 @@ public sealed class WhatsAppService : IWhatsAppService, IDisposable
         {
             try
             {
-                var resp = await _http.PostAsync(new Uri(baseUri, "/disconnect"), content: null, ct);
+                using var req = CreateRequest(HttpMethod.Post, new Uri(baseUri, "/disconnect"));
+                using var resp = await _http.SendAsync(req, ct);
                 if (resp.StatusCode == HttpStatusCode.Unauthorized)
                 {
                     _authenticated = false;
@@ -142,6 +217,17 @@ public sealed class WhatsAppService : IWhatsAppService, IDisposable
 
     public void Dispose() => _http.Dispose();
 
+    private HttpRequestMessage CreateRequest(HttpMethod method, Uri uri)
+    {
+        var req = new HttpRequestMessage(method, uri);
+        var apiKey = _options.CurrentValue.ApiKey;
+        if (!string.IsNullOrWhiteSpace(apiKey) && !apiKey.StartsWith("__"))
+        {
+            req.Headers.Add("X-Api-Key", apiKey.Trim());
+        }
+        return req;
+    }
+
     private bool TryConfigureClient(out IReadOnlyList<Uri> baseUris)
     {
         var baseUrl = NormalizeBaseUrl(_options.CurrentValue.BaseUrl);
@@ -157,11 +243,6 @@ public sealed class WhatsAppService : IWhatsAppService, IDisposable
         }
 
         baseUris = GetCandidateBaseUris(baseUrl);
-        _http.DefaultRequestHeaders.Remove("X-Api-Key");
-
-        if (!string.IsNullOrWhiteSpace(_options.CurrentValue.ApiKey))
-            _http.DefaultRequestHeaders.Add("X-Api-Key", _options.CurrentValue.ApiKey);
-
         _configuredBaseUrl = baseUrl;
         return true;
     }
@@ -169,17 +250,30 @@ public sealed class WhatsAppService : IWhatsAppService, IDisposable
     private static IReadOnlyList<Uri> GetCandidateBaseUris(string baseUrl)
     {
         var primary = new Uri(baseUrl, UriKind.Absolute);
+
+        // Always prefer HTTPS over HTTP to prevent HTTP -> HTTPS redirect header stripping
+        if (string.Equals(primary.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase))
+        {
+            var httpsBuilder = new UriBuilder(primary)
+            {
+                Scheme = Uri.UriSchemeHttps,
+                Port = primary.IsDefaultPort ? 443 : primary.Port
+            };
+
+            return new List<Uri> { httpsBuilder.Uri, primary };
+        }
+
         var uris = new List<Uri> { primary };
 
         if (string.Equals(primary.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase))
         {
-            var fallbackBuilder = new UriBuilder(primary)
+            var httpBuilder = new UriBuilder(primary)
             {
                 Scheme = Uri.UriSchemeHttp,
                 Port = primary.IsDefaultPort ? 80 : primary.Port
             };
 
-            uris.Add(fallbackBuilder.Uri);
+            uris.Add(httpBuilder.Uri);
         }
 
         return uris;
@@ -193,5 +287,7 @@ public sealed class WhatsAppService : IWhatsAppService, IDisposable
         return baseUrl.Trim().TrimEnd('/');
     }
 
+    private sealed record StatusPayload(bool Authenticated);
     private sealed record QrPayload(string? QrBase64, bool Authenticated);
+    private sealed record BroadcastPayload(int Sent, int Failed, int Total);
 }

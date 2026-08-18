@@ -154,7 +154,7 @@ jobs:
               Provider = 'SqlServer'
             }
             WhatsApp = @{
-              BaseUrl = if ([string]::IsNullOrWhiteSpace($env:PROD_WHATSAPP_BASE_URL)) { 'http://wa.shivkalaclasses.com' } else { $env:PROD_WHATSAPP_BASE_URL }
+              BaseUrl = if ([string]::IsNullOrWhiteSpace($env:PROD_WHATSAPP_BASE_URL)) { 'https://wa.shivkalaclasses.com' } else { $env:PROD_WHATSAPP_BASE_URL }
               ApiKey = if ([string]::IsNullOrWhiteSpace($env:PROD_WHATSAPP_API_KEY)) { '' } else { $env:PROD_WHATSAPP_API_KEY }
             }
           }
