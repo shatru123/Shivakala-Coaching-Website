@@ -17,10 +17,24 @@ public sealed class PortalUserService(
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
             return null;
 
-        var user = role == "Teacher"
-            ? await FindTeacherUserAsync(username, ct)
-            : await db.AppUsers.FirstOrDefaultAsync(
+        AppUser? user = null;
+        if (role == "Teacher")
+        {
+            user = await FindTeacherUserAsync(username, ct);
+        }
+        else if (role == "Student")
+        {
+            user = await FindStudentUserAsync(username, ct);
+        }
+        else if (role == "MpscStudent")
+        {
+            user = await FindMpscUserAsync(username, ct);
+        }
+        else
+        {
+            user = await db.AppUsers.FirstOrDefaultAsync(
                 u => u.Username == username.Trim() && u.Role == role && u.IsActive, ct);
+        }
 
         if (user is null || !VerifyPassword(password, user.PasswordHash))
             return null;
@@ -60,6 +74,72 @@ public sealed class PortalUserService(
 
         return await db.AppUsers.FirstOrDefaultAsync(
             u => u.TeacherId == teacher.Id && u.Role == "Teacher" && u.IsActive, ct);
+    }
+
+    public async Task<AppUser?> FindStudentUserAsync(string login, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(login)) return null;
+
+        var normalized = login.Trim().ToLowerInvariant();
+        var mobile = NormalizeMobile(login);
+
+        var user = await db.AppUsers.FirstOrDefaultAsync(
+            u => u.Role == "Student" && u.IsActive && u.Username.ToLower() == normalized, ct);
+        if (user is not null) return user;
+
+        if (mobile.Length == 10)
+        {
+            user = await db.AppUsers.FirstOrDefaultAsync(
+                u => u.Role == "Student" && u.IsActive && u.Mobile == mobile, ct);
+            if (user is not null) return user;
+        }
+
+        var student = await db.Students.FirstOrDefaultAsync(s =>
+            (s.RollNumber != null && s.RollNumber.ToLower() == normalized) ||
+            (s.AdmissionNumber != null && s.AdmissionNumber.ToLower() == normalized) ||
+            (mobile.Length == 10 && s.Mobile != null && s.Mobile.EndsWith(mobile)), ct);
+
+        if (student is null) return null;
+
+        return await db.AppUsers.FirstOrDefaultAsync(
+            u => u.StudentId == student.Id && u.Role == "Student" && u.IsActive, ct);
+    }
+
+    public async Task<AppUser?> FindMpscUserAsync(string login, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(login)) return null;
+
+        var normalized = login.Trim().ToLowerInvariant();
+        var mobile = NormalizeMobile(login);
+
+        // Match AppUser directly by username
+        var user = await db.AppUsers.Include(u => u.MpscStudent).FirstOrDefaultAsync(
+            u => u.Role == "MpscStudent" && u.IsActive && u.Username.ToLower() == normalized, ct);
+        if (user is not null) return user;
+
+        // Match AppUser directly by email
+        user = await db.AppUsers.Include(u => u.MpscStudent).FirstOrDefaultAsync(
+            u => u.Role == "MpscStudent" && u.IsActive && u.Email.ToLower() == normalized, ct);
+        if (user is not null) return user;
+
+        // Match AppUser by mobile
+        if (mobile.Length == 10)
+        {
+            user = await db.AppUsers.Include(u => u.MpscStudent).FirstOrDefaultAsync(
+                u => u.Role == "MpscStudent" && u.IsActive && u.Mobile == mobile, ct);
+            if (user is not null) return user;
+        }
+
+        // Match candidate record by RegistrationNumber, Email, or Mobile
+        var candidate = await db.MpscStudents.FirstOrDefaultAsync(m =>
+            m.RegistrationNumber.ToLower() == normalized ||
+            m.Email.ToLower() == normalized ||
+            (mobile.Length == 10 && m.Mobile.EndsWith(mobile)), ct);
+
+        if (candidate is null) return null;
+
+        return await db.AppUsers.Include(u => u.MpscStudent).FirstOrDefaultAsync(
+            u => u.MpscStudentId == candidate.Id && u.Role == "MpscStudent" && u.IsActive, ct);
     }
 
     public async Task<AppUser> EnsureTeacherAccountAsync(int teacherId, string? username = null, string? password = null, CancellationToken ct = default)
@@ -161,6 +241,67 @@ public sealed class PortalUserService(
         return user;
     }
 
+    public async Task<AppUser?> EnsureStudentAccountAsync(int studentId, string? username = null, string? password = null, CancellationToken ct = default)
+    {
+        var student = await db.Students.FindAsync([studentId], ct);
+        if (student is null) return null;
+
+        var existing = await db.AppUsers.FirstOrDefaultAsync(
+            u => u.StudentId == studentId && u.Role == "Student", ct);
+
+        var mobile = NormalizeMobile(student.Mobile);
+        var baseUsername = !string.IsNullOrWhiteSpace(username)
+            ? SanitizeUsername(username)
+            : !string.IsNullOrWhiteSpace(student.RollNumber)
+                ? SanitizeUsername(student.RollNumber)
+                : mobile.Length == 10 ? mobile : $"student{studentId}";
+
+        var finalUsername = baseUsername;
+        if (existing is null && await db.AppUsers.AnyAsync(u => u.Username == finalUsername, ct))
+        {
+            finalUsername = $"{baseUsername}_{studentId}";
+        }
+
+        var finalPassword = !string.IsNullOrWhiteSpace(password)
+            ? password
+            : DefaultPasswordFromMobile(mobile);
+
+        var finalEmail = (!string.IsNullOrWhiteSpace(student.Email) && !await db.AppUsers.AnyAsync(u => u.Email == student.Email && (existing == null || u.Id != existing.Id), ct))
+            ? student.Email
+            : PortalEmail(finalUsername);
+
+        if (existing is not null)
+        {
+            existing.Username = finalUsername;
+            existing.FullName = student.FullName;
+            existing.Mobile = student.Mobile;
+            existing.Email = finalEmail;
+            if (!string.IsNullOrWhiteSpace(password))
+                existing.PasswordHash = HashPassword(password);
+            existing.IsActive = true;
+            await db.SaveChangesAsync(ct);
+            return existing;
+        }
+
+        var user = new AppUser
+        {
+            Username = finalUsername,
+            Email = finalEmail,
+            PasswordHash = HashPassword(finalPassword),
+            Role = "Student",
+            FullName = student.FullName,
+            Mobile = student.Mobile,
+            StudentId = studentId,
+            IsActive = true,
+            CreatedDate = DateTime.UtcNow
+        };
+
+        db.AppUsers.Add(user);
+        await db.SaveChangesAsync(ct);
+        logger.LogInformation("Student portal account created for student #{Id} (username: {Username})", studentId, user.Username);
+        return user;
+    }
+
     public async Task<AppUser> EnsureAdminAccountAsync(string username, string password, CancellationToken ct = default)
     {
         var finalUsername = SanitizeUsername(username);
@@ -249,11 +390,18 @@ public sealed class PortalUserService(
 
         foreach (var student in students)
         {
+            // Sync Parent account
             var mobile = NormalizeMobile(student.ParentMobile ?? student.Mobile);
-            if (mobile.Length != 10) continue;
-            if (await db.AppUsers.AnyAsync(u => u.Username == mobile && u.Role == "Parent", ct))
-                continue;
-            await EnsureParentAccountForStudentAsync(student.Id, ct: ct);
+            if (mobile.Length == 10 && !await db.AppUsers.AnyAsync(u => u.Username == mobile && u.Role == "Parent", ct))
+            {
+                await EnsureParentAccountForStudentAsync(student.Id, ct: ct);
+            }
+
+            // Sync Student account
+            if (!await db.AppUsers.AnyAsync(u => u.StudentId == student.Id && u.Role == "Student", ct))
+            {
+                await EnsureStudentAccountAsync(student.Id, ct: ct);
+            }
         }
     }
 

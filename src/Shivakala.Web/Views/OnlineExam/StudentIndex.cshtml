@@ -1,0 +1,185 @@
+@model IReadOnlyList<Shivakala.Core.ViewModels.OnlineExamStudentListViewModel>
+@using System.Globalization
+@{
+    ViewData["Title"] = "My Online Exams | Shivakala";
+    var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
+    var upcoming = Model.Where(e => e.IsUpcoming).ToList();
+    var available = Model.Where(e => e.IsAvailableNow).ToList();
+    var completed = Model.Where(e => e.IsCompleted).ToList();
+}
+
+<section class="page-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="badge-soft"><i class="fa-solid fa-graduation-cap me-1"></i>@(isMr ? "विद्यार्थी पोर्टल" : "Student Portal")</span>
+            <h1 class="mt-2">@(isMr ? "माझ्या ऑनलाइन परीक्षा" : "My Online Examinations")</h1>
+            <p>@(isMr ? "उपलब्ध परीक्षा द्या आणि रिझल्ट पहा." : "Attempt available tests, track status, and view scorecards.")</p>
+        </div>
+        <a asp-controller="StudentPortal" asp-action="MyResults" class="btn-outline-light-sk">
+            <i class="fa-solid fa-trophy text-warning me-1"></i>My Result History
+        </a>
+    </div>
+</section>
+
+<section class="section-shell pt-4 pb-5">
+    <div class="container">
+
+        <!-- NAV TABS -->
+        <div class="glass-card p-2 mb-4">
+            <ul class="nav nav-pills gap-2 border-0" id="examTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active fw-semibold px-4 py-2" id="tab-available" data-bs-toggle="pill" data-bs-target="#available" type="button" role="tab" style="border-radius:20px">
+                        <i class="fa-solid fa-circle-play me-1.5 text-success"></i>Available Now (@available.Count)
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-semibold px-4 py-2" id="tab-upcoming" data-bs-toggle="pill" data-bs-target="#upcoming" type="button" role="tab" style="border-radius:20px">
+                        <i class="fa-solid fa-calendar-check me-1.5 text-warning"></i>Upcoming (@upcoming.Count)
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-semibold px-4 py-2" id="tab-completed" data-bs-toggle="pill" data-bs-target="#completed" type="button" role="tab" style="border-radius:20px">
+                        <i class="fa-solid fa-circle-check me-1.5 text-primary"></i>Completed (@completed.Count)
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="tab-content" id="examTabsContent">
+
+            <!-- AVAILABLE NOW TAB -->
+            <div class="tab-pane fade show active" id="available" role="tabpanel">
+                @if (!available.Any())
+                {
+                    <div class="glass-card text-center py-5">
+                        <i class="fa-regular fa-clock fa-3x text-muted mb-3"></i>
+                        <h5 class="fw-bold text-muted">No tests are available right now.</h5>
+                        <p class="text-muted small mb-0">Check the Upcoming tab for scheduled examinations.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="row g-4">
+                        @foreach (var e in available)
+                        {
+                            <div class="col-md-6 col-lg-4">
+                                <div class="glass-card h-100 d-flex flex-column justify-content-between p-4" style="border-top:4px solid var(--green);">
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="badge-soft" style="background:rgba(27,122,62,0.15);color:var(--green);border-color:rgba(27,122,62,0.3)">Available Now</span>
+                                            <span class="badge-soft dark" style="font-size:0.75rem">Std @e.Standard</span>
+                                        </div>
+                                        <h5 class="fw-bold mb-3" style="color:var(--navy-dark)">@e.Title</h5>
+                                        <div class="p-3 bg-light rounded-3 text-muted small mb-3 border">
+                                            <div class="mb-1.5"><i class="fa-solid fa-book-open me-2 text-primary"></i><strong>Subject:</strong> @e.Subject</div>
+                                            <div class="mb-1.5"><i class="fa-regular fa-clock me-2 text-info"></i><strong>Duration:</strong> @e.DurationMinutes Mins</div>
+                                            <div><i class="fa-solid fa-list-check me-2 text-success"></i><strong>Questions:</strong> @e.QuestionCount MCQs (@e.TotalMarks Marks)</div>
+                                        </div>
+                                    </div>
+                                    <div class="d-grid gap-2 pt-2">
+                                        @if (e.IsRegistrationRequired && !e.IsRegistered)
+                                        {
+                                            <form asp-controller="OnlineExam" asp-action="Register" asp-route-id="@e.Id" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn-gold-sk w-100 justify-content-center">
+                                                    <i class="fa-solid fa-user-plus me-1"></i>Register for Exam
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <a asp-controller="OnlineExam" asp-action="Details" asp-route-id="@e.Id" class="btn-green-sk w-100 justify-content-center">
+                                                <i class="fa-solid fa-play me-1"></i>Start Examination
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- UPCOMING TAB -->
+            <div class="tab-pane fade" id="upcoming" role="tabpanel">
+                @if (!upcoming.Any())
+                {
+                    <div class="glass-card text-center py-5">
+                        <i class="fa-regular fa-calendar-check fa-3x text-muted mb-3"></i>
+                        <h5 class="fw-bold text-muted">No upcoming exams scheduled.</h5>
+                    </div>
+                }
+                else
+                {
+                    <div class="row g-4">
+                        @foreach (var e in upcoming)
+                        {
+                            <div class="col-md-6 col-lg-4">
+                                <div class="glass-card h-100 d-flex flex-column justify-content-between p-4" style="border-top:4px solid var(--gold);">
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="badge-soft">Upcoming</span>
+                                            <span class="badge-soft dark" style="font-size:0.75rem">Std @e.Standard</span>
+                                        </div>
+                                        <h5 class="fw-bold mb-2" style="color:var(--navy-dark)">@e.Title</h5>
+                                        <p class="text-muted small"><i class="fa-regular fa-calendar me-1 text-primary"></i><strong>Starts:</strong> @(e.StartDateTime?.ToString("dd MMM yyyy, hh:mm tt") ?? "TBA")</p>
+                                    </div>
+                                    <div class="pt-2">
+                                        <a asp-controller="OnlineExam" asp-action="Details" asp-route-id="@e.Id" class="btn-outline-sk w-100 justify-content-center">
+                                            <i class="fa-solid fa-eye me-1"></i>View Instructions
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <!-- COMPLETED TAB -->
+            <div class="tab-pane fade" id="completed" role="tabpanel">
+                @if (!completed.Any())
+                {
+                    <div class="glass-card text-center py-5">
+                        <i class="fa-solid fa-clipboard-check fa-3x text-muted mb-3"></i>
+                        <h5 class="fw-bold text-muted">No completed tests yet.</h5>
+                    </div>
+                }
+                else
+                {
+                    <div class="row g-4">
+                        @foreach (var e in completed)
+                        {
+                            <div class="col-md-6 col-lg-4">
+                                <div class="glass-card h-100 d-flex flex-column justify-content-between p-4" style="border-top:4px solid var(--navy);">
+                                    <div>
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="badge-soft dark">Completed</span>
+                                            <span class="badge-soft dark" style="font-size:0.75rem">Std @e.Standard</span>
+                                        </div>
+                                        <h5 class="fw-bold mb-3" style="color:var(--navy-dark)">@e.Title</h5>
+                                        <div class="p-3 bg-light rounded-3 text-muted small mb-3 border">
+                                            <div class="mb-1.5"><strong>Score Obtained:</strong> <span class="fw-bold text-primary">@(e.LatestScore?.ToString("F1") ?? "N/A") / @e.TotalMarks</span></div>
+                                            <div><strong>Percentage:</strong> <span class="badge-soft dark ms-1">@(e.LatestPercentage?.ToString("F1") ?? "0")%</span></div>
+                                        </div>
+                                    </div>
+                                    @if (e.LatestAttemptId.HasValue)
+                                    {
+                                        <div class="pt-2">
+                                            <a asp-controller="OnlineExam" asp-action="Result" asp-route-id="@e.Id" asp-route-attemptId="@e.LatestAttemptId.Value" class="btn-primary-sk w-100 justify-content-center">
+                                                <i class="fa-solid fa-chart-pie me-1"></i>View Scorecard &amp; Solutions
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+        </div>
+
+    </div>
+</section>
+

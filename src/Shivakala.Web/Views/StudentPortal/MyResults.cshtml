@@ -1,0 +1,83 @@
+@model List<Shivakala.Core.Entities.OnlineExamAttempt>
+@{
+    ViewData["Title"] = "My Exam Results";
+}
+
+<section class="page-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="badge-soft"><i class="fa-solid fa-trophy me-1"></i>Performance History</span>
+            <h1 class="mt-2">My Online Examination Results</h1>
+            <p class="mb-0">View all your submitted test scorecards and analytical summaries</p>
+        </div>
+        <a asp-action="Index" class="btn-outline-light-sk">
+            <i class="fa-solid fa-arrow-left me-1"></i> My Exams Dashboard
+        </a>
+    </div>
+</section>
+
+<section class="section-shell pt-4 pb-5">
+    <div class="container">
+        <div class="glass-card p-0 overflow-hidden">
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-clipboard-list fa-3x mb-3 text-secondary"></i>
+                    <h5 class="fw-bold text-dark mb-1">No Examination Attempts Found</h5>
+                    <p class="small text-muted mb-0">You have not submitted any online exam attempts yet.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table admin-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Examination</th>
+                                <th>Subject / Std</th>
+                                <th>Submitted Date</th>
+                                <th>Score</th>
+                                <th>Percentage</th>
+                                <th>Status</th>
+                                <th class="text-end pe-4">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var attempt in Model)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold text-dark">@(attempt.Exam?.Title ?? "Online Examination")</td>
+                                    <td>
+                                        <span class="badge-soft dark">@(attempt.Exam?.Subject ?? "General")</span>
+                                        <small class="text-muted d-block mt-0.5">Std @(attempt.Exam?.Standard)</small>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted"><i class="fa-regular fa-calendar-check me-1"></i> @attempt.SubmittedAt?.ToString("dd MMM yyyy, hh:mm tt")</small>
+                                    </td>
+                                    <td class="fw-bold text-dark">@attempt.Score / @attempt.TotalMarks</td>
+                                    <td class="fw-bold text-primary">@attempt.Percentage.ToString("F1")%</td>
+                                    <td>
+                                        @if (attempt.Percentage >= (attempt.Exam?.PassingMarks ?? 35))
+                                        {
+                                            <span class="badge bg-success py-1.5 px-3 rounded-pill"><i class="fa-solid fa-check me-1"></i> PASS</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger py-1.5 px-3 rounded-pill"><i class="fa-solid fa-xmark me-1"></i> FAIL</span>
+                                        }
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <a asp-controller="OnlineExam" asp-action="Result" asp-route-id="@attempt.ExamId" asp-route-attemptId="@attempt.Id" class="toolbar-btn">
+                                            <i class="fa-solid fa-eye me-1"></i> View Scorecard
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+

@@ -1,0 +1,78 @@
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Bulk Import MPSC Candidates";
+}
+
+<div class="p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <span class="badge-soft dark mb-1"><i class="fa-solid fa-file-csv me-1"></i>Bulk Upload</span>
+            <h2 class="fw-bold mb-1" style="color:var(--navy-dark)">Import Candidates via CSV</h2>
+            <p class="text-muted mb-0 small">Fast onboarding of MPSC candidates with duplicate detection and automatic portal account generation</p>
+        </div>
+        <a asp-action="Candidates" class="btn-outline-sk">
+            <i class="fa-solid fa-arrow-left me-1"></i>Back to Directory
+        </a>
+    </div>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-4 shadow-sm" role="alert">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        <!-- Upload Form -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4 p-md-5 h-100">
+                <h4 class="fw-bold mb-3 text-primary"><i class="fa-solid fa-upload me-2"></i>Upload CSV File</h4>
+                <p class="text-muted small mb-4">
+                    Upload your CSV file containing candidate records. You will have an opportunity to review the parsed records, inspect duplicates, and fix validation issues before committing to the database.
+                </p>
+
+                <form asp-action="ImportPreview" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Select CSV File <span class="text-danger">*</span></label>
+                        <input type="file" name="csvFile" class="form-control form-control-lg" accept=".csv" required />
+                        <div class="form-text">UTF-8 encoded standard comma-separated text file (.csv).</div>
+                    </div>
+
+                    <button type="submit" class="btn-primary-sk btn-lg w-100 py-2.5">
+                        <i class="fa-solid fa-magnifying-glass me-2"></i>Parse &amp; Preview Records
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Format Guidelines & Template -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4 p-md-5 h-100">
+                <h5 class="fw-bold mb-3 text-dark"><i class="fa-solid fa-circle-info me-2 text-info"></i>Expected CSV Structure</h5>
+                <p class="text-muted small mb-3">
+                    Ensure your CSV has a header row with the following column structure (in order):
+                </p>
+
+                <div class="bg-dark text-light p-3 rounded-3 font-monospace small mb-4" style="overflow-x:auto;">
+FullName,Mobile,Email,District,Qualification,TargetExam,TargetYear
+"Amol Deshmukh",9876543210,"amol@example.com","Buldhana","Graduate","Rajyaseva",2026
+"Snehal Kulkarni",9822123456,"snehal@example.com","Akola","PostGraduate","Combine Group B",2026
+                </div>
+
+                <h6 class="fw-bold mb-2">Column Guidelines:</h6>
+                <ul class="text-muted small ps-3 mb-0">
+                    <li><strong>FullName:</strong> Candidate's full name (Required).</li>
+                    <li><strong>Mobile:</strong> 10-digit Indian mobile number (Unique, Required).</li>
+                    <li><strong>Email:</strong> Valid email address (Unique, Required).</li>
+                    <li><strong>District:</strong> Maharashtra district (e.g. Buldhana, Pune).</li>
+                    <li><strong>Qualification:</strong> Graduate / PostGraduate / 12th / Diploma.</li>
+                    <li><strong>TargetExam:</strong> Rajyaseva / Combine Group B / Combine Group C / PSI / STI / ASO.</li>
+                    <li><strong>TargetYear:</strong> Target exam attempt year (e.g. 2026).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

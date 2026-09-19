@@ -1,0 +1,106 @@
+@model IReadOnlyList<Shivakala.Core.Entities.Exam>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Offline MPSC Exams Management";
+}
+
+<div class="p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <span class="badge-soft dark mb-1"><i class="fa-solid fa-clipboard-user me-1"></i>Offline Examinations</span>
+            <h2 class="fw-bold mb-1" style="color:var(--navy-dark)">Offline Exam &amp; Center Management</h2>
+            <p class="text-muted mb-0 small">Manage offline hall check-in, seat numbers, attendance verification, and results entry</p>
+        </div>
+        <a asp-controller="OnlineExamAdmin" asp-action="Wizard" class="btn-primary-sk">
+            <i class="fa-solid fa-plus me-1"></i>Schedule New Exam
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4 shadow-sm" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="glass-card p-4">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="fa-solid fa-building-circle-check fa-3x mb-3 text-muted"></i>
+                <h5>No examinations configured for MPSC audience yet.</h5>
+                <p class="small mb-3">Create or assign exams to the MPSC audience in the exam wizard.</p>
+                <a asp-controller="OnlineExamAdmin" asp-action="Wizard" class="btn btn-outline-primary btn-sm">
+                    <i class="fa-solid fa-plus me-1"></i>Open Exam Wizard
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Exam Title</th>
+                            <th>Mode</th>
+                            <th>Audience</th>
+                            <th>Exam Date</th>
+                            <th>Venue / Capacity</th>
+                            <th>Passing / Total</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ex in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">@ex.Title</div>
+                                    <small class="text-muted">@ex.Subject • Standard: @ex.Standard</small>
+                                </td>
+                                <td>
+                                    <span class="badge @(ex.ExamMode == "Online" ? "bg-info text-dark" : "bg-success-subtle text-success")">
+                                        @ex.ExamMode
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary-subtle text-primary">@ex.Audience</span>
+                                </td>
+                                <td>
+                                    <strong>@ex.ExamDate.ToString("dd MMM yyyy")</strong>
+                                </td>
+                                <td>
+                                    <div><i class="fa-solid fa-map-pin text-danger small me-1"></i>@(string.IsNullOrWhiteSpace(ex.Venue) ? "Main Center" : ex.Venue)</div>
+                                    @if (ex.Capacity.HasValue)
+                                    {
+                                        <small class="text-muted"><i class="fa-solid fa-chair me-1"></i>Capacity: @ex.Capacity</small>
+                                    }
+                                </td>
+                                <td>
+                                    <span>@ex.PassingMarks / @ex.TotalMarks</span>
+                                </td>
+                                <td>
+                                    <span class="badge @(ex.IsPublished ? "bg-success" : "bg-secondary")">
+                                        @(ex.IsPublished ? "Published" : "Draft")
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="CheckIn" asp-route-id="@ex.Id" class="btn btn-outline-primary" title="Check-In Attendance">
+                                            <i class="fa-solid fa-clipboard-check me-1"></i>Check-In
+                                        </a>
+                                        <a asp-action="EnterMarks" asp-route-id="@ex.Id" class="btn btn-outline-success" title="Enter Offline Marks">
+                                            <i class="fa-solid fa-pen-to-square me-1"></i>Marks
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

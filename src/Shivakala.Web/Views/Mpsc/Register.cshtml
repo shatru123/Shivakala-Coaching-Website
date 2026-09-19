@@ -1,0 +1,316 @@
+@model Shivakala.Core.ViewModels.MpscRegistrationViewModel
+@{
+    ViewData["Title"] = "MPSC Candidate Registration | Shivakala Coaching Classes";
+}
+
+<section class="page-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="badge-soft"><i class="fa-solid fa-user-plus me-1"></i>New Aspirant</span>
+            <h1 class="mt-2">MPSC Candidate Registration</h1>
+            <p>Complete this one-time registration to create your Shivakala MPSC student account and access test series.</p>
+        </div>
+        <div>
+            <a asp-action="Login" class="btn-outline-light-sk">
+                <i class="fa-solid fa-right-to-bracket me-1"></i>Already Registered? Login
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="section-shell py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+
+                <form asp-action="Register" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+
+                    <div asp-validation-summary="All" class="alert alert-danger mb-4 shadow-sm" style="display:@(ViewData.ModelState.IsValid ? "none" : "block")"></div>
+
+                    <!-- STEP 1: PERSONAL INFORMATION -->
+                    <div class="glass-card p-4 p-md-5 mb-4">
+                        <h4 class="fw-bold mb-4 pb-2 border-bottom text-primary">
+                            <i class="fa-solid fa-id-badge me-2"></i>1. Personal Information / वैयक्तिक माहिती
+                        </h4>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="FullName" class="form-label fw-semibold">Full Name (as per SSC/HSC Certificate) <span class="text-danger">*</span></label>
+                                <input asp-for="FullName" class="form-control" placeholder="First Middle Last Name" required />
+                                <span asp-validation-for="FullName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="FullNameMarathi" class="form-label fw-semibold">पूर्ण नाव (मराठीत) <span class="text-muted small">(ऐच्छिक)</span></label>
+                                <input asp-for="FullNameMarathi" class="form-control" placeholder="उदा. अमोल सुरेश देशमुख" />
+                                <span asp-validation-for="FullNameMarathi" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label asp-for="DateOfBirth" class="form-label fw-semibold">Date of Birth <span class="text-danger">*</span></label>
+                                <input asp-for="DateOfBirth" type="date" class="form-control" required />
+                                <span asp-validation-for="DateOfBirth" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Gender" class="form-label fw-semibold">Gender <span class="text-danger">*</span></label>
+                                <select asp-for="Gender" class="form-select" required>
+                                    <option value="Male">Male / पुरुष</option>
+                                    <option value="Female">Female / स्त्री</option>
+                                    <option value="Other">Other / इतर</option>
+                                </select>
+                                <span asp-validation-for="Gender" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="PhotoFile" class="form-label fw-semibold">Passport Photo <span class="text-muted small">(Optional)</span></label>
+                                <input asp-for="PhotoFile" type="file" class="form-control" accept="image/*" />
+                                <span asp-validation-for="PhotoFile" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Mobile" class="form-label fw-semibold">Mobile Number (WhatsApp) <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">+91</span>
+                                    <input asp-for="Mobile" class="form-control" maxlength="10" placeholder="10-digit mobile number" required />
+                                </div>
+                                <span asp-validation-for="Mobile" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="AlternateMobile" class="form-label fw-semibold">Alternate Mobile / Parents Phone</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">+91</span>
+                                    <input asp-for="AlternateMobile" class="form-control" maxlength="10" placeholder="10-digit mobile number" />
+                                </div>
+                                <span asp-validation-for="AlternateMobile" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="Email" class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                                <input asp-for="Email" type="email" class="form-control" placeholder="yourname@domain.com" required />
+                                <div class="form-text">Your examination credentials and hall tickets will be emailed here.</div>
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: ADDRESS -->
+                    <div class="glass-card p-4 p-md-5 mb-4">
+                        <h4 class="fw-bold mb-4 pb-2 border-bottom text-primary">
+                            <i class="fa-solid fa-location-dot me-2"></i>2. Residential Address / पत्ता
+                        </h4>
+
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label asp-for="Address" class="form-label fw-semibold">Full Residential Address <span class="text-danger">*</span></label>
+                                <textarea asp-for="Address" class="form-control" rows="2" placeholder="House/Flat No, Street, Landmark, Village/Town" required></textarea>
+                                <span asp-validation-for="Address" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="City" class="form-label fw-semibold">City / Taluka</label>
+                                <input asp-for="City" class="form-control" placeholder="e.g. Chikhali / Buldhana" />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="District" class="form-label fw-semibold">District <span class="text-danger">*</span></label>
+                                <input asp-for="District" class="form-control" placeholder="e.g. Buldhana / Akola / Pune" required />
+                                <span asp-validation-for="District" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="Pincode" class="form-label fw-semibold">PIN Code</label>
+                                <input asp-for="Pincode" class="form-control" maxlength="6" placeholder="6-digit PIN" />
+                                <span asp-validation-for="Pincode" class="text-danger small"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: EDUCATION -->
+                    <div class="glass-card p-4 p-md-5 mb-4">
+                        <h4 class="fw-bold mb-4 pb-2 border-bottom text-primary">
+                            <i class="fa-solid fa-graduation-cap me-2"></i>3. Educational Background / शैक्षणिक माहिती
+                        </h4>
+
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label asp-for="HighestQualification" class="form-label fw-semibold">Highest Qualification <span class="text-danger">*</span></label>
+                                <select asp-for="HighestQualification" class="form-select" required>
+                                    <option value="Graduate">Graduate (Any Degree)</option>
+                                    <option value="PostGraduate">Post Graduate</option>
+                                    <option value="Diploma">Diploma / Polytechnic</option>
+                                    <option value="12th">12th Standard (HSC)</option>
+                                    <option value="Undergraduate">Final Year Appearing</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <span asp-validation-for="HighestQualification" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="DegreeOrCourse" class="form-label fw-semibold">Degree / Specialization</label>
+                                <input asp-for="DegreeOrCourse" class="form-control" placeholder="e.g. B.A., B.Sc., B.E., B.Com." />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="University" class="form-label fw-semibold">University / Board</label>
+                                <input asp-for="University" class="form-control" placeholder="e.g. SPPU, SGBAU, BAMU" />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="YearOfPassing" class="form-label fw-semibold">Year of Passing / Appearing</label>
+                                <input asp-for="YearOfPassing" type="number" class="form-control" min="1980" max="2035" placeholder="e.g. 2024" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 4: MPSC TARGET & EXPERIENCE -->
+                    <div class="glass-card p-4 p-md-5 mb-4">
+                        <h4 class="fw-bold mb-4 pb-2 border-bottom text-primary">
+                            <i class="fa-solid fa-bullseye me-2"></i>4. Target Examination &amp; Preparation Level / स्पर्धा परीक्षा तपशील
+                        </h4>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="PreferredExam" class="form-label fw-semibold">Primary Target Exam <span class="text-danger">*</span></label>
+                                <select asp-for="PreferredExam" class="form-select" required>
+                                    <option value="Rajyaseva">MPSC Rajyaseva (State Services)</option>
+                                    <option value="Combine Group B">Combine Group B (PSI / STI / ASO)</option>
+                                    <option value="Combine Group C">Combine Group C (Clerk / Tax Asst / Excise)</option>
+                                    <option value="PSI">PSI (Police Sub-Inspector Focused)</option>
+                                    <option value="STI">STI (State Tax Inspector Focused)</option>
+                                    <option value="ASO">ASO (Assistant Section Officer Focused)</option>
+                                    <option value="Technical Services">MPSC Technical Services (Forest/Agri/Engg)</option>
+                                    <option value="Other">Other Civil Exams</option>
+                                </select>
+                                <span asp-validation-for="PreferredExam" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="OtherExamInterest" class="form-label fw-semibold">Other Exams of Interest</label>
+                                <input asp-for="OtherExamInterest" class="form-control" placeholder="e.g. UPSC, Talathi, Police Bharti, Banking" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="PreparationLevel" class="form-label fw-semibold">Current Preparation Level</label>
+                                <select asp-for="PreparationLevel" class="form-select">
+                                    <option value="Beginner">Beginner (Just Starting / Fresh Aspirant)</option>
+                                    <option value="Intermediate">Intermediate (Completed GS Basics / 6-12 Months)</option>
+                                    <option value="Advanced">Advanced (Appeared in Prelims / Mains)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="TargetAttemptYear" class="form-label fw-semibold">Target Attempt Year</label>
+                                <input asp-for="TargetAttemptYear" type="number" class="form-control" min="2024" max="2032" value="@DateTime.UtcNow.Year" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-check mt-3">
+                                    <input asp-for="PreviousAttempts" class="form-check-input" type="checkbox" id="chkPreviousAttempts" />
+                                    <label class="form-check-label fw-semibold" for="chkPreviousAttempts">
+                                        Have you previously appeared for any MPSC exam?
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6" id="divAttemptsCount" style="display:none;">
+                                <label asp-for="NumberOfPreviousAttempts" class="form-label fw-semibold">Number of Previous Attempts</label>
+                                <input asp-for="NumberOfPreviousAttempts" type="number" class="form-control" min="0" max="20" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 5: SOCIAL CATEGORY -->
+                    <div class="glass-card p-4 p-md-5 mb-4">
+                        <h4 class="fw-bold mb-4 pb-2 border-bottom text-primary">
+                            <i class="fa-solid fa-users me-2"></i>5. Category &amp; Eligibility / प्रवर्ग
+                        </h4>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label asp-for="Category" class="form-label fw-semibold">Social Category <span class="text-danger">*</span></label>
+                                <select asp-for="Category" class="form-select" required>
+                                    <option value="Open">Open / General</option>
+                                    <option value="OBC">OBC (Other Backward Class)</option>
+                                    <option value="EWS">EWS (Economically Weaker Section)</option>
+                                    <option value="SC">SC (Scheduled Caste)</option>
+                                    <option value="ST">ST (Scheduled Tribe)</option>
+                                    <option value="VJ/NT">VJ / NT</option>
+                                    <option value="SBC">SBC</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold d-block">Certificates Status</label>
+                                <div class="form-check mb-1">
+                                    <input asp-for="CasteCertificateAvailable" class="form-check-input" type="checkbox" id="chkCaste" />
+                                    <label class="form-check-label small" for="chkCaste">Caste Certificate Available</label>
+                                </div>
+                                <div class="form-check mb-1">
+                                    <input asp-for="NonCreamyLayerCertificateAvailable" class="form-check-input" type="checkbox" id="chkNCL" />
+                                    <label class="form-check-label small" for="chkNCL">Non-Creamy Layer (NCL) Certificate Valid</label>
+                                </div>
+                                <div class="form-check">
+                                    <input asp-for="EwsCertificateAvailable" class="form-check-input" type="checkbox" id="chkEWS" />
+                                    <label class="form-check-label small" for="chkEWS">EWS Certificate Available</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 6: SECURITY & CONSENT -->
+                    <div class="glass-card p-4 p-md-5 mb-4">
+                        <h4 class="fw-bold mb-4 pb-2 border-bottom text-primary">
+                            <i class="fa-solid fa-shield-halved me-2"></i>6. Account Password &amp; Consent / पासवर्ड व संमती
+                        </h4>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="Password" class="form-label fw-semibold">Create Password <span class="text-danger">*</span></label>
+                                <input asp-for="Password" type="password" class="form-control" placeholder="Minimum 6 characters" required />
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="ConfirmPassword" class="form-label fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+                                <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Re-enter password" required />
+                                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-light rounded-3 mb-4">
+                            <div class="form-check mb-2">
+                                <input asp-for="AgreeTerms" class="form-check-input" type="checkbox" id="chkAgree" required />
+                                <label class="form-check-label fw-semibold text-dark" for="chkAgree">
+                                    I agree to Shivakala Coaching Classes terms of service and examination conduct rules. <span class="text-danger">*</span>
+                                </label>
+                                <span asp-validation-for="AgreeTerms" class="text-danger small d-block"></span>
+                            </div>
+                            <div class="form-check">
+                                <input asp-for="ConfirmAccuracy" class="form-check-input" type="checkbox" id="chkAccuracy" required />
+                                <label class="form-check-label fw-semibold text-dark" for="chkAccuracy">
+                                    मी याद्वारे प्रमाणित करतो/करते की मी दिलेली सर्व माहिती सत्य व अचूक आहे. (I confirm all details are accurate). <span class="text-danger">*</span>
+                                </label>
+                                <span asp-validation-for="ConfirmAccuracy" class="text-danger small d-block"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fa-solid fa-arrow-left me-1"></i>Back to Overview
+                            </a>
+                            <button type="submit" class="btn-primary-sk btn-lg px-5 py-3 shadow">
+                                <i class="fa-solid fa-circle-check me-2"></i>Complete Registration &amp; Submit
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var chk = document.getElementById("chkPreviousAttempts");
+            var div = document.getElementById("divAttemptsCount");
+            if (chk && div) {
+                chk.addEventListener("change", function () {
+                    div.style.display = this.checked ? "block" : "none";
+                });
+                if (chk.checked) div.style.display = "block";
+            }
+        });
+    </script>
+}

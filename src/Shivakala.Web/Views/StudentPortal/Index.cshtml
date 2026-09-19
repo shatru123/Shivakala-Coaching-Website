@@ -1,0 +1,100 @@
+@using Shivakala.Core.Entities
+@using Shivakala.Core.ViewModels
+@{
+    ViewData["Title"] = "Student Dashboard";
+    var student = ViewBag.Student as Student;
+    var exams = ViewBag.Exams as List<OnlineExamStudentListViewModel> ?? new List<OnlineExamStudentListViewModel>();
+}
+
+<div class="container py-4">
+    <!-- Student Header Banner -->
+    <div class="card border-0 shadow-sm mb-4 text-white" style="background: linear-gradient(135deg, #0d1b3e 0%, #1a3a6b 100%);">
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <span class="badge bg-warning text-dark px-3 py-2 fw-bold mb-2">Student Dashboard</span>
+                    <h2 class="fw-bold mb-1">Welcome, @(student?.FullName ?? User.Identity?.Name)!</h2>
+                    <p class="mb-0 text-white-50">
+                        Roll No: <strong>@(student?.RollNumber ?? "N/A")</strong> | Standard: <strong>@(student?.Standard ?? "N/A")</strong> | Mobile: <strong>@(student?.Mobile ?? "N/A")</strong>
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <a asp-controller="OnlineExam" asp-action="Index" class="btn btn-warning text-dark fw-bold me-2">
+                        <i class="fa-solid fa-laptop-code me-1"></i> Browse Online Exams
+                    </a>
+                    <a asp-action="MyResults" class="btn btn-outline-light">
+                        <i class="fa-solid fa-trophy me-1"></i> My Results
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active / Assigned Online Exams -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+            <h5 class="mb-0 fw-bold text-dark"><i class="fa-solid fa-file-pen me-2 text-primary"></i> Assigned Online Examinations</h5>
+            <span class="badge bg-primary">@exams.Count Active Tests</span>
+        </div>
+        <div class="card-body">
+            @if (!exams.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-folder-open fs-1 mb-3 text-secondary"></i>
+                    <p class="mb-0">No active online examinations assigned currently.</p>
+                </div>
+            }
+            else
+            {
+                <div class="row g-3">
+                    @foreach (var item in exams)
+                    {
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card h-100 border-0 shadow-sm hover-shadow transition">
+                                <div class="card-body p-4 d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="badge bg-info text-dark">@item.Subject</span>
+                                        <span class="badge bg-secondary">Std @item.Standard</span>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-2">@item.Title</h5>
+                                    <p class="small text-muted mb-3">
+                                        <i class="fa-solid fa-clock me-1"></i> @item.DurationMinutes Mins | 
+                                        <i class="fa-solid fa-circle-question me-1"></i> @item.QuestionCount Questions | 
+                                        <i class="fa-solid fa-star me-1"></i> @item.TotalMarks Marks
+                                    </p>
+
+                                    <div class="mt-auto pt-3 border-top d-flex align-items-center justify-content-between">
+                                        @if (item.IsCompleted)
+                                        {
+                                            <span class="badge bg-success py-2 px-3"><i class="fa-solid fa-circle-check me-1"></i> Completed</span>
+                                            @if (item.LatestAttemptId.HasValue)
+                                            {
+                                                <a asp-controller="OnlineExam" asp-action="Result" asp-route-id="@item.Id" asp-route-attemptId="@item.LatestAttemptId.Value" class="btn btn-sm btn-outline-primary fw-bold">
+                                                    View Score
+                                                </a>
+                                            }
+                                        }
+                                        else if (item.IsAvailableNow)
+                                        {
+                                            <span class="badge bg-primary py-2 px-3"><i class="fa-solid fa-play me-1"></i> Live</span>
+                                            <a asp-controller="OnlineExam" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-primary fw-bold">
+                                                Start Exam
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark py-2 px-3"><i class="fa-solid fa-calendar me-1"></i> Scheduled</span>
+                                            <a asp-controller="OnlineExam" asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-secondary">
+                                                Details
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

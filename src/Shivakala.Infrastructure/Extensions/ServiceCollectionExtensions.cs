@@ -17,7 +17,10 @@ public static class ServiceCollectionExtensions
         services.Configure<DatabaseOptions>(configuration.GetSection(DatabaseOptions.SectionName));
         services.Configure<WhatsAppOptions>(configuration.GetSection(WhatsAppOptions.SectionName));
 
-        var provider = DatabaseProviderResolver.Normalize(configuration[$"{DatabaseOptions.SectionName}:Provider"]);
+        var provider = DatabaseProviderResolver.Normalize(
+            configuration[$"{DatabaseOptions.SectionName}:Provider"]
+            ?? Environment.GetEnvironmentVariable("SHIVAKALA_DB_PROVIDER")
+            ?? Environment.GetEnvironmentVariable("Database__Provider"));
         var connectionString = GetConnectionString(configuration, provider);
 
         services.Configure<AdminCredentialsOptions>(options =>
@@ -78,6 +81,9 @@ public static class ServiceCollectionExtensions
 
         // ── New Services ───────────────────────────────────────────────────
         services.AddScoped<IAuditService, AuditService>();
+        services.AddScoped<IQuestionImportService, QuestionImportService>();
+        services.AddScoped<IOnlineExamService, OnlineExamService>();
+        services.AddScoped<IMpscStudentService, MpscStudentService>();
         services.AddSingleton<IWhatsAppService, WhatsAppService>();
 
         return services;

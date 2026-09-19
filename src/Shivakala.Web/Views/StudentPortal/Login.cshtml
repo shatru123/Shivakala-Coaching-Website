@@ -1,0 +1,68 @@
+@{
+    ViewData["Title"] = "Student Portal Login";
+    var returnUrl = ViewBag.ReturnUrl as string;
+}
+
+<section class="page-hero">
+    <div class="container text-center">
+        <span class="badge-soft"><i class="fa-solid fa-graduation-cap me-1"></i>Student Access</span>
+        <h1 class="mt-2">Student Portal Login</h1>
+        <p>Log in using your registered Roll Number or Mobile Number</p>
+    </div>
+</section>
+
+<section class="section-shell pt-4 pb-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="glass-card p-4 p-md-5" style="border-top:4px solid var(--gold);">
+                    <div class="text-center mb-4">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width:64px;height:64px;background:rgba(27,43,107,0.1)">
+                            <i class="fa-solid fa-user-graduate fs-2" style="color:var(--navy)"></i>
+                        </div>
+                        <h4 class="fw-bold mb-1" style="color:var(--navy-dark)">Welcome Back, Student!</h4>
+                        <p class="text-muted small mb-0">Enter your credentials to access tests &amp; results</p>
+                    </div>
+
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger py-2 small rounded-3 mb-4">
+                            <i class="fa-solid fa-triangle-exclamation me-1"></i>
+                            @Html.ValidationSummary(false, "", new { @class = "mb-0" })
+                        </div>
+                    }
+
+                    <form asp-action="Authenticate" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small" style="color:var(--navy-dark)">Username / Roll No / Mobile</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted border-end-0"><i class="fa-solid fa-user"></i></span>
+                                <input type="text" name="username" class="form-control border-start-0" placeholder="e.g. 101 or 8087807011" required autofocus />
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small" style="color:var(--navy-dark)">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted border-end-0"><i class="fa-solid fa-lock"></i></span>
+                                <input type="password" name="password" class="form-control border-start-0" placeholder="Enter your password" required />
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary-sk w-100 py-2.5 justify-content-center text-uppercase">
+                            <i class="fa-solid fa-right-to-bracket me-2"></i> Log In to Portal
+                        </button>
+                    </form>
+
+                    <div class="text-center pt-4 mt-4 border-top">
+                        <small class="text-muted">Need login assistance? Contact Shivakala Coaching administration.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+

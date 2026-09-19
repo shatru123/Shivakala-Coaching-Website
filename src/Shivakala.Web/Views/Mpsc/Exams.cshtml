@@ -1,0 +1,83 @@
+@model IReadOnlyList<Shivakala.Core.ViewModels.MpscExamCardViewModel>
+@{
+    ViewData["Title"] = "MPSC Examinations | Shivakala";
+    var onlineExams = Model.Where(e => e.ExamMode == "Online").ToList();
+    var offlineExams = Model.Where(e => e.ExamMode == "Offline").ToList();
+}
+
+<section class="page-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="badge-soft"><i class="fa-solid fa-graduation-cap me-1"></i>MPSC Portal</span>
+            <h1 class="mt-2">MPSC Examinations Schedule</h1>
+            <p>Register and appear for Shivakala's online and offline MPSC mock examination series.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Results" class="btn btn-outline-light btn-sm">
+                <i class="fa-solid fa-trophy text-warning me-1"></i>My Results
+            </a>
+            <a asp-action="Dashboard" class="btn btn-outline-light btn-sm">
+                <i class="fa-solid fa-house me-1"></i>Dashboard
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="section-shell py-5">
+    <div class="container">
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show mb-4 shadow-sm" role="alert">
+                <i class="fa-solid fa-circle-check me-2"></i>@TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["WarningMessage"] != null)
+        {
+            <div class="alert alert-warning alert-dismissible fade show mb-4 shadow-sm" role="alert">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>@TempData["WarningMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        <!-- TABS FOR ONLINE & OFFLINE EXAMS -->
+        <div class="glass-card p-2 mb-4">
+            <ul class="nav nav-pills gap-2 border-0" id="examModeTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active fw-semibold px-4 py-2" id="tab-all" data-bs-toggle="pill" data-bs-target="#all-exams" type="button" role="tab" style="border-radius:20px">
+                        <i class="fa-solid fa-list-check me-1.5"></i>All Tests (@Model.Count)
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-semibold px-4 py-2" id="tab-online" data-bs-toggle="pill" data-bs-target="#online-exams" type="button" role="tab" style="border-radius:20px">
+                        <i class="fa-solid fa-laptop me-1.5 text-primary"></i>Online Tests (@onlineExams.Count)
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-semibold px-4 py-2" id="tab-offline" data-bs-toggle="pill" data-bs-target="#offline-exams" type="button" role="tab" style="border-radius:20px">
+                        <i class="fa-solid fa-building me-1.5 text-success"></i>Offline Center Tests (@offlineExams.Count)
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="tab-content" id="examModeContent">
+            <!-- ALL EXAMS -->
+            <div class="tab-pane fade show active" id="all-exams" role="tabpanel">
+                @await Html.PartialAsync("_ExamCardsList", Model)
+            </div>
+
+            <!-- ONLINE EXAMS -->
+            <div class="tab-pane fade" id="online-exams" role="tabpanel">
+                @await Html.PartialAsync("_ExamCardsList", onlineExams)
+            </div>
+
+            <!-- OFFLINE EXAMS -->
+            <div class="tab-pane fade" id="offline-exams" role="tabpanel">
+                @await Html.PartialAsync("_ExamCardsList", offlineExams)
+            </div>
+        </div>
+
+    </div>
+</section>

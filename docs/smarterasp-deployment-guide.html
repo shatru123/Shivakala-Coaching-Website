@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Shivakala Classes - SmarterASP Deployment Guide</title>
+    <style>
+        :root {
+            --bg: #f6f1e8;
+            --panel: #fffdf8;
+            --ink: #1f2937;
+            --muted: #5b6472;
+            --line: #e7dcc8;
+            --brand: #8b5e34;
+            --brand-dark: #5f3d1e;
+            --accent: #0f766e;
+            --warn-bg: #fff4db;
+            --warn-ink: #8a5a00;
+            --code-bg: #f4efe6;
+            --shadow: 0 18px 50px rgba(71, 46, 22, 0.09);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background:
+                radial-gradient(circle at top right, rgba(139, 94, 52, 0.10), transparent 26%),
+                linear-gradient(180deg, #fbf7f0 0%, var(--bg) 100%);
+            color: var(--ink);
+            line-height: 1.6;
+        }
+
+        .page {
+            width: min(1160px, calc(100% - 32px));
+            margin: 24px auto 48px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #4f2f13 0%, #8b5e34 52%, #c58c4f 100%);
+            color: #fff;
+            border-radius: 28px;
+            padding: 42px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: auto -60px -80px auto;
+            width: 260px;
+            height: 260px;
+            background: rgba(255, 255, 255, 0.10);
+            border-radius: 50%;
+        }
+
+        .hero h1 {
+            margin: 0 0 10px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.1;
+        }
+
+        .hero p {
+            margin: 0;
+            max-width: 760px;
+            color: rgba(255, 255, 255, 0.88);
+            font-size: 1.05rem;
+        }
+
+        .badge-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 22px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.14);
+            color: #fff;
+            font-size: 0.92rem;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 280px minmax(0, 1fr);
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .toc,
+        .section,
+        .callout {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            box-shadow: var(--shadow);
+        }
+
+        .toc {
+            position: sticky;
+            top: 20px;
+            padding: 22px;
+            height: fit-content;
+        }
+
+        .toc h2 {
+            margin: 0 0 14px;
+            font-size: 1.1rem;
+            color: var(--brand-dark);
+        }
+
+        .toc a {
+            display: block;
+            text-decoration: none;
+            color: var(--muted);
+            padding: 8px 0;
+        }
+
+        .toc a:hover {
+            color: var(--brand-dark);
+        }
+
+        .content {
+            display: grid;
+            gap: 22px;
+        }
+
+        .section {
+            padding: 28px;
+        }
+
+        .section h2 {
+            margin: 0 0 12px;
+            font-size: 1.5rem;
+            color: var(--brand-dark);
+        }
+
+        .section h3 {
+            margin: 24px 0 10px;
+            font-size: 1.05rem;
+            color: var(--ink);
+        }
+
+        .lead {
+            color: var(--muted);
+            margin-top: 0;
+        }
+
+        .grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .grid.two {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .card {
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 18px;
+            background: #fff;
+        }
+
+        .card h4 {
+            margin: 0 0 8px;
+            font-size: 1rem;
+            color: var(--brand-dark);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            overflow: hidden;
+            border-radius: 16px;
+            border: 1px solid var(--line);
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--line);
+            vertical-align: top;
+        }
+
+        th {
+            background: #f8f1e4;
+            color: var(--brand-dark);
+            font-weight: 700;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        ol,
+        ul {
+            margin: 10px 0 0 20px;
+            padding: 0;
+        }
+
+        li + li {
+            margin-top: 8px;
+        }
+
+        code,
+        pre {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        }
+
+        code {
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 7px;
+            color: #7a3f0a;
+        }
+
+        pre {
+            margin: 14px 0 0;
+            padding: 18px;
+            overflow: auto;
+            border-radius: 16px;
+            background: #221913;
+            color: #f5ede3;
+            border: 1px solid #3c2a20;
+        }
+
+        .callout {
+            padding: 18px 20px;
+            background: var(--warn-bg);
+            color: var(--warn-ink);
+            border-color: #f3d590;
+        }
+
+        .callout strong {
+            color: #704700;
+        }
+
+        .flow {
+            display: grid;
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .flow-step {
+            display: grid;
+            grid-template-columns: 52px 1fr;
+            gap: 14px;
+            align-items: start;
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            background: #fff;
+        }
+
+        .flow-num {
+            width: 52px;
+            height: 52px;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #8b5e34, #c58c4f);
+            color: #fff;
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        .footer {
+            text-align: center;
+            color: var(--muted);
+            padding: 8px 0 0;
+            font-size: 0.92rem;
+        }
+
+        @media (max-width: 920px) {
+            .layout,
+            .grid.two {
+                grid-template-columns: 1fr;
+            }
+
+            .toc {
+                position: static;
+            }
+
+            .hero,
+            .section,
+            .toc {
+                padding: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <section class="hero">
+            <h1>Shivakala Classes SmarterASP Deployment Guide</h1>
+            <p>This guide covers the live deployment setup for the Shivakala Coaching website on SmarterASP.NET with SQL Server, a separate Node.js WhatsApp sidecar, and GitHub Actions based deployment.</p>
+            <div class="badge-row">
+                <span class="badge">Main Site: shivkalaclasses.com</span>
+                <span class="badge">WhatsApp Sidecar: wa.shivkalaclasses.com</span>
+                <span class="badge">Database: SmarterASP SQL Server</span>
+                <span class="badge">Branch: main</span>
+            </div>
+        </section>
+
+        <div class="layout">
+            <aside class="toc">
+                <h2>Contents</h2>
+                <a href="#overview">1. Deployment Overview</a>
+                <a href="#hosting">2. Hosting Values</a>
+                <a href="#github">3. GitHub Secrets</a>
+                <a href="#server-config">4. Server App Settings</a>
+                <a href="#deploy-flow">5. Deployment Flow</a>
+                <a href="#database">6. Database Migration</a>
+                <a href="#verification">7. Verification Checklist</a>
+                <a href="#whatsapp">8. WhatsApp Setup</a>
+                <a href="#troubleshooting">9. Troubleshooting</a>
+                <a href="#security">10. Security Notes</a>
+            </aside>
+
+            <main class="content">
+                <section class="section" id="overview">
+                    <h2>1. Deployment Overview</h2>
+                    <p class="lead">The application is deployed as two separate web apps so the ASP.NET MVC site stays clean while the WhatsApp bridge runs independently on a Node.js subsite.</p>
+
+                    <div class="grid two">
+                        <div class="card">
+                            <h4>Main Website</h4>
+                            <ul>
+                                <li>Hosts the public website, admin portal, teacher portal, and parent portal.</li>
+                                <li>Uses ASP.NET Core and SQL Server.</li>
+                                <li>Primary URL: <code>https://shivkalaclasses.com</code></li>
+                            </ul>
+                        </div>
+                        <div class="card">
+                            <h4>WhatsApp Sidecar</h4>
+                            <ul>
+                                <li>Runs the Node.js service for QR login and WhatsApp broadcast.</li>
+                                <li>Separate subsite to avoid mixing app runtimes.</li>
+                                <li>Primary URL: <code>https://wa.shivkalaclasses.com</code></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="flow">
+                        <div class="flow-step">
+                            <div class="flow-num">1</div>
+                            <div><strong>Push code to GitHub</strong><br />The repository `main` branch triggers the CI/CD workflow.</div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-num">2</div>
+                            <div><strong>Deploy main app</strong><br />GitHub Actions publishes the ASP.NET app to the SmarterASP main site by Web Deploy.</div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-num">3</div>
+                            <div><strong>Deploy sidecar</strong><br />GitHub Actions publishes a slim Node.js WhatsApp artifact to the `wa` subsite.</div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-num">4</div>
+                            <div><strong>Apply DB migration</strong><br />Run the SQL Server migration command once against the production database.</div>
+                        </div>
+                        <div class="flow-step">
+                            <div class="flow-num">5</div>
+                            <div><strong>Scan WhatsApp QR</strong><br />Open the admin WhatsApp page and connect the phone using Linked Devices.</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="section" id="hosting">
+                    <h2>2. Hosting Values</h2>
+                    <p class="lead">These are the SmarterASP site values already collected during setup.</p>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Component</th>
+                                <th>Key</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Main site</td>
+                                <td>Web Deploy Service URL</td>
+                                <td><code>https://win8140.site4now.net:8172/MsDeploy.axd?site=shatrughna8087-001-site1</code></td>
+                            </tr>
+                            <tr>
+                                <td>Main site</td>
+                                <td>Site Name</td>
+                                <td><code>shatrughna8087-001-site1</code></td>
+                            </tr>
+                            <tr>
+                                <td>Main site</td>
+                                <td>Folder</td>
+                                <td><code>site1</code></td>
+                            </tr>
+                            <tr>
+                                <td>WhatsApp site</td>
+                                <td>Web Deploy Service URL</td>
+                                <td><code>https://win8140.site4now.net:8172/MsDeploy.axd?site=shatrughna8087-001-subsite2</code></td>
+                            </tr>
+                            <tr>
+                                <td>WhatsApp site</td>
+                                <td>Site Name</td>
+                                <td><code>shatrughna8087-001-subsite2</code></td>
+                            </tr>
+                            <tr>
+                                <td>WhatsApp site</td>
+                                <td>Folder</td>
+                                <td><code>wa</code></td>
+                            </tr>
+                            <tr>
+                                <td>Shared</td>
+                                <td>Username</td>
+                                <td><code>shatrughna8087-001</code></td>
+                            </tr>
+                            <tr>
+                                <td>Database</td>
+                                <td>SQL Server Connection</td>
+                                <td><code>Data Source=SQL8002.site4now.net;Initial Catalog=db_aca3e8_shivkalaclasses;User Id=db_aca3e8_shivkalaclasses_admin;Password=Shatru123@;Encrypt=True;TrustServerCertificate=True;</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section class="section" id="github">
+                    <h2>3. GitHub Secrets</h2>
+                    <p class="lead">Add these in GitHub under <code>Settings -> Secrets and variables -> Actions</code>.</p>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Secret</th>
+                                <th>Purpose</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>SMARTERASP_WEBDEPLOY_SERVICE_URL</code></td><td>Main site Web Deploy service URL</td></tr>
+                            <tr><td><code>SMARTERASP_WEB_SITE_NAME</code></td><td>Main site Web Deploy site name</td></tr>
+                            <tr><td><code>SMARTERASP_WEBDEPLOY_USERNAME</code></td><td>Main site Web Deploy username</td></tr>
+                            <tr><td><code>SMARTERASP_WEBDEPLOY_PASSWORD</code></td><td>Main site Web Deploy password</td></tr>
+                            <tr><td><code>SMARTERASP_NODE_WEBDEPLOY_SERVICE_URL</code></td><td>WhatsApp site Web Deploy service URL</td></tr>
+                            <tr><td><code>SMARTERASP_NODE_SITE_NAME</code></td><td>WhatsApp site Web Deploy site name</td></tr>
+                            <tr><td><code>SMARTERASP_NODE_WEBDEPLOY_USERNAME</code></td><td>WhatsApp site Web Deploy username</td></tr>
+                            <tr><td><code>SMARTERASP_NODE_WEBDEPLOY_PASSWORD</code></td><td>WhatsApp site Web Deploy password</td></tr>
+                            <tr><td><code>WHATSAPP_API_KEY</code></td><td>Shared secret between the main app and sidecar</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div class="callout">
+                        <strong>Optional secrets:</strong> <code>WHATSAPP_AUTH_PATH</code> and <code>PUPPETEER_EXECUTABLE_PATH</code> are not needed for the first deployment. Only add them later if a specific runtime error points to them.
+                    </div>
+                </section>
+
+                <section class="section" id="server-config">
+                    <h2>4. Server App Settings</h2>
+                    <p class="lead">After the first publish, place this content into the deployed <code>site1/appsettings.Production.json</code>.</p>
+
+                    <pre>{
+  "Database": {
+    "Provider": "SqlServer"
+  },
+  "ConnectionStrings": {
+    "SqlServer": "Data Source=SQL8002.site4now.net;Initial Catalog=db_aca3e8_shivkalaclasses;User Id=db_aca3e8_shivkalaclasses_admin;Password=Shatru123@;Encrypt=True;TrustServerCertificate=True;"
+  },
+  "WhatsApp": {
+    "BaseUrl": "https://wa.shivkalaclasses.com",
+    "ApiKey": "YOUR_LONG_RANDOM_SECRET"
+  }
+}</pre>
+
+                    <h3>Important rules</h3>
+                    <ul>
+                        <li><code>YOUR_LONG_RANDOM_SECRET</code> must be the same value as GitHub secret <code>WHATSAPP_API_KEY</code>.</li>
+                        <li>The file is for the main ASP.NET site only, not the WhatsApp subsite.</li>
+                        <li>The WhatsApp subsite uses its own <code>web.config</code> generated by the workflow.</li>
+                    </ul>
+                </section>
+
+                <section class="section" id="deploy-flow">
+                    <h2>5. Deployment Flow</h2>
+                    <ol>
+                        <li>Push the latest code to the <code>main</code> branch.</li>
+                        <li>Open GitHub Actions and run the <code>CI-CD</code> workflow if it does not trigger automatically.</li>
+                        <li>Wait for these jobs to pass: <code>build</code>, <code>deploy-web</code>, and <code>deploy-whatsapp-sidecar</code>.</li>
+                        <li>Connect to SmarterASP via FTP and confirm that the main site folder <code>site1</code> now contains the published application files.</li>
+                        <li>Edit <code>site1/appsettings.Production.json</code> with the production database and WhatsApp values.</li>
+                        <li>Restart the application pool from SmarterASP if needed.</li>
+                    </ol>
+                </section>
+
+                <section class="section" id="database">
+                    <h2>6. Database Migration</h2>
+                    <p class="lead">Run the production migration once from your local machine so the hosted SQL Server gets the required schema.</p>
+
+                    <pre>dotnet ef database update --project src/Shivakala.SqlServerMigrations --startup-project src/Shivakala.Web -- --provider=SqlServer</pre>
+
+                    <div class="callout">
+                        <strong>Tip:</strong> run this only after the SQL Server connection string is final. If you rotate the password, update the connection string before running migrations again.
+                    </div>
+                </section>
+
+                <section class="section" id="verification">
+                    <h2>7. Verification Checklist</h2>
+                    <ul>
+                        <li>Open <code>https://shivkalaclasses.com</code> and confirm the public site loads.</li>
+                        <li>Open <code>https://shivkalaclasses.com/admin/login</code> and confirm the login page loads.</li>
+                        <li>Open <code>https://wa.shivkalaclasses.com/status</code> and confirm JSON is returned.</li>
+                        <li>Log into the admin portal and open the WhatsApp page.</li>
+                        <li>Confirm the QR area loads instead of showing a sidecar configuration warning.</li>
+                    </ul>
+                </section>
+
+                <section class="section" id="whatsapp">
+                    <h2>8. WhatsApp Setup</h2>
+                    <ol>
+                        <li>Open <code>https://shivkalaclasses.com/admin/whatsapp</code>.</li>
+                        <li>Wait for the QR code to appear.</li>
+                        <li>On the mobile phone, open WhatsApp and go to <code>Linked Devices</code>.</li>
+                        <li>Scan the QR code shown in the admin panel.</li>
+                        <li>Confirm the status changes to connected.</li>
+                        <li>Send a small test broadcast before using the feature for a real audience.</li>
+                    </ol>
+                </section>
+
+                <section class="section" id="troubleshooting">
+                    <h2>9. Troubleshooting</h2>
+
+                    <h3>Main site loads but login or data fails</h3>
+                    <ul>
+                        <li>Check <code>site1/appsettings.Production.json</code>.</li>
+                        <li>Confirm <code>Database.Provider</code> is set to <code>SqlServer</code>.</li>
+                        <li>Confirm the SQL Server connection string is correct.</li>
+                    </ul>
+
+                    <h3>WhatsApp deploy fails</h3>
+                    <ul>
+                        <li>Check the GitHub Actions job named <code>deploy-whatsapp-sidecar</code>.</li>
+                        <li>The workflow now trims non-runtime files before deploy, so a failure usually means hosting permission or runtime issues.</li>
+                    </ul>
+
+                    <h3><code>/status</code> fails on the WhatsApp subsite</h3>
+                    <ul>
+                        <li>Check whether the Node.js app is enabled on the `wa` subsite.</li>
+                        <li>Check whether SmarterASP supports the Chromium requirement for <code>whatsapp-web.js</code>.</li>
+                        <li>If Chromium is not available, move only the sidecar to a small VPS and keep the main site on SmarterASP.</li>
+                    </ul>
+
+                    <h3>QR does not appear</h3>
+                    <ul>
+                        <li>Verify the main app and sidecar share the same WhatsApp API key.</li>
+                        <li>Verify <code>WhatsApp.BaseUrl</code> points to <code>https://wa.shivkalaclasses.com</code>.</li>
+                    </ul>
+                </section>
+
+                <section class="section" id="security">
+                    <h2>10. Security Notes</h2>
+                    <div class="callout">
+                        <strong>Rotate the SQL password.</strong> The current SQL Server password was exposed during setup chat, so it should be changed in SmarterASP and then updated everywhere it is used.
+                    </div>
+
+                    <ul>
+                        <li>Use a strong random value for <code>WHATSAPP_API_KEY</code>.</li>
+                        <li>Do not commit live passwords into the repository.</li>
+                        <li>After deployment is stable, consider rotating the SmarterASP Web Deploy password too.</li>
+                    </ul>
+                </section>
+
+                <p class="footer">Prepared for the Shivakala Classes production deployment on SmarterASP.NET.</p>
+            </main>
+        </div>
+    </div>
+</body>
+</html>

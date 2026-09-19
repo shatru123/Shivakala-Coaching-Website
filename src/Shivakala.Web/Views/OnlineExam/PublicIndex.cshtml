@@ -1,0 +1,75 @@
+@model IReadOnlyList<Shivakala.Core.ViewModels.OnlineExamStudentListViewModel>
+@using System.Globalization
+@{
+    ViewData["Title"] = "Online Examinations | Shivakala";
+    var isMr = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "mr";
+}
+
+<section class="page-hero">
+    <div class="container">
+        <span class="badge-soft"><i class="fa-solid fa-laptop-code me-1"></i>@(isMr ? "ऑनलाइन परीक्षा केंद्र" : "Online Examination Portal")</span>
+        <h1 class="mt-2">@(isMr ? "ऑनलाइन परीक्षा लिस्ट" : "Available Online Examinations")</h1>
+        <p>@(isMr ? "तुमच्या अभ्यासाचे मूल्यांकन करण्यासाठी ऑनलाइन परीक्षा सराव करा." : "Attempt online tests, test your knowledge, and review instant scorecards.")</p>
+    </div>
+</section>
+
+<section class="section-shell pt-4 pb-5">
+    <div class="container">
+
+        <!-- LOGIN REQUIRED BANNER FOR NON-LOGGED-IN USERS -->
+        <div class="glass-card mb-4 border-0" style="background:linear-gradient(135deg,rgba(200,168,75,0.12),rgba(27,43,107,0.04));border-left:5px solid var(--gold)!important;">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                <div>
+                    <h5 class="fw-bold mb-1" style="color:var(--navy-dark)"><i class="fa-solid fa-lock text-warning me-2"></i>@(isMr ? "लॉगिन आवश्यक आहे" : "Login Required to Attempt Exams")</h5>
+                    <p class="text-muted mb-0 small">
+                        @(isMr ? "ऑनलाइन परीक्षेत बसण्यासाठी तुम्हाला प्रथम विद्यार्थी म्हणून नोंदणी किंवा लॉगिन करणे आवश्यक आहे." : "You must register or log in before attempting an online examination.")
+                    </p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a asp-controller="StudentPortal" asp-action="Login" class="btn-primary-sk"><i class="fa-solid fa-right-to-bracket me-1"></i>Login</a>
+                    <a asp-controller="Registration" asp-action="Index" class="btn-outline-sk"><i class="fa-solid fa-user-plus me-1"></i>Register</a>
+                </div>
+            </div>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="glass-card text-center py-5">
+                <i class="fa-solid fa-file-signature fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted fw-bold">No online exams available right now.</h5>
+                <p class="text-muted small mb-0">Please check back later or contact administration.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var e in Model)
+                {
+                    <div class="col-md-6 col-lg-4">
+                        <div class="glass-card h-100 d-flex flex-column justify-content-between p-4" style="border-top:4px solid var(--gold);">
+                            <div>
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="badge-soft dark" style="font-size:0.75rem">Std @e.Standard</span>
+                                    <span class="badge-soft" style="font-size:0.75rem">@e.Subject</span>
+                                </div>
+                                <h5 class="fw-bold mb-3" style="color:var(--navy-dark)">@e.Title</h5>
+                                <div class="p-3 bg-light rounded-3 text-muted small mb-3 border">
+                                    <div class="mb-1.5"><i class="fa-regular fa-clock me-2 text-primary"></i><strong>Duration:</strong> @e.DurationMinutes Mins</div>
+                                    <div class="mb-1.5"><i class="fa-solid fa-star me-2 text-warning"></i><strong>Total Marks:</strong> @e.TotalMarks Marks</div>
+                                    <div class="mb-1.5"><i class="fa-solid fa-list-check me-2 text-success"></i><strong>Questions:</strong> @e.QuestionCount MCQs</div>
+                                    <div><i class="fa-regular fa-calendar-check me-2 text-info"></i><strong>Starts:</strong> @(e.StartDateTime?.ToString("dd MMM yyyy, hh:mm tt") ?? "Immediate")</div>
+                                </div>
+                            </div>
+                            <div class="pt-2">
+                                <a asp-controller="OnlineExam" asp-action="Details" asp-route-id="@e.Id" class="btn-outline-sk w-100 justify-content-center">
+                                    <i class="fa-solid fa-eye me-1"></i>View Exam Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>
+

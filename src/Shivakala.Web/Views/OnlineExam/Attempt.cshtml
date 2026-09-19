@@ -1,0 +1,410 @@
+@model Shivakala.Core.ViewModels.OnlineExamAttemptViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = $"{Model.ExamTitle} — Online Exam Session";
+}
+
+<style>
+    .exam-header-bar {
+        background: linear-gradient(90deg, var(--navy-dark), var(--navy));
+        color: #fff;
+        padding: 12px 0;
+        position: sticky;
+        top: 0;
+        z-index: 1020;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .timer-badge {
+        background: rgba(0,0,0,0.3);
+        color: var(--gold-light);
+        font-family: monospace;
+        font-size: 1.3rem;
+        font-weight: 700;
+        padding: 6px 16px;
+        border-radius: 8px;
+        border: 2px solid var(--gold);
+    }
+    .timer-badge.urgent {
+        background: rgba(192,57,43,0.3);
+        color: #ff6b6b;
+        border-color: #ff6b6b;
+        animation: pulse 1s infinite;
+    }
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+    }
+    .q-nav-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--border);
+        background: var(--white);
+        color: var(--text);
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+    .q-nav-btn.answered { background: rgba(27,122,62,0.15); color: var(--green-dark); border-color: var(--green); }
+    .q-nav-btn.review { background: rgba(245,166,35,0.2); color: #854d0e; border-color: var(--gold); }
+    .q-nav-btn.active { border: 3px solid var(--navy); font-weight: 700; box-shadow: 0 0 0 2px rgba(27,43,107,0.2); }
+    .save-status-indicator {
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+    }
+    .option-card {
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 18px;
+        cursor: pointer;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--white);
+    }
+    .option-card:hover { border-color: var(--navy-mid); background: rgba(27,43,107,0.02); }
+    .option-card.selected { border-color: var(--navy); background: rgba(27,43,107,0.08); font-weight: 600; }
+</style>
+
+<!-- STICKY EXAM HEADER -->
+<div class="exam-header-bar">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h5 class="mb-0 fw-bold text-white">@Model.ExamTitle</h5>
+            <small class="text-white-50">Std @Model.Standard &bull; @Model.Subject</small>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+            <div id="saveStatus" class="save-status-indicator bg-success text-white">
+                <i class="fa-solid fa-check me-1"></i>Saved
+            </div>
+            <div class="timer-badge" id="examTimer">
+                <i class="fa-regular fa-clock me-1"></i><span id="timerText">--:--</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="section-shell pt-4 pb-5">
+    <div class="container">
+        <div class="row g-4">
+
+            <!-- MAIN QUESTION VIEW PANEL -->
+            <div class="col-lg-8">
+                <div class="glass-card p-4">
+
+                    @for (int i = 0; i < Model.Questions.Count; i++)
+                    {
+                        var q = Model.Questions[i];
+                        <div class="question-block" id="qBlock_@i" style="display:@(i == 0 ? "block" : "none")">
+                            
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                <span class="fw-bold text-navy">Question @(i + 1) of @Model.Questions.Count</span>
+                                <span class="badge bg-light text-dark border">@q.Marks Marks</span>
+                            </div>
+
+                            <h5 class="fw-semibold text-dark mb-3" style="line-height:1.5">@q.QuestionText</h5>
+
+                            @if (!string.IsNullOrWhiteSpace(q.QuestionImageUrl))
+                            {
+                                <div class="mb-3 text-center">
+                                    <img src="@q.QuestionImageUrl" class="img-fluid rounded" style="max-height:250px" alt="Question Diagram" />
+                                </div>
+                            }
+
+                            <!-- OPTIONS LIST -->
+                            <div class="d-grid gap-2 mb-4">
+                                @foreach (var opt in q.Options)
+                                {
+                                    var isChecked = q.SelectedOptionId == opt.Id;
+                                    <div class="option-card @(isChecked ? "selected" : "")" onclick="selectOption(@i, @q.QuestionId, @opt.Id, this)">
+                                        <input type="radio" name="opt_@q.QuestionId" value="@opt.Id" class="form-check-input mt-0" @(isChecked ? "checked" : "") />
+                                        <span class="fw-bold text-navy" style="min-width:24px">@opt.OptionKey.</span>
+                                        <span>@opt.OptionText</span>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- QUESTION ACTION CONTROLS -->
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-3 border-top">
+                                <div>
+                                    @if (i > 0)
+                                    {
+                                        <button type="button" class="btn btn-outline-secondary px-3" onclick="goToQuestion(@(i - 1))">
+                                            <i class="fa-solid fa-chevron-left me-1"></i>Previous
+                                        </button>
+                                    }
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn @(q.IsMarkedForReview ? "btn-warning" : "btn-outline-warning") px-3" id="reviewBtn_@i" onclick="toggleReview(@i, @q.QuestionId)">
+                                        <i class="fa-solid fa-bookmark me-1"></i><span id="reviewText_@i">@(q.IsMarkedForReview ? "Marked for Review" : "Mark for Review")</span>
+                                    </button>
+
+                                    @if (i < Model.Questions.Count - 1)
+                                    {
+                                        <button type="button" class="btn-primary-sk px-4" onclick="goToQuestion(@(i + 1))">
+                                            Save &amp; Next <i class="fa-solid fa-chevron-right ms-1"></i>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-success px-4" onclick="openSubmitModal()">
+                                            <i class="fa-solid fa-paper-plane me-1"></i>Submit Exam
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+            </div>
+
+            <!-- QUESTION NAVIGATOR SIDEBAR -->
+            <div class="col-lg-4">
+                <div class="glass-card p-3 position-sticky" style="top:90px">
+                    <h6 class="fw-bold mb-3 text-navy d-flex justify-content-between align-items-center">
+                        <span><i class="fa-solid fa-compass me-2"></i>Question Navigator</span>
+                        <span class="badge bg-primary" id="navSummary">0/@Model.Questions.Count</span>
+                    </h6>
+
+                    <!-- NAV GRID -->
+                    <div class="d-flex flex-wrap gap-2 mb-4" id="navGrid">
+                        @for (int i = 0; i < Model.Questions.Count; i++)
+                        {
+                            var q = Model.Questions[i];
+                            var statusClass = q.IsMarkedForReview ? "review" : (q.SelectedOptionId.HasValue ? "answered" : "");
+                            var activeClass = i == 0 ? "active" : "";
+                            <button type="button" class="q-nav-btn @statusClass @activeClass" id="navBtn_@i" onclick="goToQuestion(@i)">
+                                @(i + 1)
+                                @if (q.IsMarkedForReview) { <span class="ms-1">⚑</span> }
+                                else if (q.SelectedOptionId.HasValue) { <span class="ms-1">✓</span> }
+                            </button>
+                        }
+                    </div>
+
+                    <!-- LEGEND -->
+                    <div class="p-3 bg-light rounded text-muted small">
+                        <div class="row g-2">
+                            <div class="col-6"><span class="badge bg-success me-1">✓</span> Answered</div>
+                            <div class="col-6"><span class="badge bg-light text-dark border me-1">○</span> Unanswered</div>
+                            <div class="col-6"><span class="badge bg-warning text-dark me-1">⚑</span> Marked Review</div>
+                            <div class="col-6"><span class="badge bg-primary me-1">&bull;</span> Current</div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-outline-danger w-100 mt-3" onclick="openSubmitModal()">
+                        <i class="fa-solid fa-flag-checkered me-1"></i>Finish &amp; Submit Exam
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- SUBMIT CONFIRMATION MODAL -->
+<div class="modal fade" id="submitModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius:16px">
+            <div class="modal-header bg-navy text-white">
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-paper-plane me-2 text-warning"></i>Submit Examination?</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted mb-3">Please review your attempt summary before final submission:</p>
+
+                <div class="row g-3 text-center mb-3">
+                    <div class="col-4">
+                        <div class="p-2 bg-success bg-opacity-10 text-success rounded">
+                            <h4 class="fw-bold mb-0" id="modalAnsweredCount">0</h4>
+                            <small>Answered</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 bg-secondary bg-opacity-10 text-secondary rounded">
+                            <h4 class="fw-bold mb-0" id="modalUnansweredCount">0</h4>
+                            <small>Unanswered</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 bg-warning bg-opacity-10 text-dark rounded">
+                            <h4 class="fw-bold mb-0" id="modalReviewCount">0</h4>
+                            <small>For Review</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning small mb-0">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i>Once submitted, you cannot change your answers.
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Continue Exam</button>
+                <form asp-controller="OnlineExam" asp-action="Submit" method="post" id="finalSubmitForm">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="attemptId" value="@Model.AttemptId" />
+                    <input type="hidden" name="isAutoSubmit" id="isAutoSubmitInput" value="false" />
+                    <button type="submit" class="btn btn-success px-4"><i class="fa-solid fa-check me-1"></i>Confirm &amp; Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    var currentQIndex = 0;
+    var totalQuestions = @Model.Questions.Count;
+    var attemptId = @Model.AttemptId;
+    var remainingSeconds = @Model.RemainingSeconds;
+
+    var questionData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Questions.Select(q => new {
+        q.QuestionId,
+        q.SelectedOptionId,
+        q.IsMarkedForReview
+    })));
+
+    // Timer logic
+    function updateTimerDisplay() {
+        var mins = Math.floor(remainingSeconds / 60);
+        var secs = remainingSeconds % 60;
+        var display = (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+        document.getElementById('timerText').textContent = display;
+
+        var timerBadge = document.getElementById('examTimer');
+        if (remainingSeconds <= 300) {
+            timerBadge.classList.add('urgent');
+        } else {
+            timerBadge.classList.remove('urgent');
+        }
+
+        if (remainingSeconds <= 0) {
+            document.getElementById('isAutoSubmitInput').value = 'true';
+            document.getElementById('finalSubmitForm').submit();
+        } else {
+            remainingSeconds--;
+        }
+    }
+
+    setInterval(updateTimerDisplay, 1000);
+    updateTimerDisplay();
+
+    function goToQuestion(index) {
+        if (index < 0 || index >= totalQuestions) return;
+
+        document.getElementById('qBlock_' + currentQIndex).style.display = 'none';
+        document.getElementById('navBtn_' + currentQIndex).classList.remove('active');
+
+        currentQIndex = index;
+        document.getElementById('qBlock_' + currentQIndex).style.display = 'block';
+        document.getElementById('navBtn_' + currentQIndex).classList.add('active');
+    }
+
+    function selectOption(qIdx, questionId, optionId, cardElem) {
+        var container = cardElem.parentElement;
+        container.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+        cardElem.classList.add('selected');
+        cardElem.querySelector('input[type="radio"]').checked = true;
+
+        questionData[qIdx].SelectedOptionId = optionId;
+        saveAnswer(qIdx, questionId, optionId, questionData[qIdx].IsMarkedForReview);
+    }
+
+    function toggleReview(qIdx, questionId) {
+        questionData[qIdx].IsMarkedForReview = !questionData[qIdx].IsMarkedForReview;
+        var btn = document.getElementById('reviewBtn_' + qIdx);
+        var txt = document.getElementById('reviewText_' + qIdx);
+
+        if (questionData[qIdx].IsMarkedForReview) {
+            btn.className = 'btn btn-warning px-3';
+            txt.textContent = 'Marked for Review';
+        } else {
+            btn.className = 'btn btn-outline-warning px-3';
+            txt.textContent = 'Mark for Review';
+        }
+
+        saveAnswer(qIdx, questionId, questionData[qIdx].SelectedOptionId, questionData[qIdx].IsMarkedForReview);
+    }
+
+    function saveAnswer(qIdx, questionId, optionId, isReview) {
+        var statusElem = document.getElementById('saveStatus');
+        statusElem.className = 'save-status-indicator bg-warning text-dark';
+        statusElem.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Saving...';
+
+        fetch('/online-exams/save-answer', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                AttemptId: attemptId,
+                QuestionId: questionId,
+                SelectedOptionId: optionId,
+                IsMarkedForReview: isReview
+            })
+        })
+        .then(r => r.json())
+        .then(d => {
+            if (d.success) {
+                statusElem.className = 'save-status-indicator bg-success text-white';
+                statusElem.innerHTML = '<i class="fa-solid fa-check me-1"></i>Saved ✓';
+            } else {
+                statusElem.className = 'save-status-indicator bg-danger text-white';
+                statusElem.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i>Save Error';
+            }
+            updateNavState(qIdx);
+        })
+        .catch(() => {
+            statusElem.className = 'save-status-indicator bg-danger text-white';
+            statusElem.innerHTML = '<i class="fa-solid fa-triangle-exclamation me-1"></i>Connection Lost — Retrying';
+        });
+    }
+
+    function updateNavState(qIdx) {
+        var btn = document.getElementById('navBtn_' + qIdx);
+        var item = questionData[qIdx];
+
+        btn.classList.remove('answered', 'review');
+        if (item.IsMarkedForReview) {
+            btn.classList.add('review');
+            btn.innerHTML = (qIdx + 1) + ' <span class="ms-1">⚑</span>';
+        } else if (item.SelectedOptionId) {
+            btn.classList.add('answered');
+            btn.innerHTML = (qIdx + 1) + ' <span class="ms-1">✓</span>';
+        } else {
+            btn.innerHTML = (qIdx + 1);
+        }
+
+        updateSummary();
+    }
+
+    function updateSummary() {
+        var answered = questionData.filter(q => q.SelectedOptionId && !q.IsMarkedForReview).length;
+        var review = questionData.filter(q => q.IsMarkedForReview).length;
+        var total = questionData.length;
+        document.getElementById('navSummary').textContent = answered + '/' + total;
+    }
+
+    function openSubmitModal() {
+        var answered = questionData.filter(q => q.SelectedOptionId).length;
+        var review = questionData.filter(q => q.IsMarkedForReview).length;
+        var unanswered = totalQuestions - answered;
+
+        document.getElementById('modalAnsweredCount').textContent = answered;
+        document.getElementById('modalUnansweredCount').textContent = unanswered;
+        document.getElementById('modalReviewCount').textContent = review;
+
+        var modal = new bootstrap.Modal(document.getElementById('submitModal'));
+        modal.show();
+    }
+
+    updateSummary();
+</script>
+}

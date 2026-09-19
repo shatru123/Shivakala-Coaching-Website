@@ -15,5 +15,6 @@ public sealed class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
         b.Property(x => x.Email).HasMaxLength(200).IsRequired();
         b.Property(x => x.Role).HasMaxLength(50).IsRequired();
         b.Property(x => x.PasswordHash).HasMaxLength(200).IsRequired();
+        b.HasOne(x => x.MpscStudent).WithMany().HasForeignKey(x => x.MpscStudentId).OnDelete(DeleteBehavior.SetNull);
     }
 }

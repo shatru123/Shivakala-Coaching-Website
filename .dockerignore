@@ -1,0 +1,11 @@
+.git
+.github
+.idea
+.ai
+**/bin
+**/obj
+**/.DS_Store
+**/.wwebjs_auth
+uploads
+data
+node_modules

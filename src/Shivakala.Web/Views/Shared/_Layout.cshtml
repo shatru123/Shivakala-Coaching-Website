@@ -8,6 +8,8 @@
     var isAdminLoggedIn = User.Identity?.IsAuthenticated == true && User.IsInRole("Admin");
     var isTeacherLoggedIn = User.Identity?.IsAuthenticated == true && User.IsInRole("Teacher");
     var isParentLoggedIn = User.Identity?.IsAuthenticated == true && User.IsInRole("Parent");
+    var isStudentLoggedIn = User.Identity?.IsAuthenticated == true && User.IsInRole("Student");
+    var isMpscStudentLoggedIn = User.Identity?.IsAuthenticated == true && User.IsInRole("MpscStudent");
 }
 <!DOCTYPE html>
 <html lang="@currentCulture" data-theme="light">
@@ -45,7 +47,7 @@
 </head>
 <body>
 
-    <!-- ADMIN BAR (shown when any portal user is logged in) -->
+    <!-- ADMIN / PORTAL BAR -->
     @if (isAdminLoggedIn)
     {
         <div class="admin-bar">
@@ -82,6 +84,31 @@
             </div>
         </div>
     }
+    else if (isStudentLoggedIn)
+    {
+        <div class="admin-bar" style="background:#1b2b6b">
+            <div class="container">
+                <span><i class="fa-solid fa-graduation-cap me-1"></i>Student Portal — <strong style="color:#fff">@User.Identity?.Name</strong></span>
+                <div class="d-flex gap-2">
+                    <a asp-controller="StudentPortal" asp-action="Index"><i class="fa-solid fa-gauge-high me-1"></i>My Exams</a>
+                    <a asp-controller="StudentPortal" asp-action="Logout" style="border-color:rgba(255,100,100,.4);color:#f87171"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a>
+                </div>
+            </div>
+        </div>
+    }
+    else if (isMpscStudentLoggedIn)
+    {
+        <div class="admin-bar" style="background:#092b5a;border-bottom:2px solid #eab308;">
+            <div class="container">
+                <span><i class="fa-solid fa-landmark-flag me-1 text-warning"></i>MPSC Portal — <strong style="color:#fff">@User.Identity?.Name</strong></span>
+                <div class="d-flex gap-2">
+                    <a asp-controller="Mpsc" asp-action="Dashboard"><i class="fa-solid fa-gauge-high me-1"></i>My Dashboard</a>
+                    <a asp-controller="Mpsc" asp-action="Exams"><i class="fa-solid fa-laptop me-1"></i>My Exams</a>
+                    <a asp-controller="Mpsc" asp-action="Logout" style="border-color:rgba(255,100,100,.4);color:#f87171"><i class="fa-solid fa-right-from-bracket me-1"></i>Logout</a>
+                </div>
+            </div>
+        </div>
+    }
 
     <!-- TOP STRIP -->
     <div class="top-strip">
@@ -113,6 +140,43 @@
                         <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">@T["NavHome"]</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="About" asp-action="Index">@T["NavAbout"]</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Courses" asp-action="Index">@T["NavCourses"]</a></li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle fw-semibold" href="#" id="mpscDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="color:var(--navy-dark,#1a3a6b);">
+                                <i class="fa-solid fa-landmark-flag text-warning me-1"></i>MPSC
+                            </a>
+                            <ul class="dropdown-menu shadow-sm border-0" aria-labelledby="mpscDropdown">
+                                <li>
+                                    <a class="dropdown-item py-2 fw-semibold" asp-controller="OnlineExam" asp-action="Index">
+                                        <i class="fa-solid fa-laptop-code text-primary me-2"></i>Online Exams
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider my-1"></li>
+                                <li>
+                                    <a class="dropdown-item py-2" asp-controller="Mpsc" asp-action="Index">
+                                        <i class="fa-solid fa-circle-info text-secondary me-2"></i>MPSC Overview
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-2" asp-controller="Mpsc" asp-action="Register">
+                                        <i class="fa-solid fa-user-plus text-success me-2"></i>Candidate Registration
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item py-2" asp-controller="Mpsc" asp-action="Login">
+                                        <i class="fa-solid fa-right-to-bracket text-primary me-2"></i>Candidate Login
+                                    </a>
+                                </li>
+                                @if (isMpscStudentLoggedIn)
+                                {
+                                    <li><hr class="dropdown-divider my-1"></li>
+                                    <li>
+                                        <a class="dropdown-item py-2 text-primary fw-semibold" asp-controller="Mpsc" asp-action="Dashboard">
+                                            <i class="fa-solid fa-gauge-high text-warning me-2"></i>Candidate Dashboard
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </li>
                         <li class="nav-item"><a class="nav-link" asp-controller="Results" asp-action="Index">@(isMr ? "साप्ताहिक निकाल" : "Weekly Test")</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="StudyMaterial" asp-action="Index">@(isMr ? "अभ्यास साहित्य" : "Study Material")</a></li>
                         <li class="nav-item"><a class="nav-link" asp-controller="NoticeBoard" asp-action="Index">@(isMr ? "सूचना" : "Notice Board")</a></li>
@@ -132,7 +196,7 @@
                         <!-- Dark mode -->
                         <button type="button" id="themeToggle" aria-label="Toggle theme"><i class="fa-solid fa-moon"></i></button>
 
-                        <!-- Portal button — dropdown if not logged in, dashboard if logged in -->
+                        <!-- Portal button -->
                         @if (!User.Identity!.IsAuthenticated)
                         {
                             <div class="dropdown portal-dropdown">
@@ -140,6 +204,16 @@
                                     <i class="fa-solid fa-user me-1"></i>@(isMr ? "पोर्टल" : "Portal Login")
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end">
+                                    <li>
+                                        <a class="portal-item" asp-controller="StudentPortal" asp-action="Login">
+                                            <div class="portal-ico" style="background:rgba(200,168,75,.15);color:#c8a84b"><i class="fa-solid fa-graduation-cap"></i></div>
+                                            <div>
+                                                <span class="portal-label">Student Portal</span>
+                                                <span class="portal-sub">Online Exams · Attempt · Results</span>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li><div class="portal-divider"></div></li>
                                     <li>
                                         <a class="portal-item" asp-controller="Admin" asp-action="Login">
                                             <div class="portal-ico" style="background:rgba(26,58,107,.12);color:#1a3a6b"><i class="fa-solid fa-shield-halved"></i></div>
@@ -169,6 +243,16 @@
                                             </div>
                                         </a>
                                     </li>
+                                    <li><div class="portal-divider"></div></li>
+                                    <li>
+                                        <a class="portal-item" asp-controller="Mpsc" asp-action="Login">
+                                            <div class="portal-ico" style="background:rgba(234,179,8,.15);color:#b45309"><i class="fa-solid fa-landmark-flag"></i></div>
+                                            <div>
+                                                <span class="portal-label">MPSC Candidate Portal</span>
+                                                <span class="portal-sub">Mock Tests · Profile · Results</span>
+                                            </div>
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
                         }
@@ -188,6 +272,18 @@
                         {
                             <a class="btn-login nav-link" asp-controller="ParentPortal" asp-action="Index" style="background:rgba(90,78,142,.1)">
                                 <i class="fa-solid fa-gauge-high me-1"></i>My Portal
+                            </a>
+                        }
+                        else if (isStudentLoggedIn)
+                        {
+                            <a class="btn-login nav-link" asp-controller="StudentPortal" asp-action="Index" style="background:rgba(27,43,107,.1)">
+                                <i class="fa-solid fa-laptop-code me-1"></i>My Exams
+                            </a>
+                        }
+                        else if (isMpscStudentLoggedIn)
+                        {
+                            <a class="btn-login nav-link" asp-controller="Mpsc" asp-action="Dashboard" style="background:rgba(234,179,8,.15);color:#b45309;">
+                                <i class="fa-solid fa-landmark-flag me-1"></i>MPSC Portal
                             </a>
                         }
                     </div>

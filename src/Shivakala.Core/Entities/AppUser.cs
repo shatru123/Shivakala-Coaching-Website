@@ -17,6 +17,9 @@ public sealed class AppUser : BaseEntity
     public DateTime? LastLoginDate    { get; set; }
 
     // FK mappings (nullable — a user may not yet be linked)
-    public int? TeacherId  { get; set; }
-    public int? StudentId  { get; set; }
+    public int? TeacherId      { get; set; }
+    public int? StudentId      { get; set; }
+    public int? MpscStudentId  { get; set; }
+
+    public MpscStudent? MpscStudent { get; set; }
 }

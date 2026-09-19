@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shivakala Classes Visual User Guide</title>
+  <style>
+    :root {
+      --bg: #f7f1e7;
+      --bg-soft: #fffaf2;
+      --card: #ffffff;
+      --ink: #1f2937;
+      --muted: #5f6b7a;
+      --line: #eadcc8;
+      --brand: #8b5e34;
+      --brand-dark: #603d21;
+      --accent: #0f766e;
+      --accent-soft: #e8fbf7;
+      --admin: #e8eefc;
+      --teacher: #e9fbf4;
+      --parent: #f4ebff;
+      --public: #fff3d8;
+      --shared: #f4f4f5;
+      --shadow: 0 20px 50px rgba(80, 49, 22, 0.12);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(139, 94, 52, 0.16), transparent 24%),
+        radial-gradient(circle at top right, rgba(15, 118, 110, 0.10), transparent 22%),
+        linear-gradient(180deg, #fcf7ef 0%, var(--bg) 100%);
+      line-height: 1.6;
+    }
+
+    .page {
+      width: min(1320px, calc(100% - 28px));
+      margin: 18px auto 40px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 30px;
+      padding: 42px;
+      color: #fff;
+      background:
+        radial-gradient(circle at 85% 20%, rgba(255,255,255,0.16), transparent 18%),
+        linear-gradient(135deg, #4a2d17 0%, #8b5e34 44%, #c89a5f 100%);
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -60px -90px auto;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.10);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.10);
+      font-size: 0.88rem;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 14px 0 10px;
+      font-size: clamp(2.2rem, 4vw, 3.5rem);
+      line-height: 1.06;
+      max-width: 900px;
+    }
+
+    .hero p {
+      max-width: 880px;
+      margin: 0;
+      color: rgba(255,255,255,0.88);
+      font-size: 1.04rem;
+    }
+
+    .hero-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .meta-card {
+      border-radius: 18px;
+      padding: 16px 18px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.14);
+      backdrop-filter: blur(5px);
+    }
+
+    .meta-card strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: rgba(255,255,255,0.72);
+    }
+
+    .meta-card span {
+      font-size: 1rem;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .section {
+      margin-top: 24px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px;
+    }
+
+    .section h2 {
+      margin: 0 0 8px;
+      font-size: 1.6rem;
+      color: var(--brand-dark);
+    }
+
+    .section p.lead {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .summary-card {
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, #fffefb 0%, #fff 100%);
+      padding: 18px;
+    }
+
+    .summary-card h3 {
+      margin: 0 0 8px;
+      font-size: 1.05rem;
+      color: var(--brand-dark);
+    }
+
+    .summary-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .tour-shell {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 22px;
+      margin-top: 20px;
+    }
+
+    .tour-sidebar,
+    .tour-stage,
+    .atlas-card {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      background: var(--bg-soft);
+    }
+
+    .tour-sidebar {
+      padding: 22px;
+      position: sticky;
+      top: 18px;
+      align-self: start;
+    }
+
+    .role-buttons,
+    .quick-jump {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+      border: none;
+    }
+
+    .role-btn,
+    .jump-btn {
+      text-align: left;
+      padding: 12px 14px;
+      border-radius: 15px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      transition: .2s ease;
+    }
+
+    .role-btn:hover,
+    .jump-btn:hover,
+    .role-btn.active,
+    .jump-btn.active {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(80, 49, 22, 0.08);
+      border-color: rgba(96, 61, 33, 0.25);
+    }
+
+    .role-btn small,
+    .jump-btn small {
+      display: block;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .tour-stage {
+      padding: 22px;
+      background:
+        radial-gradient(circle at top right, rgba(139, 94, 52, 0.08), transparent 20%),
+        linear-gradient(180deg, #fffefb 0%, #fff 100%);
+    }
+
+    .progress-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: #efe2cf;
+      overflow: hidden;
+      margin: 14px 0 18px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #8b5e34 0%, #d7aa6e 100%);
+      transition: width .25s ease;
+    }
+
+    .role-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: .82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .role-public { background: var(--public); color: #8a6100; }
+    .role-admin { background: var(--admin); color: #28488d; }
+    .role-teacher { background: var(--teacher); color: #0e6a52; }
+    .role-parent { background: var(--parent); color: #6d49a2; }
+    .role-shared { background: var(--shared); color: #4b5563; }
+
+    .slide-title {
+      margin: 12px 0 8px;
+      font-size: clamp(1.45rem, 3vw, 2.2rem);
+      color: var(--brand-dark);
+      line-height: 1.15;
+    }
+
+    .slide-copy {
+      color: var(--muted);
+      max-width: 880px;
+      margin: 0 0 16px;
+    }
+
+    .slide-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(280px, .8fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .shot-wrap {
+      border-radius: 22px;
+      border: 1px solid var(--line);
+      padding: 14px;
+      background: #fff;
+      box-shadow: 0 16px 36px rgba(80, 49, 22, 0.08);
+    }
+
+    .shot-wrap img {
+      width: 100%;
+      display: block;
+      border-radius: 14px;
+      background: #f0ece4;
+    }
+
+    .detail-card {
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      background: #fffdfa;
+      padding: 18px;
+    }
+
+    .detail-card h3 {
+      margin: 0 0 10px;
+      color: var(--brand-dark);
+      font-size: 1.05rem;
+    }
+
+    .detail-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .nav-btn,
+    .ghost-btn {
+      padding: 12px 18px;
+      border-radius: 14px;
+      font-weight: 600;
+    }
+
+    .nav-btn {
+      color: #fff;
+      background: linear-gradient(135deg, #8b5e34, #c58c4f);
+    }
+
+    .nav-btn:disabled {
+      opacity: .45;
+      cursor: not-allowed;
+    }
+
+    .ghost-btn {
+      background: #fff;
+      color: var(--brand-dark);
+      border: 1px solid var(--line);
+    }
+
+    .atlas-controls {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .search {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px 14px;
+      min-width: min(100%, 360px);
+    }
+
+    .search input {
+      border: none;
+      outline: none;
+      width: 100%;
+      font: inherit;
+      background: transparent;
+      color: var(--ink);
+    }
+
+    .atlas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .atlas-card {
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 14px 36px rgba(80, 49, 22, 0.08);
+    }
+
+    .atlas-card img {
+      width: 100%;
+      display: block;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      background: #eee8de;
+    }
+
+    .atlas-copy {
+      padding: 14px 16px 18px;
+    }
+
+    .atlas-copy h3 {
+      margin: 8px 0 6px;
+      font-size: 1rem;
+      color: var(--brand-dark);
+      line-height: 1.25;
+    }
+
+    .atlas-copy p {
+      margin: 0;
+      color: var(--muted);
+      font-size: .94rem;
+    }
+
+    .sample-box {
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 18px;
+      border: 1px solid #f0cf95;
+      background: linear-gradient(180deg, #fff6e3 0%, #fffaf1 100%);
+    }
+
+    .sample-box h3 {
+      margin: 0 0 8px;
+      color: #8a6100;
+    }
+
+    .sample-box ul {
+      margin: 0;
+      padding-left: 18px;
+      color: #7a6646;
+    }
+
+    @media (max-width: 1040px) {
+      .tour-shell,
+      .slide-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tour-sidebar {
+        position: static;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page { width: min(100% - 16px, 1320px); }
+      .hero,
+      .section,
+      .tour-sidebar,
+      .tour-stage { padding: 18px; }
+      .hero h1 { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="eyebrow">Shivakala Classes • Visual Walkthrough</div>
+      <h1>Beautiful Light-Mode User Guide With Full Screen-by-Screen Navigation</h1>
+      <p>This guide explains how every major user works inside the Shivakala Classes system. It uses sample data, polished screenshots, guided next/previous navigation, and a complete screen atlas so the product is easy to understand for admins, teachers, parents, and the public website team.</p>
+      <div class="hero-meta">
+        <div class="meta-card"><strong>Guide Style</strong><span>Interactive walkthrough</span></div>
+        <div class="meta-card"><strong>Theme</strong><span>Light mode only</span></div>
+        <div class="meta-card"><strong>Coverage</strong><span>All captured screens</span></div>
+        <div class="meta-card"><strong>Purpose</strong><span>Training, onboarding, handoff</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>What This Guide Covers</h2>
+      <p class="lead">Use the guided tour for a clean next-to-next walkthrough, then use the screen atlas to jump to any individual page. The screenshots already include demo records so the flows feel realistic instead of empty.</p>
+      <div class="summary-grid">
+        <div class="summary-card">
+          <h3>Public Website Journey</h3>
+          <ul>
+            <li>Home page, courses, gallery, notice board, results, contact, enquiry, testimonials, and registration.</li>
+          </ul>
+        </div>
+        <div class="summary-card">
+          <h3>Admin Operations</h3>
+          <ul>
+            <li>Admissions, teachers, batches, attendance, fees, exams, materials, homework, website content, and WhatsApp.</li>
+          </ul>
+        </div>
+        <div class="summary-card">
+          <h3>Teacher Portal</h3>
+          <ul>
+            <li>Dashboard, attendance marking, homework, exams, marks entry, and password change.</li>
+          </ul>
+        </div>
+        <div class="summary-card">
+          <h3>Parent Portal</h3>
+          <ul>
+            <li>Dashboard, attendance view, fee history, and password change.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="sample-box">
+        <h3>Sample Data Used In Screenshots</h3>
+        <ul>
+          <li>Students such as Atharv Kulkarni and Ishita Jagtap are shown for demo understanding.</li>
+          <li>Batch examples include 10th Evening Batch B and real-looking class allocations.</li>
+          <li>Sample academic records include Unit Test - Algebra, homework practice sets, notices, fee receipts, and testimonials.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" id="tour">
+      <h2>Interactive Guided Tour</h2>
+      <p class="lead">Pick a role to focus the tour, then use the navigation buttons to move through the flow one screen at a time.</p>
+
+      <div class="tour-shell">
+        <aside class="tour-sidebar">
+          <h3>Choose Role</h3>
+          <div class="role-buttons" id="roleButtons"></div>
+
+          <h3 style="margin-top:22px;">Jump To</h3>
+          <div class="quick-jump" id="quickJump"></div>
+        </aside>
+
+        <div class="tour-stage">
+          <div class="progress-row">
+            <span id="progressLabel">Step 1</span>
+            <span id="progressCount">1 / 1</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+
+          <span class="role-pill" id="slideRole"></span>
+          <h3 class="slide-title" id="slideTitle"></h3>
+          <p class="slide-copy" id="slideDescription"></p>
+
+          <div class="slide-grid">
+            <div class="shot-wrap">
+              <img id="slideImage" alt="Guide screenshot" />
+            </div>
+            <div class="detail-card">
+              <h3>What To Understand On This Screen</h3>
+              <ul id="slideNotes"></ul>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="ghost-btn" id="prevBtn" type="button">Previous Screen</button>
+            <button class="nav-btn" id="nextBtn" type="button">Next Screen</button>
+            <button class="ghost-btn" id="atlasBtn" type="button">Jump To Full Screen Atlas</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="atlas">
+      <h2>Full Screen Atlas</h2>
+      <p class="lead">Every captured view is listed below. Use search or role filters to locate a screen quickly during training or handover.</p>
+
+      <div class="atlas-controls">
+        <div class="role-buttons" id="atlasRoles" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));"></div>
+        <label class="search">
+          <span>Search</span>
+          <input id="atlasSearch" type="search" placeholder="Find login, fees, homework, gallery..." />
+        </label>
+      </div>
+
+      <div class="atlas-grid" id="atlasGrid"></div>
+    </section>
+  </div>
+
+  <script>
+    const roleStyles = {
+      all: { className: "role-shared", label: "All Screens" },
+      public: { className: "role-public", label: "Public" },
+      admin: { className: "role-admin", label: "Admin" },
+      teacher: { className: "role-teacher", label: "Teacher" },
+      parent: { className: "role-parent", label: "Parent" },
+      shared: { className: "role-shared", label: "Shared" }
+    };
+
+    const slides = [
+      { role: "public", title: "Public Home Page", image: "docs/assets/all-views/public-home.png", description: "This is the main landing page that introduces Shivakala Classes, highlights programs, outcomes, testimonials, and calls visitors toward enquiry or registration.", notes: ["Use this page to explain the brand story and trust-building content.", "Admin-controlled homepage sections such as testimonials and stats appear here.", "This is the starting point for most new visitors."], jump: "Public tour begins" },
+      { role: "public", title: "About Page", image: "docs/assets/all-views/public-about.png", description: "The About page explains the institute mission, faculty approach, and learning philosophy in a more detailed format.", notes: ["Useful for parents comparing coaching institutes.", "Supports trust and institutional positioning.", "Content should be kept aligned with the homepage message."] },
+      { role: "public", title: "Courses Page", image: "docs/assets/all-views/public-courses.png", description: "Courses are presented here so visitors can understand available standards, exam preparation types, and learning tracks.", notes: ["Acts as the offer catalog for the coaching institute.", "Helps visitors choose between academic and exam-focused programs.", "Admins can keep this aligned with actual batch operations."] },
+      { role: "public", title: "Gallery Page", image: "docs/assets/all-views/public-gallery.png", description: "The gallery showcases classroom moments, events, student achievements, and visual proof of activity.", notes: ["Used for social proof and presentation quality.", "Images come from the admin-managed gallery module.", "Strong visuals make the site feel active and credible."] },
+      { role: "public", title: "Notice Board", image: "docs/assets/all-views/public-notice-board.png", description: "Important public-facing notices are shown here for announcements, schedules, and updates.", notes: ["Can be used for exam schedules, holiday updates, or parent communication.", "Should stay current to maintain trust.", "Notices can also support offline notice board workflows."] },
+      { role: "public", title: "Results Page", image: "docs/assets/all-views/public-results.png", description: "This page presents published results and academic performance information for public visibility.", notes: ["Useful for marketing success stories and academic credibility.", "Admins should publish only finalized results here.", "Pairs well with testimonials and achievement announcements."] },
+      { role: "public", title: "Study Material Page", image: "docs/assets/all-views/public-study-material.png", description: "Public study materials and downloadable academic resources are listed here.", notes: ["Can support open resources or promotional sample materials.", "Material quality helps reinforce teaching strength.", "Admins should keep outdated files cleaned up."] },
+      { role: "public", title: "Testimonials Page", image: "docs/assets/all-views/public-testimonials.png", description: "This page presents student and parent feedback to strengthen confidence in the institute.", notes: ["Testimonials shown here are part of the website credibility layer.", "Admin approval helps keep this section polished.", "Featured records are especially useful for homepage and marketing."] },
+      { role: "public", title: "Contact Page", image: "docs/assets/all-views/public-contact.png", description: "Contact details, inquiry instructions, and institute communication channels appear here.", notes: ["Parents use this to reach the institute quickly.", "Should always show correct phone numbers and address details.", "This page usually supports conversion after interest is built."] },
+      { role: "public", title: "Enquiry Form", image: "docs/assets/all-views/public-enquiry.png", description: "The enquiry page captures lead information from interested students or parents.", notes: ["Acts as the lead generation form for admissions follow-up.", "Submitted records become actionable items in admin enquiries.", "This is one of the most important conversion screens."] },
+      { role: "public", title: "Student Registration Form", image: "docs/assets/all-views/public-registration.png", description: "This is the formal online registration page for collecting applicant details before admission processing.", notes: ["Captures admission data for the admin team.", "Reduces manual paperwork and improves intake consistency.", "This page typically leads into internal approval or processing."] },
+
+      { role: "admin", title: "Admin Login", image: "docs/assets/all-views/admin-login.png", description: "The admin login page is the secure entry point for management staff.", notes: ["Only admin users should use this login.", "Teachers and parents have separate dedicated portals.", "A clean login flow is the first control point for operations."] , jump: "Admin management flow"},
+      { role: "admin", title: "Admin Dashboard", image: "docs/assets/all-views/admin-dashboard.png", description: "The dashboard summarizes institute operations with high-level cards, shortcuts, and performance signals.", notes: ["Use this page as the operational command center.", "Gives a snapshot of admissions, fees, academics, and activity.", "Ideal for daily review at the start of office hours."] },
+      { role: "admin", title: "Registrations", image: "docs/assets/all-views/admin-registrations.png", description: "Registration entries submitted from the website are reviewed and managed here.", notes: ["This is where admission leads become actual student workflows.", "Useful for filtering, reviewing, and acting on fresh registrations.", "Good first stop for admission staff each day."] },
+      { role: "admin", title: "Student Form", image: "docs/assets/all-views/admin-student-form.png", description: "This form is used to create or update core student records.", notes: ["Stores the official profile used across attendance, fees, and exams.", "Data quality here affects every downstream module.", "Photos and parent contact information are especially important."] },
+      { role: "admin", title: "Teachers List", image: "docs/assets/all-views/admin-teachers.png", description: "All teacher profiles and teaching staff records are managed from this screen.", notes: ["Use this for staff visibility and profile management.", "Supports teacher assignment and teacher portal readiness.", "Should stay aligned with actual working faculty."] },
+      { role: "admin", title: "Teacher Form", image: "docs/assets/all-views/admin-teacher-form.png", description: "This form creates or edits teacher profile details.", notes: ["Useful for staffing, subject allocation, and internal records.", "Portal-linked teachers should have correct role identity.", "Consistent subject data helps future timetable and batch management."] },
+      { role: "admin", title: "Courses", image: "docs/assets/all-views/admin-courses.png", description: "Course definitions are managed here for the academic offerings shown on the website and used internally.", notes: ["Keep this aligned with current standards and programs.", "Public website content often depends on this module.", "Course clarity supports better admissions communication."] },
+      { role: "admin", title: "Course Form", image: "docs/assets/all-views/admin-course-form.png", description: "This screen is used to create or edit a course entry.", notes: ["Use clear names and descriptions for marketing consistency.", "Make sure the course reflects actual batch delivery.", "This helps bridge website content and institute operations."] },
+      { role: "admin", title: "Batches", image: "docs/assets/all-views/admin-batches.png", description: "All academic batches are listed here for scheduling, assignment, and operational grouping.", notes: ["Batches connect students, teachers, subjects, attendance, and exams.", "This is a foundational operational screen.", "Batch naming should be consistent and easy to understand."] },
+      { role: "admin", title: "Batch Form", image: "docs/assets/all-views/admin-batch-form.png", description: "This form creates new batches or edits existing batch details.", notes: ["Use it to define timing, naming, and structure.", "A good batch setup prevents downstream confusion.", "Ensure the correct teacher and class logic is represented."] },
+      { role: "admin", title: "Batch Detail", image: "docs/assets/all-views/admin-batch-detail.png", description: "Batch details bring together student assignment, subjects, and operational context for one class group.", notes: ["Useful for checking if a batch is fully configured.", "Helps admin review the exact composition of a running class.", "Important before marking attendance or scheduling exams."] },
+      { role: "admin", title: "Attendance Index", image: "docs/assets/all-views/admin-attendance-index.png", description: "This page is the attendance hub for access to marking and reports.", notes: ["Acts as the entry point for daily attendance workflows.", "Good for choosing the correct class or date-driven action.", "Attendance quality affects parent trust and reporting."] },
+      { role: "admin", title: "Attendance Marking", image: "docs/assets/all-views/admin-attendance-mark.png", description: "Attendance is marked here for students on a selected date and batch.", notes: ["A core daily operational screen.", "Accuracy here directly influences parent and student visibility.", "Should be completed on time for reliable records."] },
+      { role: "admin", title: "Attendance Report", image: "docs/assets/all-views/admin-attendance-report.png", description: "Reports summarize attendance patterns and student consistency.", notes: ["Use for identifying irregular students.", "Helps with parent discussion and intervention.", "Also useful for internal academic monitoring."] },
+      { role: "admin", title: "Fees Dashboard", image: "docs/assets/all-views/admin-fees.png", description: "The fees module overview helps track payment operations and pending dues.", notes: ["This is the main financial operations screen for fee collection.", "Use it to move into receipts, structures, and collections.", "A strong fee workflow improves admin discipline."] },
+      { role: "admin", title: "Fee Structure", image: "docs/assets/all-views/admin-fee-structure.png", description: "Standardized fee structures are configured here for programs or classes.", notes: ["This keeps billing logic consistent.", "Useful before collecting payments at scale.", "Accurate structures reduce manual fee confusion."] },
+      { role: "admin", title: "Fee Collection", image: "docs/assets/all-views/admin-fee-collect.png", description: "Individual student fee payments are entered through this collection screen.", notes: ["This is the operational payment-entry page.", "Always confirm student identity and amount carefully.", "Receipts and parent history depend on this data."] },
+      { role: "admin", title: "Fee Receipt", image: "docs/assets/all-views/admin-fee-receipt.png", description: "A printable receipt is generated from a successful fee collection entry.", notes: ["Use this as proof of payment.", "Helps both office staff and parents maintain clarity.", "Receipts also improve institutional professionalism."] },
+      { role: "admin", title: "Exams", image: "docs/assets/all-views/admin-exams.png", description: "Exam schedules and academic assessments are managed from this page.", notes: ["Used to control the assessment lifecycle.", "Pairs with marks entry and result publication.", "Supports discipline in academic tracking."] },
+      { role: "admin", title: "Exam Form", image: "docs/assets/all-views/admin-exam-form.png", description: "This form defines a new exam or edits an existing one.", notes: ["Use clear exam titles and dates.", "Accurate scheduling avoids confusion for staff and students.", "Batch and subject alignment matters here."] },
+      { role: "admin", title: "Exam Marks Entry", image: "docs/assets/all-views/admin-exam-marks.png", description: "This screen captures marks against a scheduled exam.", notes: ["Data entered here affects rankings and results.", "Careful score entry prevents later disputes.", "Use after the exam schedule is finalized."] },
+      { role: "admin", title: "Results", image: "docs/assets/all-views/admin-results.png", description: "Academic result records are reviewed and published from this screen.", notes: ["This is where private academic data becomes presentable output.", "Use only when marks are verified.", "The public result page may depend on finalized records here."] },
+      { role: "admin", title: "Result Form", image: "docs/assets/all-views/admin-result-form.png", description: "This form supports creation or editing of published result information.", notes: ["Useful for polishing displayed results.", "Should reflect final verified academic outcomes.", "Keep naming and formatting consistent."] },
+      { role: "admin", title: "Homework List", image: "docs/assets/all-views/admin-homework.png", description: "Homework assignments created for batches are reviewed and managed here.", notes: ["Useful for tracking assignment discipline.", "Keeps class activity visible to admin leadership.", "Supports teacher accountability and parent follow-through."] },
+      { role: "admin", title: "Homework Form", image: "docs/assets/all-views/admin-homework-form.png", description: "This form creates or edits homework tasks and attachments.", notes: ["Can be used directly by admin or reviewed for teacher quality.", "Attachments improve clarity for students.", "Due dates should align with class progress."] },
+      { role: "admin", title: "Materials", image: "docs/assets/all-views/admin-materials.png", description: "Study resources and downloadable materials are managed here.", notes: ["Central place for PDFs, notes, and support resources.", "Useful for academic consistency across batches.", "Good resource organization improves student experience."] },
+      { role: "admin", title: "Material Form", image: "docs/assets/all-views/admin-material-form.png", description: "This form uploads or edits a study material entry.", notes: ["Use helpful titles and categories.", "Keep uploaded content current and relevant.", "This can power both internal and public material sections."] },
+      { role: "admin", title: "Notice List", image: "docs/assets/all-views/admin-notices.png", description: "All notices are managed here before showing to audiences.", notes: ["Useful for academic, administrative, and public communication.", "Clear wording improves parent trust.", "This module supports both internal discipline and public updates."] },
+      { role: "admin", title: "Notice Form", image: "docs/assets/all-views/admin-notice-form.png", description: "This screen creates or updates a notice item.", notes: ["Use it for timely updates and announcements.", "Good notice quality reduces back-and-forth questions.", "Keep the audience and timing in mind."] },
+      { role: "admin", title: "Timetable", image: "docs/assets/all-views/admin-timetable.png", description: "Timetable entries are reviewed here for weekly schedule management.", notes: ["Useful to validate class structure and staff coordination.", "Should reflect actual batch movement and teaching load.", "A clean timetable reduces daily operational friction."] },
+      { role: "admin", title: "Timetable Form", image: "docs/assets/all-views/admin-timetable-form.png", description: "This form creates or edits timetable slots.", notes: ["Use consistent subject, teacher, and time mapping.", "Conflict-free scheduling is important.", "Good data here helps future scaling."] },
+      { role: "admin", title: "Enquiries", image: "docs/assets/all-views/admin-enquiries.png", description: "Leads submitted through the public enquiry form appear here for follow-up.", notes: ["This supports admissions conversion workflows.", "Responding quickly improves lead quality.", "Useful for tracking incoming interest trends."] },
+      { role: "admin", title: "Gallery Manager", image: "docs/assets/all-views/admin-gallery.png", description: "The gallery manager controls visual content for the website.", notes: ["Keeps public presentation fresh.", "High-quality visuals build confidence with parents.", "Remove outdated or low-value images regularly."] },
+      { role: "admin", title: "Testimonials Manager", image: "docs/assets/all-views/admin-testimonials.png", description: "Testimonials can be reviewed, approved, and organized here.", notes: ["Supports trust-building content across the website.", "Admin control keeps messaging clean and authentic.", "Featured records are especially valuable."] },
+      { role: "admin", title: "Testimonial Form", image: "docs/assets/all-views/admin-testimonial-form.png", description: "This form creates or updates an individual testimonial.", notes: ["Useful for collecting polished stories from students and parents.", "Careful wording improves public impact.", "Can support both page and homepage display."] },
+      { role: "admin", title: "Homepage Content", image: "docs/assets/all-views/admin-homepage-content.png", description: "Homepage visibility and editable marketing content are controlled here.", notes: ["This is where the website headline sections become admin-manageable.", "Use it to turn sections on or off and revise text.", "Strong homepage content improves conversion and professionalism."] },
+      { role: "admin", title: "Portal Accounts", image: "docs/assets/all-views/admin-portal-accounts.png", description: "Teacher and parent portal users can be reviewed and managed from this screen.", notes: ["Useful for access administration.", "A core part of role-based operations.", "Helps with onboarding and login support."] },
+      { role: "admin", title: "Reset Portal Password", image: "docs/assets/all-views/admin-reset-portal-password.png", description: "Admins can reset teacher or parent passwords from this page.", notes: ["Supports account recovery without direct database access.", "Useful for operational support and onboarding.", "Should be used carefully and communicated clearly to the user."] },
+      { role: "admin", title: "Admin Change Password", image: "docs/assets/all-views/admin-change-password.png", description: "This screen lets the admin update their own password securely.", notes: ["Important for security hygiene.", "Should be updated whenever credentials are rotated.", "Use a strong password and keep it private."] },
+      { role: "admin", title: "Audit Log", image: "docs/assets/all-views/admin-audit-log.png", description: "Administrative activity history is tracked here for accountability.", notes: ["Very useful for tracing operational actions.", "Supports security and governance.", "Can help debug who changed what and when."] },
+      { role: "admin", title: "WhatsApp Broadcast", image: "docs/assets/all-views/admin-whatsapp.png", description: "The admin WhatsApp page manages QR connection and bulk communication.", notes: ["This is the sidecar-powered communication screen.", "Use it only after the WhatsApp service is connected.", "Ideal for notices, reminders, and parent broadcasts."] },
+
+      { role: "teacher", title: "Teacher Login", image: "docs/assets/all-views/teacher-login.png", description: "Teachers use their own dedicated login rather than the admin login.", notes: ["This keeps role permissions separated.", "Teachers should never access the admin portal.", "The teacher portal is designed for focused classroom work."] , jump: "Teacher portal flow"},
+      { role: "teacher", title: "Teacher Dashboard", image: "docs/assets/all-views/teacher-dashboard.png", description: "The dashboard gives teachers a fast summary of teaching tasks and daily actions.", notes: ["Use this as the teacher home base.", "Provides a quick path into classroom operations.", "Keeps the interface simpler than the admin portal."] },
+      { role: "teacher", title: "Teacher Attendance", image: "docs/assets/all-views/teacher-attendance.png", description: "Teachers mark attendance for their assigned classes from this screen.", notes: ["One of the most important daily teacher actions.", "Should be completed promptly to keep parent visibility accurate.", "Attendance quality supports discipline and communication."] },
+      { role: "teacher", title: "Teacher Homework", image: "docs/assets/all-views/teacher-homework.png", description: "Teachers can assign and manage homework for their batches here.", notes: ["Supports academic continuity between classes.", "Useful for assigning practice sheets and due dates.", "Teachers should keep task instructions clear."] },
+      { role: "teacher", title: "Teacher Exams", image: "docs/assets/all-views/teacher-exams.png", description: "Teachers view scheduled assessments and exam-related work here.", notes: ["Connects teaching activity with testing workflows.", "Useful for exam readiness and class planning.", "Complements marks-entry responsibilities."] },
+      { role: "teacher", title: "Teacher Exam Marks", image: "docs/assets/all-views/teacher-exam-marks.png", description: "Marks for teacher-handled exams are entered or reviewed on this screen.", notes: ["Data entered here affects student outcomes.", "Teachers should verify score accuracy carefully.", "Best used immediately after paper checking."] },
+      { role: "teacher", title: "Teacher Change Password", image: "docs/assets/all-views/teacher-change-password.png", description: "Teachers can update their own password here.", notes: ["Encourages self-service security.", "Should be used when passwords are first shared or reset.", "Strong passwords protect private classroom information."] },
+
+      { role: "parent", title: "Parent Login", image: "docs/assets/all-views/parent-login.png", description: "Parents use a separate portal login to see student-related information only.", notes: ["This keeps access limited to parent-facing data.", "Separates operational users from family users.", "Supports secure communication and trust."] , jump: "Parent portal flow"},
+      { role: "parent", title: "Parent Dashboard", image: "docs/assets/all-views/parent-dashboard.png", description: "The parent dashboard gives a concise overview of the student's current academic visibility.", notes: ["Designed for simplicity and quick understanding.", "Good for reviewing student status without admin complexity.", "Acts as the parent home screen."] },
+      { role: "parent", title: "Parent Attendance", image: "docs/assets/all-views/parent-attendance.png", description: "Parents can view attendance records and student regularity here.", notes: ["Useful for follow-up at home.", "Helps parents notice irregularity early.", "Supports stronger parent-institute communication."] },
+      { role: "parent", title: "Parent Fees", image: "docs/assets/all-views/parent-fees.png", description: "Fee history and payment visibility are shown on this page.", notes: ["Helps parents track financial records clearly.", "Improves transparency and trust.", "Useful when checking due status or past payments."] },
+      { role: "parent", title: "Parent Change Password", image: "docs/assets/all-views/parent-change-password.png", description: "Parents can change their own login password from here.", notes: ["Supports account security without admin involvement.", "Use after initial onboarding or any reset.", "Keeps family-side access secure."] },
+
+      { role: "shared", title: "Access Denied Page", image: "docs/assets/all-views/shared-access-denied.png", description: "This page appears when a user tries to open a page outside their permitted role.", notes: ["Important for role-based clarity.", "Teachers and parents are redirected away from admin-only areas.", "This supports safer navigation and permissions."] , jump: "Shared system screens"},
+      { role: "shared", title: "Status Code Page", image: "docs/assets/all-views/shared-status-code.png", description: "The status page handles route or response errors such as missing pages.", notes: ["Improves error handling quality for users.", "Should stay friendly and understandable.", "Useful for maintaining a polished experience."] },
+      { role: "shared", title: "System Error Page", image: "docs/assets/all-views/shared-error.png", description: "This screen is the fallback for unexpected application errors.", notes: ["Part of the production safety net.", "Users should land here instead of raw system errors.", "Supports a more professional and stable experience."] }
+    ];
+
+    const roleDefinitions = [
+      { key: "all", title: "All Screens", description: "See the full end-to-end product tour." },
+      { key: "public", title: "Public Website", description: "Visitor-facing pages for marketing, enquiry, and registration." },
+      { key: "admin", title: "Admin Portal", description: "Daily office operations, academics, content, and communications." },
+      { key: "teacher", title: "Teacher Portal", description: "Classroom workflows such as attendance, homework, and marks." },
+      { key: "parent", title: "Parent Portal", description: "Parent-friendly visibility into attendance and fees." },
+      { key: "shared", title: "Shared Screens", description: "Permission, error, and status handling views." }
+    ];
+
+    let currentRole = "all";
+    let filteredSlides = slides.slice();
+    let currentIndex = 0;
+
+    const roleButtons = document.getElementById("roleButtons");
+    const quickJump = document.getElementById("quickJump");
+    const atlasRoles = document.getElementById("atlasRoles");
+    const slideRole = document.getElementById("slideRole");
+    const slideTitle = document.getElementById("slideTitle");
+    const slideDescription = document.getElementById("slideDescription");
+    const slideImage = document.getElementById("slideImage");
+    const slideNotes = document.getElementById("slideNotes");
+    const progressLabel = document.getElementById("progressLabel");
+    const progressCount = document.getElementById("progressCount");
+    const progressFill = document.getElementById("progressFill");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const atlasBtn = document.getElementById("atlasBtn");
+    const atlasGrid = document.getElementById("atlasGrid");
+    const atlasSearch = document.getElementById("atlasSearch");
+
+    function roleLabel(role) {
+      return roleStyles[role]?.label || role;
+    }
+
+    function renderRoleButtons() {
+      roleButtons.innerHTML = "";
+      atlasRoles.innerHTML = "";
+
+      roleDefinitions.forEach((roleDef) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "role-btn" + (roleDef.key === currentRole ? " active" : "");
+        btn.innerHTML = `<strong>${roleDef.title}</strong><small>${roleDef.description}</small>`;
+        btn.addEventListener("click", () => setRole(roleDef.key));
+        roleButtons.appendChild(btn);
+
+        const atlasRoleBtn = document.createElement("button");
+        atlasRoleBtn.type = "button";
+        atlasRoleBtn.className = "role-btn" + (roleDef.key === currentRole ? " active" : "");
+        atlasRoleBtn.innerHTML = `<strong>${roleDef.title}</strong>`;
+        atlasRoleBtn.addEventListener("click", () => setRole(roleDef.key));
+        atlasRoles.appendChild(atlasRoleBtn);
+      });
+    }
+
+    function renderQuickJump() {
+      quickJump.innerHTML = "";
+      const added = new Set();
+      filteredSlides.forEach((slide, index) => {
+        if (!slide.jump || added.has(slide.jump)) return;
+        added.add(slide.jump);
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "jump-btn";
+        btn.innerHTML = `<strong>${slide.jump}</strong><small>Start at slide ${index + 1}</small>`;
+        btn.addEventListener("click", () => {
+          currentIndex = index;
+          renderSlide();
+        });
+        quickJump.appendChild(btn);
+      });
+    }
+
+    function setRole(role) {
+      currentRole = role;
+      filteredSlides = role === "all" ? slides.slice() : slides.filter((slide) => slide.role === role);
+      currentIndex = 0;
+      renderRoleButtons();
+      renderQuickJump();
+      renderSlide();
+      renderAtlas();
+    }
+
+    function renderSlide() {
+      const slide = filteredSlides[currentIndex];
+      if (!slide) return;
+
+      const style = roleStyles[slide.role] || roleStyles.shared;
+      slideRole.className = `role-pill ${style.className}`;
+      slideRole.textContent = roleLabel(slide.role);
+      slideTitle.textContent = slide.title;
+      slideDescription.textContent = slide.description;
+      slideImage.src = slide.image;
+      slideImage.alt = slide.title;
+      slideNotes.innerHTML = "";
+      slide.notes.forEach((note) => {
+        const li = document.createElement("li");
+        li.textContent = note;
+        slideNotes.appendChild(li);
+      });
+
+      progressLabel.textContent = currentRole === "all"
+        ? "Complete walkthrough"
+        : `${roleLabel(currentRole)} walkthrough`;
+      progressCount.textContent = `${currentIndex + 1} / ${filteredSlides.length}`;
+      progressFill.style.width = `${((currentIndex + 1) / filteredSlides.length) * 100}%`;
+      prevBtn.disabled = currentIndex === 0;
+      nextBtn.disabled = currentIndex === filteredSlides.length - 1;
+      nextBtn.textContent = currentIndex === filteredSlides.length - 1 ? "Tour Complete" : "Next Screen";
+    }
+
+    function renderAtlas() {
+      const term = atlasSearch.value.trim().toLowerCase();
+      const roleFiltered = currentRole === "all" ? slides : slides.filter((slide) => slide.role === currentRole);
+      const visible = roleFiltered.filter((slide) => {
+        if (!term) return true;
+        return [
+          slide.title,
+          slide.description,
+          slide.role,
+          ...(slide.notes || [])
+        ].join(" ").toLowerCase().includes(term);
+      });
+
+      atlasGrid.innerHTML = "";
+      visible.forEach((slide) => {
+        const style = roleStyles[slide.role] || roleStyles.shared;
+        const card = document.createElement("article");
+        card.className = "atlas-card";
+        card.innerHTML = `
+          <img src="${slide.image}" alt="${slide.title}">
+          <div class="atlas-copy">
+            <span class="role-pill ${style.className}">${roleLabel(slide.role)}</span>
+            <h3>${slide.title}</h3>
+            <p>${slide.description}</p>
+          </div>
+        `;
+        card.addEventListener("click", () => {
+          const nextRole = currentRole === "all" ? "all" : slide.role;
+          if (currentRole !== "all" && currentRole !== slide.role) {
+            setRole(slide.role);
+          } else {
+            filteredSlides = currentRole === "all" ? slides.slice() : slides.filter((item) => item.role === currentRole);
+            currentIndex = filteredSlides.findIndex((item) => item.image === slide.image);
+            renderSlide();
+          }
+          document.getElementById("tour").scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+        atlasGrid.appendChild(card);
+      });
+    }
+
+    prevBtn.addEventListener("click", () => {
+      if (currentIndex > 0) {
+        currentIndex -= 1;
+        renderSlide();
+      }
+    });
+
+    nextBtn.addEventListener("click", () => {
+      if (currentIndex < filteredSlides.length - 1) {
+        currentIndex += 1;
+        renderSlide();
+      }
+    });
+
+    atlasBtn.addEventListener("click", () => {
+      document.getElementById("atlas").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    atlasSearch.addEventListener("input", renderAtlas);
+
+    setRole("all");
+  </script>
+</body>
+</html>

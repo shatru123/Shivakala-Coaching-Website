@@ -1,0 +1,149 @@
+@model IReadOnlyList<Shivakala.Core.ViewModels.MpscResultHistoryItemViewModel>
+@{
+    ViewData["Title"] = "My MPSC Test Results | Shivakala";
+}
+
+<section class="page-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="badge-soft"><i class="fa-solid fa-trophy me-1"></i>Scorecards</span>
+            <h1 class="mt-2">Examination Results &amp; Rankings</h1>
+            <p>Track your scores, statewide merit ranks, and performance analytics across all MPSC mock examinations.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Exams" class="btn btn-outline-light btn-sm">
+                <i class="fa-solid fa-laptop me-1"></i>All Exams
+            </a>
+            <a asp-action="Dashboard" class="btn btn-outline-light btn-sm">
+                <i class="fa-solid fa-house me-1"></i>Dashboard
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="section-shell py-5">
+    <div class="container">
+        <div class="glass-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom flex-wrap gap-3">
+                <h5 class="fw-bold mb-0" style="color:var(--navy-dark)">
+                    <i class="fa-solid fa-square-poll-vertical me-2 text-primary"></i>All Exam Attempts (@Model.Count)
+                </h5>
+            </div>
+
+            @if (!Model.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="fa-regular fa-star fa-3x mb-3 text-muted"></i>
+                    <h5 class="fw-bold">No results on record yet</h5>
+                    <p class="small mb-3">Once you complete an online or offline MPSC test, your detailed evaluation will be published here.</p>
+                    <a asp-action="Exams" class="btn btn-primary-sk btn-sm">
+                        <i class="fa-solid fa-calendar-check me-1"></i>Browse Available Exams
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Exam Title</th>
+                                <th>Subject</th>
+                                <th>Mode</th>
+                                <th>Date</th>
+                                <th>Score</th>
+                                <th>Percentage</th>
+                                <th>Grade</th>
+                                <th>Rank</th>
+                                <th>Status</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var r in Model)
+                            {
+                                var pct = r.TotalMarks > 0 ? ((r.MarksObtained ?? 0) / r.TotalMarks) * 100 : 0;
+                                <tr>
+                                    <td>
+                                        <div class="fw-bold text-dark">@r.ExamTitle</div>
+                                    </td>
+                                    <td>@r.Subject</td>
+                                    <td>
+                                        <span class="badge @(r.Mode == "Online" ? "bg-primary-subtle text-primary" : "bg-success-subtle text-success")">
+                                            @r.Mode
+                                        </span>
+                                    </td>
+                                    <td>@r.Date.ToString("dd MMM yyyy")</td>
+                                    <td>
+                                        @if (r.IsAbsent)
+                                        {
+                                            <span class="text-danger fw-semibold">Absent</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="fw-bold">@(r.MarksObtained?.ToString("F1") ?? "-")</span>
+                                            <small class="text-muted">/ @r.TotalMarks</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!r.IsAbsent && r.MarksObtained.HasValue)
+                                        {
+                                            <span>@pct.ToString("F1")%</span>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">@(r.Grade ?? "-")</span>
+                                    </td>
+                                    <td>
+                                        @if (r.Rank.HasValue)
+                                        {
+                                            <span class="badge bg-warning text-dark">
+                                                <i class="fa-solid fa-medal me-1"></i>#@r.Rank
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (r.IsAbsent)
+                                        {
+                                            <span class="badge bg-secondary">Absent</span>
+                                        }
+                                        else if (r.IsPassed)
+                                        {
+                                            <span class="badge bg-success">Passed</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Failed</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        @if (r.Mode == "Online" && r.OnlineAttemptId.HasValue)
+                                        {
+                                            <a asp-controller="OnlineExam" asp-action="Result" asp-route-id="@r.ExamId" asp-route-attemptId="@r.OnlineAttemptId.Value" class="btn btn-outline-primary btn-sm">
+                                                <i class="fa-solid fa-eye me-1"></i>Review
+                                            </a>
+                                        }
+                                        else if (!string.IsNullOrWhiteSpace(r.Remarks))
+                                        {
+                                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="tooltip" title="@r.Remarks">
+                                                <i class="fa-solid fa-comment-dots"></i>
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</section>

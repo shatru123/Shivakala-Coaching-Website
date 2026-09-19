@@ -1,0 +1,250 @@
+@model Shivakala.Core.ViewModels.OnlineExamWizardViewModel
+@using Shivakala.Core.Entities
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = (Model.Id > 0 ? "Edit" : "Create") + " Online Examination";
+    var batches = ViewBag.Batches as List<Batch> ?? new List<Batch>();
+    var questionBank = ViewBag.QuestionBank as List<Question> ?? new List<Question>();
+}
+
+<div class="p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <span class="badge-soft dark mb-1"><i class="fa-solid fa-wand-magic-sparkles me-1"></i>Exam Setup Wizard</span>
+            <h2 class="fw-bold mb-1" style="color:var(--navy-dark)">
+                @(Model.Id > 0 ? "Edit Online Examination" : "Create Online Examination")
+            </h2>
+            <p class="text-muted mb-0 small">Configure exam settings, rules, batch assignment and question selections</p>
+        </div>
+        <a asp-action="Index" class="btn-outline-sk">
+            <i class="fa-solid fa-arrow-left me-1"></i> Back to List
+        </a>
+    </div>
+
+    <form asp-action="SaveWizard" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        <div class="row g-4">
+            <!-- Left Column: Config Settings -->
+            <div class="col-lg-7">
+                <div class="glass-card p-4 mb-4">
+                    <h5 class="fw-bold mb-4 pb-2 border-bottom" style="color:var(--navy-dark)">
+                        <i class="fa-solid fa-circle-info text-primary me-2"></i>1. Basic Exam Information
+                    </h5>
+                    <div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Exam Title <span class="text-danger">*</span></label>
+                            <input asp-for="Title" class="form-control" placeholder="e.g. Science Chapter 1 & 2 Weekly Online Test" required />
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Subject <span class="text-danger">*</span></label>
+                                <input asp-for="Subject" class="form-control" placeholder="e.g. Science / Mathematics / English" required />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Standard / Class <span class="text-danger">*</span></label>
+                                <input asp-for="Standard" class="form-control" placeholder="e.g. 10th Standard" required />
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Assigned Batch</label>
+                                <select asp-for="BatchId" class="form-select">
+                                    <option value="">-- All Batches --</option>
+                                    @foreach (var b in batches)
+                                    {
+                                        <option value="@b.Id">@b.Name (@b.Standard)</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Exam Type</label>
+                                <select asp-for="ExamType" class="form-select">
+                                    <option value="Weekly">Weekly Test</option>
+                                    <option value="Monthly">Monthly Test</option>
+                                    <option value="Unit">Unit Test</option>
+                                    <option value="Semester">Semester Mock</option>
+                                    <option value="Practice">Practice Test</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Target Audience</label>
+                                <select asp-for="Audience" class="form-select">
+                                    <option value="School">School Coaching (5th-10th)</option>
+                                    <option value="Mpsc">MPSC Candidates Only</option>
+                                    <option value="Both">Open to Both (School &amp; MPSC)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Venue (if Offline)</label>
+                                <input asp-for="Venue" class="form-control" placeholder="e.g. Main Hall, Chikhali Center" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Capacity (if Offline)</label>
+                                <input asp-for="Capacity" class="form-control" type="number" min="1" placeholder="Max Seats" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Instructions for Students</label>
+                            <textarea asp-for="Instructions" class="form-control" rows="3" placeholder="Specify key guidelines e.g. Do not refresh screen, total duration 30 minutes, negative marking applicable."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-4 mb-4">
+                    <h5 class="fw-bold mb-4 pb-2 border-bottom" style="color:var(--navy-dark)">
+                        <i class="fa-solid fa-sliders text-success me-2"></i>2. Timer, Marking &amp; Release Rules
+                    </h5>
+                    <div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Duration (Minutes)</label>
+                                <input asp-for="DurationMinutes" class="form-control" type="number" min="1" max="300" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Passing Marks (%)</label>
+                                <input asp-for="PassingMarks" class="form-control" type="number" min="0" max="100" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Result Release</label>
+                                <select asp-for="ResultReleaseMode" class="form-select">
+                                    <option value="Immediate">Immediate Scorecard</option>
+                                    <option value="Manual">Manual Release by Teacher</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Scheduled Start Time</label>
+                                <input asp-for="StartDateTime" class="form-control" type="datetime-local" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Scheduled End Time</label>
+                                <input asp-for="EndDateTime" class="form-control" type="datetime-local" />
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-2">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" asp-for="NegativeMarkingEnabled" id="chkNeg" />
+                                    <label class="form-check-label fw-semibold" for="chkNeg">Enable Negative Marking</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Deduction Per Wrong Question</label>
+                                <input asp-for="NegativeMarks" class="form-control" type="number" step="0.25" min="0" max="5" />
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" asp-for="RandomizeQuestions" id="chkRandQ" />
+                                    <label class="form-check-label" for="chkRandQ">Randomize Question Sequence</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" asp-for="ShowCorrectAnswers" id="chkShowAns" />
+                                    <label class="form-check-label" for="chkShowAns">Show Answers After Submission</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" asp-for="IsPublished" id="chkPub" />
+                                    <label class="form-check-label fw-bold text-success" for="chkPub">Publish Exam Immediately</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Select Questions from Question Bank -->
+            <div class="col-lg-5">
+                <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <h5 class="mb-0 fw-bold" style="color:var(--navy-dark)"><i class="fa-solid fa-list-check me-2 text-warning"></i>3. Select Questions</h5>
+                            <a asp-action="CreateQuestion" target="_blank" class="toolbar-btn">
+                                <i class="fa-solid fa-plus me-1"></i> Add Question
+                            </a>
+                        </div>
+
+                        <div class="mb-3">
+                            <input type="text" id="qFilter" class="form-control form-control-sm" placeholder="Filter questions by text or topic..." onkeyup="filterQuestions()" />
+                        </div>
+
+                        <div class="border rounded-3 p-2 overflow-auto bg-white" style="max-height: 520px;">
+                            @if (!questionBank.Any())
+                            {
+                                <div class="text-center py-4 text-muted small">
+                                    <p class="mb-2">No questions available in Question Bank.</p>
+                                    <a asp-action="Import" class="btn-outline-sk">Import from PDF/Image</a>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="mb-2 text-muted small px-1 d-flex justify-content-between">
+                                    <span>Select questions to include:</span>
+                                    <span id="selectedCount" class="fw-bold text-primary">0 Selected</span>
+                                </div>
+                                <div id="qList">
+                                    @foreach (var q in questionBank)
+                                    {
+                                        var isChecked = Model.SelectedQuestionIds != null && Model.SelectedQuestionIds.Contains(q.Id);
+                                        <div class="q-item p-2 mb-2 border rounded-3 bg-light" data-text="@q.QuestionText.ToLower() @(q.Topic?.ToLower())">
+                                            <div class="form-check">
+                                                <input class="form-check-input q-chk" type="checkbox" name="SelectedQuestionIds" value="@q.Id" id="q_@q.Id" @(isChecked ? "checked" : "") onchange="updateSelectedCount()" />
+                                                <label class="form-check-label w-100 cursor-pointer" for="q_@q.Id">
+                                                    <div class="d-flex justify-content-between align-items-start">
+                                                        <span class="fw-semibold text-dark small text-break">@q.QuestionText</span>
+                                                        <span class="badge-soft dark ms-1" style="font-size:0.7rem">@q.Marks M</span>
+                                                    </div>
+                                                    <div class="small text-muted mt-1">
+                                                        <span>@q.Subject</span> | <span class="badge-soft" style="font-size:0.7rem">@(q.Topic ?? "General")</span>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="pt-3 mt-3 border-top">
+                        <button type="submit" class="btn-green-sk w-100 justify-content-center text-uppercase">
+                            <i class="fa-solid fa-floppy-disk me-2"></i> Save Examination &amp; Questions
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function filterQuestions() {
+            var val = document.getElementById('qFilter').value.toLowerCase();
+            document.querySelectorAll('.q-item').forEach(el => {
+                var text = el.getAttribute('data-text') || '';
+                el.style.display = text.includes(val) ? '' : 'none';
+            });
+        }
+        function updateSelectedCount() {
+            var cnt = document.querySelectorAll('.q-chk:checked').length;
+            document.getElementById('selectedCount').innerText = cnt + ' Selected';
+        }
+        updateSelectedCount();
+    </script>
+}
