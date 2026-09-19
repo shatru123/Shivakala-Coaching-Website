@@ -89,12 +89,14 @@ jobs:
           Database__Provider: SqlServer
           SHIVAKALA_DB_PROVIDER: SqlServer
           ConnectionStrings__SqlServer: ${{ secrets.PROD_SQLSERVER_CONNECTION_STRING }}
+          PROD_SQLSERVER_CONNECTION_STRING: ${{ secrets.PROD_SQLSERVER_CONNECTION_STRING }}
         run: |
           Write-Host 'Applying latest SQL Server migrations to production...'
           dotnet tool run dotnet-ef database update `
             --project src/Shivakala.SqlServerMigrations/Shivakala.SqlServerMigrations.csproj `
             --startup-project src/Shivakala.Web/Shivakala.Web.csproj `
             --context ShivakalaDbContext `
+            --connection "$env:ConnectionStrings__SqlServer" `
             --verbose
 
       - name: Verify production schema is up to date
@@ -105,9 +107,21 @@ jobs:
           SHIVAKALA_DB_PROVIDER: SqlServer
           ConnectionStrings__SqlServer: ${{ secrets.PROD_SQLSERVER_CONNECTION_STRING }}
         run: |
-          Add-Type -AssemblyName System.Data
+          try {
+            Add-Type -AssemblyName System.Data -ErrorAction SilentlyContinue
+            $connection = New-Object System.Data.SqlClient.SqlConnection($env:ConnectionStrings__SqlServer)
+          }
+          catch {
+            $sqlClientDll = Get-ChildItem -Path "${{ github.workspace }}" -Filter "Microsoft.Data.SqlClient.dll" -Recurse -ErrorAction SilentlyContinue |
+              Select-Object -First 1 -ExpandProperty FullName
+            if ($sqlClientDll) {
+              Add-Type -Path $sqlClientDll
+              $connection = New-Object Microsoft.Data.SqlClient.SqlConnection($env:ConnectionStrings__SqlServer)
+            } else {
+              throw $_
+            }
+          }
 
-          $connection = New-Object System.Data.SqlClient.SqlConnection($env:ConnectionStrings__SqlServer)
           $connection.Open()
 
           try {
