@@ -1,0 +1,170 @@
+@model List<Shivakala.Core.Entities.Exam>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Online Examinations Management";
+    var publishedCount = Model.Count(e => e.IsPublished);
+    var draftCount = Model.Count(e => !e.IsPublished);
+}
+
+<div class="p-4">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <span class="badge-soft dark mb-1"><i class="fa-solid fa-laptop-code me-1"></i>Academic Engine</span>
+            <h2 class="fw-bold mb-1" style="color:var(--navy-dark)">Online Examinations</h2>
+            <p class="text-muted mb-0 small">Create, configure, import question banks, and view live candidate performance analytics</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-action="QuestionBank" class="btn-outline-sk">
+                <i class="fa-solid fa-database me-1"></i>Question Bank
+            </a>
+            <a asp-action="Import" class="btn-outline-sk">
+                <i class="fa-solid fa-file-import me-1"></i>Import Doc
+            </a>
+            <a asp-action="Wizard" class="btn-primary-sk">
+                <i class="fa-solid fa-plus me-1"></i>Create Online Exam
+            </a>
+        </div>
+    </div>
+
+    <!-- Summary Stat Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-6">
+            <div class="admin-stat-card">
+                <strong>@Model.Count</strong>
+                <span>Total Online Exams</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="admin-stat-card" style="border-left-color:var(--green)">
+                <strong>@publishedCount</strong>
+                <span>Published &amp; Active</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="admin-stat-card" style="border-left-color:var(--gold)">
+                <strong>@draftCount</strong>
+                <span>Draft Examinations</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="admin-stat-card" style="border-left-color:var(--teal)">
+                <strong>@Model.Sum(e => e.QuestionCount)</strong>
+                <span>Total Exam Questions</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Table Card -->
+    <div class="glass-card p-0 overflow-hidden">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="fa-solid fa-laptop-code fa-3x text-muted mb-3"></i>
+                <h5 class="fw-bold text-dark">No Online Exams Created Yet</h5>
+                <p class="text-muted small mb-3">Click below to create your first online examination with automated evaluation and topic analytics.</p>
+                <a asp-action="Wizard" class="btn-primary-sk">
+                    <i class="fa-solid fa-plus me-1"></i> Launch Exam Creation Wizard
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table admin-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Exam Title</th>
+                            <th>Subject &amp; Standard</th>
+                            <th>Type / Duration</th>
+                            <th>Schedule Window</th>
+                            <th>Questions &amp; Marks</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var exam in Model)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">@exam.Title</div>
+                                    @if (exam.NegativeMarkingEnabled)
+                                    {
+                                        <small class="text-danger"><i class="fa-solid fa-triangle-exclamation me-1"></i>Negative Marking (-@exam.NegativeMarks)</small>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary">@exam.Subject</span>
+                                    <small class="text-muted d-block mt-0.5">Std @exam.Standard</small>
+                                </td>
+                                <td>
+                                    <span class="badge-soft dark">@exam.ExamType</span>
+                                    <small class="text-muted d-block mt-1"><i class="fa-regular fa-clock me-1"></i>@exam.DurationMinutes Mins</small>
+                                </td>
+                                <td>
+                                    @if (exam.StartDateTime.HasValue)
+                                    {
+                                        <small class="text-muted d-block"><i class="fa-regular fa-calendar-check me-1 text-primary"></i>@exam.StartDateTime.Value.ToString("dd MMM yyyy, hh:mm tt")</small>
+                                    }
+                                    else
+                                    {
+                                        <small class="text-muted">Anytime</small>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-dark">@(exam.ExamQuestions?.Count ?? 0) Qs</span>
+                                    <small class="text-muted ms-1">(@exam.TotalMarks Marks)</small>
+                                </td>
+                                <td>
+                                    <form asp-action="Publish" asp-route-id="@exam.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="border-0 bg-transparent p-0" title="Click to toggle publication">
+                                            @if (exam.IsPublished)
+                                            {
+                                                <span class="badge bg-success py-1.5 px-3 rounded-pill"><i class="fa-solid fa-check-circle me-1"></i> Published</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary py-1.5 px-3 rounded-pill"><i class="fa-solid fa-eye-slash me-1"></i> Draft</span>
+                                            }
+                                        </button>
+                                    </form>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="dropdown">
+                                        <button class="toolbar-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                            Actions
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                            <li>
+                                                <a class="dropdown-item py-2" asp-action="Wizard" asp-route-id="@exam.Id">
+                                                    <i class="fa-solid fa-pen-to-square me-2 text-primary"></i> Edit / Setup Wizard
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item py-2" asp-action="Analytics" asp-route-id="@exam.Id">
+                                                    <i class="fa-solid fa-chart-column me-2 text-success"></i> Analytics &amp; Rankings
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item py-2" asp-action="ExportCsv" asp-route-id="@exam.Id">
+                                                    <i class="fa-solid fa-file-csv me-2 text-warning"></i> Export Results CSV
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item py-2" asp-action="Import" asp-route-examId="@exam.Id">
+                                                    <i class="fa-solid fa-file-import me-2 text-info"></i> Import Questions Doc
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

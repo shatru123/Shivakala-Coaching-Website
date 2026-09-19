@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shivakala Coaching Classes – Complete Functional User Guide</title>
+  <style>
+    :root {
+      --navy: #1b2b6b;
+      --navy-2: #243887;
+      --green: #128c7e;
+      --green-2: #0f6f65;
+      --gold: #c8a84b;
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1c2431;
+      --muted: #5f6b7a;
+      --line: #dce3ef;
+      --danger: #b83939;
+      --warning: #a66a00;
+      --success: #156f42;
+      --shadow: 0 14px 34px rgba(27, 43, 107, 0.08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(180deg, #eef3ff 0%, var(--bg) 200px, var(--bg) 100%);
+      color: var(--text);
+      line-height: 1.55;
+    }
+    a { color: var(--navy-2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 1240px; margin: 0 auto; padding: 24px; }
+    .hero {
+      background: linear-gradient(135deg, var(--navy), var(--navy-2));
+      color: #fff;
+      border-radius: 28px;
+      padding: 34px;
+      box-shadow: var(--shadow);
+    }
+    .eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.18);
+      padding: 8px 12px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+    h1, h2, h3, h4 { line-height: 1.2; margin: 0 0 10px; }
+    h1 { font-size: 38px; }
+    h2 { font-size: 28px; color: var(--navy); margin-top: 36px; }
+    h3 { font-size: 22px; color: var(--navy); }
+    h4 { font-size: 18px; color: var(--navy); }
+    p { margin: 0 0 12px; }
+    .lead { font-size: 17px; color: rgba(255,255,255,0.9); max-width: 900px; }
+    .meta {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .meta .item {
+      background: rgba(255,255,255,0.09);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 16px;
+      padding: 14px 16px;
+    }
+    .meta .label { font-size: 12px; opacity: 0.78; text-transform: uppercase; letter-spacing: 1px; }
+    .meta .value { font-weight: 700; margin-top: 6px; }
+    .grid { display: grid; gap: 18px; }
+    .grid.two { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .grid.three { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .grid.four { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+    .muted { color: var(--muted); }
+    .pill {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      margin: 0 6px 6px 0;
+    }
+    .pill.admin { background: #e9eeff; color: var(--navy); }
+    .pill.teacher { background: #e8faf6; color: var(--green-2); }
+    .pill.parent { background: #f1ecff; color: #5a4e8e; }
+    .pill.public { background: #fff6df; color: #8a6700; }
+    .toc {
+      position: sticky;
+      top: 18px;
+      align-self: start;
+    }
+    .toc ul { list-style: none; padding: 0; margin: 0; }
+    .toc li { margin: 8px 0; }
+    .toc a { color: var(--text); font-size: 14px; }
+    .layout {
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      gap: 20px;
+      margin-top: 24px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 14px;
+      background: #fff;
+      overflow: hidden;
+      border-radius: 14px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 12px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f3f6fd; color: var(--navy); }
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      margin-top: 16px;
+    }
+    .step {
+      flex: 1 1 170px;
+      min-width: 170px;
+      background: linear-gradient(180deg, #fff, #f7faff);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    .step strong { display: block; color: var(--navy); margin-bottom: 6px; }
+    .arrow {
+      font-size: 26px;
+      color: var(--gold);
+      font-weight: 700;
+      flex: 0 0 auto;
+    }
+    .notice {
+      border-left: 5px solid var(--gold);
+      background: #fff9ea;
+      color: #5f4a00;
+      padding: 14px 16px;
+      border-radius: 0 14px 14px 0;
+      margin: 14px 0;
+    }
+    .good {
+      border-left-color: var(--success);
+      background: #edfbf3;
+      color: #145e3b;
+    }
+    .warn {
+      border-left-color: var(--warning);
+      background: #fff5e6;
+      color: #8a5a00;
+    }
+    .bad {
+      border-left-color: var(--danger);
+      background: #fff0f0;
+      color: #8d2424;
+    }
+    .mini-list { margin: 0; padding-left: 18px; }
+    .mini-list li { margin: 6px 0; }
+    .tag-cloud { margin-top: 10px; }
+    .diagram {
+      background: #fbfcff;
+      border: 1px dashed #b8c5df;
+      border-radius: 18px;
+      padding: 20px;
+      margin-top: 18px;
+    }
+    .swim {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .swim .lane {
+      font-weight: 800;
+      color: var(--navy);
+      background: #eef3ff;
+      border-radius: 12px;
+      padding: 12px;
+      border: 1px solid var(--line);
+    }
+    .swim .lane-content {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fff;
+    }
+    .checklist {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .check {
+      padding: 14px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+    .chart {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .bar-row { display: grid; grid-template-columns: 160px 1fr 70px; gap: 10px; align-items: center; }
+    .bar {
+      height: 14px;
+      background: #ebeff7;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #d8e0ef;
+    }
+    .bar > span { display: block; height: 100%; border-radius: 999px; }
+    .bar.public > span { background: linear-gradient(90deg, #d6a73b, #ebc36e); }
+    .bar.admin > span { background: linear-gradient(90deg, #213c97, #4f6ce0); }
+    .bar.teacher > span { background: linear-gradient(90deg, #128c7e, #2dc0a9); }
+    .bar.parent > span { background: linear-gradient(90deg, #6956b4, #9078ea); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .section-anchor { scroll-margin-top: 24px; }
+    .footer-note { margin: 40px 0 10px; font-size: 13px; color: var(--muted); }
+    .route { font-size: 13px; color: var(--navy); background: #eef3ff; padding: 5px 9px; border-radius: 999px; display: inline-block; margin: 4px 6px 0 0; }
+    .shot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+      margin-top: 18px;
+    }
+    .shot-card {
+      background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .shot-card img {
+      width: 100%;
+      display: block;
+      background: #eef3ff;
+      border-bottom: 1px solid var(--line);
+    }
+    .shot-card .body {
+      padding: 14px 16px 16px;
+    }
+    .shot-card .title {
+      font-weight: 800;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .hero-strip {
+      display: grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap: 18px;
+      margin-top: 20px;
+    }
+    .hero-strip img {
+      width: 100%;
+      border-radius: 18px;
+      display: block;
+      border: 1px solid rgba(255,255,255,.16);
+    }
+    .hero-note {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.16);
+      border-radius: 18px;
+      padding: 18px;
+    }
+    @media (max-width: 980px) {
+      .layout { grid-template-columns: 1fr; }
+      .toc { position: static; }
+      .hero-strip { grid-template-columns: 1fr; }
+    }
+    @media print {
+      body { background: #fff; }
+      .wrap { max-width: none; padding: 0; }
+      .hero, .card, .step { box-shadow: none; }
+      .layout { grid-template-columns: 1fr; }
+      .toc { display: none; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="hero">
+      <div class="eyebrow">Operational Handbook</div>
+      <h1>Shivakala Coaching Classes – Complete Functional Guide</h1>
+      <p class="lead">
+        This guide explains how every major user role works in the Shivakala Coaching Classes website: public visitors,
+        admin users, teachers, and parents. It is written from the current application behavior so your team can onboard,
+        operate, and demonstrate the site confidently.
+      </p>
+      <div class="meta">
+        <div class="item"><div class="label">Guide Scope</div><div class="value">End-user + Admin operations</div></div>
+        <div class="item"><div class="label">Based On</div><div class="value">Current ASP.NET Core implementation</div></div>
+        <div class="item"><div class="label">Covers</div><div class="value">Public site, portals, workflows, filters, exports, print flows</div></div>
+        <div class="item"><div class="label">Prepared For</div><div class="value">Deployment readiness & training</div></div>
+      </div>
+      <div class="hero-strip">
+        <img src="./assets/guide/home.png" alt="Homepage screenshot of Shivakala Coaching Classes" />
+        <div class="hero-note">
+          <h3 style="color:#fff;">Visual-first onboarding</h3>
+          <p class="lead" style="font-size:15px;max-width:none;margin-bottom:10px;">
+            This version includes real website screenshots captured from the running application so non-technical users can
+            understand the interface quickly.
+          </p>
+          <ul class="mini-list" style="color:rgba(255,255,255,.92);">
+            <li>Light-mode screenshots for cleaner onboarding and printing</li>
+            <li>Public website screenshots for admissions and browsing flows</li>
+            <li>Admin portal screenshots for operations and content control</li>
+            <li>Teacher and parent portal screenshots for day-to-day usage</li>
+            <li>Representative sample records inserted for realistic training views</li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="toc card">
+        <h3>Contents</h3>
+        <ul>
+          <li><a href="#overview">1. System Overview</a></li>
+          <li><a href="#roles">2. Role Matrix</a></li>
+          <li><a href="#journeys">3. End-to-End Journeys</a></li>
+          <li><a href="#public-site">4. Public Website Guide</a></li>
+          <li><a href="#admin-guide">5. Admin Guide</a></li>
+          <li><a href="#teacher-guide">6. Teacher Portal Guide</a></li>
+          <li><a href="#parent-guide">7. Parent Portal Guide</a></li>
+          <li><a href="#feature-index">8. Complete Feature Index</a></li>
+          <li><a href="#screen-atlas">9. View-by-View Screen Atlas</a></li>
+          <li><a href="#operations">10. Daily Usage Playbooks</a></li>
+          <li><a href="#faq">11. FAQ & Notes</a></li>
+        </ul>
+      </aside>
+
+      <main>
+        <section id="overview" class="section-anchor card">
+          <h2>1. System Overview</h2>
+          <p>
+            The platform combines a public-facing coaching website with three protected operational portals:
+            <strong>Admin</strong>, <strong>Teacher</strong>, and <strong>Parent</strong>.
+          </p>
+          <div class="tag-cloud">
+            <span class="pill public">Public Website</span>
+            <span class="pill admin">Admin Portal</span>
+            <span class="pill teacher">Teacher Portal</span>
+            <span class="pill parent">Parent Portal</span>
+          </div>
+
+          <div class="diagram">
+            <h3>Platform Map</h3>
+            <div class="flow">
+              <div class="step"><strong>Public Website</strong>Admissions, enquiry, courses, notices, results, study materials, gallery, testimonials, contact.</div>
+              <div class="arrow">→</div>
+              <div class="step"><strong>Admin Operations</strong>Admissions review, content management, academics, fees, timetable, staff, broadcasts.</div>
+              <div class="arrow">→</div>
+              <div class="step"><strong>Portals</strong>Teachers manage attendance, homework, exams. Parents view attendance, fees, and results.</div>
+            </div>
+          </div>
+
+          <div class="notice good">
+            <strong>Security rule:</strong> admin pages are role-protected. Teachers and parents have their own portal areas and should not access the admin portal.
+          </div>
+
+          <div class="grid two" style="margin-top:18px;">
+            <div class="card">
+              <h3>Main navigation available to visitors</h3>
+              <ul class="mini-list">
+                <li>Home</li>
+                <li>About</li>
+                <li>Courses</li>
+                <li>Weekly Test Results</li>
+                <li>Study Material</li>
+                <li>Notice Board</li>
+                <li>Registration</li>
+                <li>Enquiry</li>
+                <li>Contact</li>
+                <li>Portal Login dropdown</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h3>Cross-site utility features</h3>
+              <ul class="mini-list">
+                <li>English / Marathi language switcher</li>
+                <li>Dark mode toggle with saved preference</li>
+                <li>Success flash messages</li>
+                <li>Animated stats and reveal effects</li>
+                <li>Footer quick links and portal shortcuts</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section id="roles" class="section-anchor card">
+          <h2>2. Role Matrix</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Role</th>
+                <th>Primary Goal</th>
+                <th>What They Can Do</th>
+                <th>What They Cannot Do</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="pill public">Public Visitor</span></td>
+                <td>Discover the institute and submit interest</td>
+                <td>View site content, apply for admission, send enquiries, browse notices/results/materials/gallery, submit testimonials</td>
+                <td>Cannot access protected admin/teacher/parent operations</td>
+              </tr>
+              <tr>
+                <td><span class="pill admin">Admin</span></td>
+                <td>Run institute operations and website content</td>
+                <td>Manage students, teachers, batches, attendance, timetable, fees, exams, homework, notices, courses, gallery, materials, homepage settings, testimonials, WhatsApp, portal passwords</td>
+                <td>Does not use teacher/parent workflows for day-to-day work</td>
+              </tr>
+              <tr>
+                <td><span class="pill teacher">Teacher</span></td>
+                <td>Manage classroom execution</td>
+                <td>Login, see dashboard, mark attendance, assign homework, enter exam marks, change own password</td>
+                <td>Cannot access admin portal or admin-only management screens</td>
+              </tr>
+              <tr>
+                <td><span class="pill parent">Parent</span></td>
+                <td>Track child academic and fee status</td>
+                <td>Login, view dashboard, attendance history, fees, exam results, change own password</td>
+                <td>Cannot modify records or access admin/teacher functions</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="chart">
+            <h3>Feature Coverage by Role</h3>
+            <div class="bar-row"><div>Public</div><div class="bar public"><span style="width:48%"></span></div><div>Browse</div></div>
+            <div class="bar-row"><div>Admin</div><div class="bar admin"><span style="width:100%"></span></div><div>Full</div></div>
+            <div class="bar-row"><div>Teacher</div><div class="bar teacher"><span style="width:38%"></span></div><div>Ops</div></div>
+            <div class="bar-row"><div>Parent</div><div class="bar parent"><span style="width:28%"></span></div><div>View</div></div>
+          </div>
+        </section>
+
+        <section id="journeys" class="section-anchor card">
+          <h2>3. End-to-End Journeys</h2>
+          <div class="grid two">
+            <div>
+              <h3>Admission-to-Portal Flow</h3>
+              <div class="flow">
+                <div class="step"><strong>1. Visitor registers</strong>Uses public Registration form or admin manually adds the student.</div>
+                <div class="arrow">→</div>
+                <div class="step"><strong>2. Admin reviews</strong>Filters, updates student status, adds notes, exports CSV if needed.</div>
+                <div class="arrow">→</div>
+                <div class="step"><strong>3. Student admitted</strong>Student can be assigned to a batch and connected to fees, attendance, exams.</div>
+                <div class="arrow">→</div>
+                <div class="step"><strong>4. Parent portal works</strong>Linked mobile / student account can view attendance, fees, and results.</div>
+              </div>
+            </div>
+            <div>
+              <h3>Academic Management Flow</h3>
+              <div class="flow">
+                <div class="step"><strong>1. Admin creates structure</strong>Adds teachers, batches, timetable, exams, fee structure.</div>
+                <div class="arrow">→</div>
+                <div class="step"><strong>2. Teacher executes</strong>Marks attendance, posts homework, enters marks.</div>
+                <div class="arrow">→</div>
+                <div class="step"><strong>3. Admin publishes and monitors</strong>Reviews records, prints receipts, publishes exams, audits changes.</div>
+                <div class="arrow">→</div>
+                <div class="step"><strong>4. Parent monitors</strong>Views attendance, fees, and exam results in portal.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="diagram">
+            <h3>Responsibility Swimlane</h3>
+            <div class="swim">
+              <div class="lane">Visitor</div>
+              <div class="lane-content">Reads public content → submits registration / enquiry / testimonial</div>
+              <div class="lane">Admin</div>
+              <div class="lane-content">Validates leads → manages records → controls website sections → sets staff & fee workflows</div>
+              <div class="lane">Teacher</div>
+              <div class="lane-content">Marks attendance → assigns homework → records exam marks</div>
+              <div class="lane">Parent</div>
+              <div class="lane-content">Checks child attendance → fee status → exam outcomes</div>
+            </div>
+          </div>
+        </section>
+
+        <section id="public-site" class="section-anchor card">
+          <h2>4. Public Website Guide</h2>
+          <p>The public website is the institute’s digital front desk. It is designed for discovery, lead generation, and content access.</p>
+
+          <div class="shot-grid">
+            <div class="shot-card">
+              <img src="./assets/guide/home.png" alt="Homepage UI screenshot" />
+              <div class="body">
+                <div class="title">Homepage</div>
+                <div class="muted">Admissions-focused landing view with CTAs, course areas, statistics, and testimonials.</div>
+              </div>
+            </div>
+            <div class="shot-card">
+              <img src="./assets/guide/registration.png" alt="Registration page UI screenshot" />
+              <div class="body">
+                <div class="title">Registration Form</div>
+                <div class="muted">Simple and friendly admission form for collecting student and parent interest.</div>
+              </div>
+            </div>
+          </div>
+
+          <h3>4.1 Global Public Features</h3>
+          <div class="grid three">
+            <div class="check"><strong>Language switcher</strong><br><span class="muted">Toggles English and Marathi while keeping the user on the same page.</span></div>
+            <div class="check"><strong>Dark mode</strong><br><span class="muted">Theme choice is saved in the browser for future visits.</span></div>
+            <div class="check"><strong>Portal login menu</strong><br><span class="muted">Dropdown offers Admin, Teacher, and Parent login routes.</span></div>
+          </div>
+          <div class="route">/</div>
+          <div class="route">/admin/login</div>
+          <div class="route">/teacher/login</div>
+          <div class="route">/parent/login</div>
+
+          <h3>4.2 Home Page</h3>
+          <ul class="mini-list">
+            <li>Hero section with admissions message and action buttons for <strong>Apply for Admission</strong> and <strong>Enquire Now</strong>.</li>
+            <li>Course overview cards for pre-primary, primary, and secondary classes.</li>
+            <li>Weekly test flow visualization.</li>
+            <li>Quick action buttons for admissions and contact.</li>
+            <li>Feature highlights section.</li>
+            <li>Homepage statistics section that admin can show/hide and edit.</li>
+            <li>Homepage testimonials section that admin can show/hide and control.</li>
+          </ul>
+          <div class="notice">Homepage statistics and testimonial section text are admin-manageable from the admin portal.</div>
+
+          <h3>4.3 Registration Form</h3>
+          <p><span class="route">/registration</span></p>
+          <table>
+            <thead><tr><th>Area</th><th>Fields / Behavior</th></tr></thead>
+            <tbody>
+              <tr><td>Personal info</td><td>Full name, mobile number, email</td></tr>
+              <tr><td>Academic info</td><td>Standard, subject, board, address</td></tr>
+              <tr><td>Submission</td><td>Shows success message after form submission</td></tr>
+              <tr><td>Purpose</td><td>Creates a lead for admin review in the Registrations module</td></tr>
+            </tbody>
+          </table>
+
+          <h3>4.4 Enquiry Form</h3>
+          <p><span class="route">/enquiry</span></p>
+          <ul class="mini-list">
+            <li>Collects name, mobile, and message.</li>
+            <li>Designed for quick questions from parents/students.</li>
+            <li>Shows success message on submit.</li>
+            <li>Appears again in simplified form on the Contact page.</li>
+          </ul>
+
+          <h3>4.5 Courses Page</h3>
+          <p><span class="route">/courses</span></p>
+          <ul class="mini-list">
+            <li>Displays admin-managed course cards.</li>
+            <li>Supports English/Marathi titles and descriptions.</li>
+            <li>Acts as a conversion page with Apply / Enquire CTA buttons.</li>
+          </ul>
+
+          <h3>4.6 Weekly Test Results</h3>
+          <p><span class="route">/results</span></p>
+          <ul class="mini-list">
+            <li>Filters by <strong>Test Title</strong> and <strong>Standard</strong>.</li>
+            <li>Displays rank list, student, standard, subject, score, percentage, grade, and date.</li>
+            <li>Includes <strong>Print</strong> option for the displayed result table.</li>
+          </ul>
+
+          <h3>4.7 Study Materials</h3>
+          <p><span class="route">/studymaterial</span></p>
+          <ul class="mini-list">
+            <li>Filters by standard, subject, and material type.</li>
+            <li>Downloads uploaded files such as PDFs, notes, worksheets, and papers.</li>
+            <li>Only active/visible materials are intended for public access.</li>
+          </ul>
+
+          <h3>4.8 Notice Board</h3>
+          <p><span class="route">/noticeboard</span></p>
+          <ul class="mini-list">
+            <li>Displays institute notices and announcements.</li>
+            <li>Supports category filtering.</li>
+            <li>Supports pinned notices for priority visibility.</li>
+          </ul>
+
+          <h3>4.9 Gallery</h3>
+          <p><span class="route">/gallery</span></p>
+          <ul class="mini-list">
+            <li>Shows images uploaded from admin.</li>
+            <li>Supports category browsing.</li>
+            <li>Includes lightbox-style image viewing behavior.</li>
+          </ul>
+
+          <h3>4.10 Testimonials</h3>
+          <p><span class="route">/testimonials</span></p>
+          <ul class="mini-list">
+            <li>Visitors can browse approved testimonials.</li>
+            <li>Visitors can submit a testimonial with name, role, quote, and rating.</li>
+            <li>Submitted testimonials require admin approval before publication.</li>
+          </ul>
+
+          <h3>4.11 About and Contact</h3>
+          <p><span class="route">/about</span> <span class="route">/contact</span></p>
+          <ul class="mini-list">
+            <li>About page presents institute summary, faculty, and reasons to choose Shivakala.</li>
+            <li>Contact page shows phone, email, location, social buttons, WhatsApp CTA, and a contact/enquiry form.</li>
+          </ul>
+        </section>
+
+        <section id="admin-guide" class="section-anchor card">
+          <h2>5. Admin Guide</h2>
+          <p>Admin is the control center of the application. Almost every operational and content feature starts here.</p>
+          <div class="route">/admin/login</div>
+          <div class="route">/admin</div>
+
+          <div class="shot-grid">
+            <div class="shot-card">
+              <img src="./assets/guide/admin-dashboard.png" alt="Admin dashboard screenshot" />
+              <div class="body">
+                <div class="title">Admin Dashboard</div>
+                <div class="muted">Quick overview of institution activity, counts, and module shortcuts.</div>
+              </div>
+            </div>
+            <div class="shot-card">
+              <img src="./assets/guide/admin-registrations.png" alt="Admin registrations screen screenshot" />
+              <div class="body">
+                <div class="title">Registrations Management</div>
+                <div class="muted">Admissions review area with filters, status changes, and export support.</div>
+              </div>
+            </div>
+            <div class="shot-card">
+              <img src="./assets/guide/admin-homepage-content.png" alt="Admin homepage content screen screenshot" />
+              <div class="body">
+                <div class="title">Homepage Content Control</div>
+                <div class="muted">Section visibility and text management for homepage statistics and testimonials.</div>
+              </div>
+            </div>
+          </div>
+
+          <h3>5.1 Admin Login & Session</h3>
+          <ul class="mini-list">
+            <li>Admin logs in with username and password.</li>
+            <li>Authenticated admin sees an admin bar and dashboard shortcuts.</li>
+            <li>Admin can log out from the top bar.</li>
+            <li>Admin can change own password from the Change Password screen.</li>
+          </ul>
+
+          <h3>5.2 Dashboard</h3>
+          <p>The dashboard summarizes the institute using live counts and shortcuts.</p>
+          <div class="checklist">
+            <div class="check"><strong>Summary cards</strong><br><span class="muted">Students, teachers, batches, unread enquiries, fee totals, pending fees, upcoming exams, pending homework.</span></div>
+            <div class="check"><strong>Module tiles</strong><br><span class="muted">Direct links to key management areas.</span></div>
+            <div class="check"><strong>Recent registrations</strong><br><span class="muted">Helps admissions follow-up.</span></div>
+            <div class="check"><strong>WhatsApp launch</strong><br><span class="muted">Direct access to broadcast operations.</span></div>
+          </div>
+
+          <h3>5.3 Registrations</h3>
+          <p><span class="route">/admin/registrations</span></p>
+          <ul class="mini-list">
+            <li>Shows all submitted admission forms.</li>
+            <li>Filter by status and search by name/mobile.</li>
+            <li>Update student status using modal workflow.</li>
+            <li>Add optional admin notes.</li>
+            <li>Export all registrations as CSV.</li>
+            <li>Manually add a student through <strong>Add Student</strong>.</li>
+          </ul>
+          <table>
+            <thead><tr><th>Student form fields</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td>Name, parent name, mobile, email</td><td>Basic profile and contact</td></tr>
+              <tr><td>Parent mobile</td><td>Important for parent portal login/linking</td></tr>
+              <tr><td>Standard, subject, board, medium</td><td>Academic classification</td></tr>
+              <tr><td>Status</td><td>Admitted / Pending / Waitlisted / Rejected</td></tr>
+              <tr><td>Address, admin notes</td><td>Operational record keeping</td></tr>
+            </tbody>
+          </table>
+
+          <h3>5.4 Teachers</h3>
+          <p><span class="route">/admin/teachers</span></p>
+          <ul class="mini-list">
+            <li>Add, edit, and delete teachers.</li>
+            <li>Manage teacher profile data: full name, code, mobile, email, qualification, specialization, address, salary, joining date, photo, notes.</li>
+            <li>Create teacher portal credentials with custom username/password or allow generated defaults.</li>
+            <li>Mark teacher as active/inactive.</li>
+          </ul>
+
+          <h3>5.5 Portal Accounts & Password Management</h3>
+          <p><span class="route">/admin/portalaccounts</span></p>
+          <ul class="mini-list">
+            <li>Lists teacher and parent portal accounts.</li>
+            <li>Shows linked person, username, mobile, status, and role.</li>
+            <li>Admin can reset password for teacher and parent accounts.</li>
+            <li>Admin can also change their own password separately.</li>
+          </ul>
+
+          <h3>5.6 Batches</h3>
+          <p><span class="route">/admin/batches</span></p>
+          <ul class="mini-list">
+            <li>Create batches with name, standard, medium, timing, room, max strength, academic year, and active flag.</li>
+            <li>Open batch detail page to add/remove students.</li>
+            <li>Jump from a batch into attendance marking, timetable view, and attendance reports.</li>
+          </ul>
+
+          <h3>5.7 Attendance</h3>
+          <p><span class="route">/admin/attendance</span></p>
+          <ul class="mini-list">
+            <li>Select batch and date to open attendance sheet.</li>
+            <li>Mark each student Present / Absent / Leave using radio buttons.</li>
+            <li>Use <strong>Mark All Present</strong> or <strong>Mark All Absent</strong> shortcuts.</li>
+            <li>Save attendance for the selected date.</li>
+            <li>Run reports by <strong>student</strong> or <strong>batch</strong> with from/to date range.</li>
+          </ul>
+
+          <h3>5.8 Timetable</h3>
+          <p><span class="route">/admin/timetable</span></p>
+          <ul class="mini-list">
+            <li>Select a batch and view the weekly timetable grid.</li>
+            <li>Add timetable slots with subject, teacher, day, start time, end time, and room.</li>
+            <li>Conflict detection prevents overlapping timetable slots for the same teacher on the same day/time window.</li>
+            <li>Delete timetable slots from the grid.</li>
+          </ul>
+
+          <h3>5.9 Exams</h3>
+          <p><span class="route">/admin/exams</span></p>
+          <ul class="mini-list">
+            <li>Schedule exams with title, standard, subject, type, optional batch, total marks, passing marks, duration, and exam date.</li>
+            <li>Open marks entry for each exam.</li>
+            <li>Save marks student-wise and recalculate ranks.</li>
+            <li>Publish exams/results when ready.</li>
+            <li>Delete exams if needed.</li>
+          </ul>
+
+          <h3>5.10 Homework</h3>
+          <p><span class="route">/admin/homework</span></p>
+          <ul class="mini-list">
+            <li>Create homework manually from admin.</li>
+            <li>Fields include title, subject, standard, teacher, optional batch, due date, attachment, and description.</li>
+            <li>View homework list and attachments.</li>
+            <li>Open submission view for a homework item.</li>
+            <li>Delete homework records.</li>
+          </ul>
+
+          <h3>5.11 Fees</h3>
+          <p><span class="route">/admin/fees</span></p>
+          <ul class="mini-list">
+            <li>Filter fee records by month and status.</li>
+            <li>Collect a fee with student, fee type, month, amount, discount, fine, net payable, payment mode, reference, date, and remarks.</li>
+            <li>Auto-calculates the effective payable amount.</li>
+            <li>Print receipt after collection.</li>
+            <li>Maintain fee structure separately by standard, fee type, amount, and academic year.</li>
+          </ul>
+
+          <h3>5.12 Notices</h3>
+          <p><span class="route">/admin/notices</span></p>
+          <ul class="mini-list">
+            <li>Create and edit bilingual notices.</li>
+            <li>Fields: English title/body, Marathi title/body, category, published date, pinned, active.</li>
+            <li>Delete notices.</li>
+          </ul>
+
+          <h3>5.13 Test Results (Weekly Result Module)</h3>
+          <p><span class="route">/admin/results</span></p>
+          <ul class="mini-list">
+            <li>Add weekly test style result entries manually.</li>
+            <li>Fields include test title, student name, standard, subject, score, total marks, rank, test date, and remarks.</li>
+            <li>Delete result entries from the list.</li>
+          </ul>
+
+          <h3>5.14 Study Materials</h3>
+          <p><span class="route">/admin/materials</span></p>
+          <ul class="mini-list">
+            <li>Upload files such as PDFs, docs, and images.</li>
+            <li>Fields include title, Marathi title, material type, standard, subject, active flag, and file.</li>
+            <li>Preview/download uploaded material.</li>
+            <li>Delete material records.</li>
+          </ul>
+
+          <h3>5.15 Courses</h3>
+          <p><span class="route">/admin/courses</span></p>
+          <ul class="mini-list">
+            <li>Create, edit, and delete courses displayed on the website.</li>
+            <li>Manage title, slug, bilingual descriptions, standard, duration, display order, and featured flag.</li>
+          </ul>
+
+          <h3>5.16 Gallery</h3>
+          <p><span class="route">/admin/gallery</span></p>
+          <ul class="mini-list">
+            <li>Upload gallery items with title, category, caption, and image file.</li>
+            <li>Delete gallery images.</li>
+            <li>Supports categories like General, Event, Results, Classroom, and Achievement.</li>
+          </ul>
+
+          <h3>5.17 Testimonials</h3>
+          <p><span class="route">/admin/testimonials</span></p>
+          <ul class="mini-list">
+            <li>Create testimonials directly or manage user-submitted testimonials.</li>
+            <li>Edit name, role, English quote, Marathi quote, rating, approval, and featured status.</li>
+            <li>Quick actions: <strong>Approve</strong> and <strong>Approve + Feature</strong>.</li>
+            <li>Delete testimonials.</li>
+          </ul>
+
+          <h3>5.18 Homepage Content</h3>
+          <p><span class="route">/admin/homepagecontent</span></p>
+          <ul class="mini-list">
+            <li>Show/hide statistics section on homepage.</li>
+            <li>Edit all 4 statistic values and their English/Marathi labels.</li>
+            <li>Show/hide testimonials section on homepage.</li>
+            <li>Edit testimonial eyebrow/title text in English and Marathi.</li>
+            <li>Use Testimonials page to control which cards are visible and featured.</li>
+          </ul>
+
+          <h3>5.19 WhatsApp Broadcast</h3>
+          <p><span class="route">/admin/whatsapp</span></p>
+          <ul class="mini-list">
+            <li>Authenticate WhatsApp by scanning QR code from the sidecar service.</li>
+            <li>Send broadcast to <strong>all parents</strong> or a <strong>specific batch</strong>.</li>
+            <li>Use quick templates to prefill common messages.</li>
+            <li>Review broadcast log with date, message, audience, sent count, failed count, and status.</li>
+          </ul>
+          <div class="notice warn"><strong>Operational note:</strong> WhatsApp broadcasting depends on the WhatsApp sidecar being available and authenticated.</div>
+
+          <h3>5.20 Audit Log</h3>
+          <p><span class="route">/admin/auditlog</span></p>
+          <ul class="mini-list">
+            <li>View paginated activity records with date/time, action, entity, record ID, performer, and IP address.</li>
+            <li>Useful for tracing administrative changes.</li>
+          </ul>
+        </section>
+
+        <section id="teacher-guide" class="section-anchor card">
+          <h2>6. Teacher Portal Guide</h2>
+          <p>The teacher portal is focused on classroom execution rather than institute administration.</p>
+          <div class="route">/teacher/login</div>
+          <div class="route">/teacher</div>
+
+          <div class="shot-grid">
+            <div class="shot-card">
+              <img src="./assets/guide/teacher-dashboard.png" alt="Teacher dashboard screenshot" />
+              <div class="body">
+                <div class="title">Teacher Dashboard</div>
+                <div class="muted">Shows assigned batches, homework and exam counts, and quick action links.</div>
+              </div>
+            </div>
+            <div class="shot-card">
+              <img src="./assets/guide/teacher-attendance.png" alt="Teacher attendance screen screenshot" />
+              <div class="body">
+                <div class="title">Teacher Attendance Screen</div>
+                <div class="muted">Daily attendance workflow with batch selection and save action.</div>
+              </div>
+            </div>
+          </div>
+
+          <h3>6.1 Login</h3>
+          <ul class="mini-list">
+            <li>Teacher logs in with assigned portal credentials.</li>
+            <li>Session shows teacher portal bar at the top.</li>
+            <li>Teacher can log out anytime.</li>
+          </ul>
+
+          <h3>6.2 Dashboard</h3>
+          <ul class="mini-list">
+            <li>Shows teacher identity and assigned batches.</li>
+            <li>Key counts: my batches, active homework, total homework, upcoming exams, total students.</li>
+            <li>Provides quick actions to attendance, homework, and exam marks.</li>
+          </ul>
+
+          <h3>6.3 Attendance</h3>
+          <p><span class="route">/teacher/attendance</span></p>
+          <ul class="mini-list">
+            <li>Select one of the teacher’s assigned batches.</li>
+            <li>Choose date.</li>
+            <li>Mark status for each student in the batch.</li>
+            <li>Save attendance for the selected day.</li>
+          </ul>
+
+          <h3>6.4 Homework</h3>
+          <p><span class="route">/teacher/homework</span></p>
+          <ul class="mini-list">
+            <li>See homework previously assigned by that teacher.</li>
+            <li>Create new homework with title, subject, standard, optional batch, due date, description, and attachment.</li>
+            <li>Delete homework created by the same teacher.</li>
+          </ul>
+
+          <h3>6.5 Exams & Marks</h3>
+          <p><span class="route">/teacher/exams</span> <span class="route">/teacher/exams/{id}/marks</span></p>
+          <ul class="mini-list">
+            <li>View scheduled exams relevant to classroom work.</li>
+            <li>Open a specific exam’s marks page.</li>
+            <li>Enter marks student-wise, with support for absent entries.</li>
+            <li>Save marks back to the system.</li>
+          </ul>
+
+          <h3>6.6 Change Password</h3>
+          <p><span class="route">/teacher/change-password</span></p>
+          <ul class="mini-list">
+            <li>Teacher enters current password, new password, and confirmation.</li>
+            <li>Updates own password without admin help.</li>
+          </ul>
+
+          <div class="notice good">
+            Teachers are intentionally restricted to teacher workflows only. They should not be using admin screens.
+          </div>
+        </section>
+
+        <section id="parent-guide" class="section-anchor card">
+          <h2>7. Parent Portal Guide</h2>
+          <p>The parent portal is a view-first portal for tracking the child’s status.</p>
+          <div class="route">/parent/login</div>
+          <div class="route">/parent</div>
+
+          <div class="shot-grid">
+            <div class="shot-card">
+              <img src="./assets/guide/parent-dashboard.png" alt="Parent dashboard screenshot" />
+              <div class="body">
+                <div class="title">Parent Dashboard</div>
+                <div class="muted">Single place for attendance, fee, and result visibility for linked children.</div>
+              </div>
+            </div>
+          </div>
+
+          <h3>7.1 Login</h3>
+          <ul class="mini-list">
+            <li>Parent logs in using the linked portal account.</li>
+            <li>Credentials are typically tied to the student/parent mobile record.</li>
+            <li>Successful login opens the parent dashboard.</li>
+          </ul>
+
+          <h3>7.2 Dashboard</h3>
+          <ul class="mini-list">
+            <li>Supports one or multiple linked children under the same parent mobile.</li>
+            <li>Shows recent attendance, recent fee records, and recent exam results.</li>
+            <li>Highlights relevant child data in one place.</li>
+          </ul>
+
+          <h3>7.3 Attendance History</h3>
+          <p><span class="route">/parent/attendance</span></p>
+          <ul class="mini-list">
+            <li>Displays attendance history for linked student(s).</li>
+            <li>Useful for monitoring daily presence and absence trends.</li>
+          </ul>
+
+          <h3>7.4 Fee History</h3>
+          <p><span class="route">/parent/fees</span></p>
+          <ul class="mini-list">
+            <li>Displays fee payment history for linked student(s).</li>
+            <li>Includes payment date and recorded fee details.</li>
+          </ul>
+
+          <h3>7.5 Exam Results</h3>
+          <ul class="mini-list">
+            <li>Recent exam results are visible directly on the parent dashboard.</li>
+            <li>Includes exam name and marks/grade when available.</li>
+          </ul>
+
+          <h3>7.6 Change Password</h3>
+          <p><span class="route">/parent/change-password</span></p>
+          <ul class="mini-list">
+            <li>Parent can update their own portal password securely.</li>
+          </ul>
+        </section>
+
+        <section id="feature-index" class="section-anchor card">
+          <h2>8. Complete Feature Index</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Module</th>
+                <th>User Type</th>
+                <th>Key Functions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Home</td><td>Public</td><td>Admissions hero, CTAs, quick actions, stats, testimonials</td></tr>
+              <tr><td>About</td><td>Public</td><td>Institute introduction, faculty, value proposition</td></tr>
+              <tr><td>Courses</td><td>Public + Admin</td><td>Course browsing, bilingual content, featured courses, course CRUD</td></tr>
+              <tr><td>Registration</td><td>Public + Admin</td><td>Admission form, status review, manual add, CSV export</td></tr>
+              <tr><td>Enquiry</td><td>Public + Admin</td><td>Lead collection, search/filter, mark read, CSV export</td></tr>
+              <tr><td>Notice Board</td><td>Public + Admin</td><td>Category browsing, pinned notices, bilingual notice CRUD</td></tr>
+              <tr><td>Results</td><td>Public + Admin</td><td>Weekly merit list, filters, print, result entry CRUD</td></tr>
+              <tr><td>Study Materials</td><td>Public + Admin</td><td>Filter, download, upload, activation control</td></tr>
+              <tr><td>Gallery</td><td>Public + Admin</td><td>Category view, lightbox, upload, delete</td></tr>
+              <tr><td>Testimonials</td><td>Public + Admin</td><td>Submission, approval, featuring, homepage integration</td></tr>
+              <tr><td>Teachers</td><td>Admin</td><td>Teacher profiles, portal credentials, photo and status</td></tr>
+              <tr><td>Batches</td><td>Admin</td><td>Create batches, assign/remove students, batch-level navigation</td></tr>
+              <tr><td>Attendance</td><td>Admin + Teacher</td><td>Mark attendance, mark-all shortcuts, reports</td></tr>
+              <tr><td>Timetable</td><td>Admin</td><td>Batch-wise slots, teacher conflict check</td></tr>
+              <tr><td>Exams</td><td>Admin + Teacher</td><td>Schedule, marks entry, absent handling, publish</td></tr>
+              <tr><td>Homework</td><td>Admin + Teacher</td><td>Assign, attach files, view/delete</td></tr>
+              <tr><td>Fees</td><td>Admin + Parent</td><td>Collect, filter, receipt printing, structure, parent viewing</td></tr>
+              <tr><td>WhatsApp</td><td>Admin</td><td>QR auth, audience targeting, templates, logs</td></tr>
+              <tr><td>Homepage Content</td><td>Admin</td><td>Toggle homepage sections and edit text/stat values</td></tr>
+              <tr><td>Portal Accounts</td><td>Admin</td><td>Reset teacher and parent passwords</td></tr>
+              <tr><td>Self Password</td><td>Admin/Teacher/Parent</td><td>Change own password</td></tr>
+              <tr><td>Audit Log</td><td>Admin</td><td>Track actions and actors</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="screen-atlas" class="section-anchor card">
+          <h2>9. View-by-View Screen Atlas</h2>
+          <p>
+            This section acts as the full visual catalog of the application. Screens below were captured in
+            <strong>light mode</strong> with representative sample records so every view is easier to understand during training,
+            handover, and deployment review.
+          </p>
+
+          <h3>Public Website Screens</h3>
+          <div class="shot-grid">
+            <div class="shot-card">
+              <img src="./assets/all-views/public-home.png" alt="Homepage screenshot" />
+              <div class="body">
+                <div class="title">Homepage</div>
+                <div class="muted">Landing page with admissions CTA, homepage stats, and testimonials.</div>
+              </div>
+            </div>
+            <div class="shot-card">
+              <img src="./assets/all-views/public-about.png" alt="About screenshot" />
+              <div class="body">
+                <div class="title">About</div>
+                <div class="muted">Institute story, faculty section, and differentiators.</div>
+              </div>
+            </div>
+            <div class="shot-card">
+              <img src="./assets/all-views/public-courses.png" alt="Courses screenshot" />
+              <div class="body">
+                <div class="title">Courses</div>
+                <div class="muted">Course catalog and conversion CTA section.</div>
+              </div>
+            </div>
+            <div class="shot-card">
+              <img src="./assets/all-views/public-results.png" alt="Weekly Results screenshot" />
+              <div class="body">
+                <div class="title">Weekly Results</div>
+                <div class="muted">Public result browsing with filters and printable ranking table.</div>
+              </div>
+            </div>
+            <div class="shot-card">
+              <img src="./assets/all-views/public-study-material.png" alt="Study Material screenshot" />
+              <div class="body">
+                <div class="title">Study Material</div>
+                <div class="muted">Download hub for notes, worksheets, and papers.</div>
+              </div>
+            </div>
+            <div class="shot-card">
+              <img src="./assets/all-views/public-notice-board.png" alt="Notice Board screenshot" />
+              <div class="body">
+                <div class="title">Notice Board</div>
+                <div class="muted">Announcements and pinned notices.</div>
+              </div>
+            </div>
+            <div class="shot-card">
+              <img src="./assets/all-views/public-registration.png" alt="Registration screenshot" />
+              <div class="body">
+                <div class="title">Registration</div>
+                <div class="muted">Student admission form.</div>
+              </div>
+            </div>
+            <div class="shot-card">
+              <img src="./assets/all-views/public-enquiry.png" alt="Enquiry screenshot" />
+              <div class="body">
+                <div class="title">Enquiry</div>
+                <div class="muted">Lead capture and quick question form.</div>
+              </div>
+            </div>
+            <div class="shot-card">
+              <img src="./assets/all-views/public-contact.png" alt="Contact screenshot" />
+              <div class="body">
+                <div class="title">Contact</div>
+                <div class="muted">Contact channels and enquiry widget.</div>
+              </div>
+            </div>
+            <div class="shot-card">
+              <img src="./assets/all-views/public-gallery.png" alt="Gallery screenshot" />
+              <div class="body">
+                <div class="title">Gallery</div>
+                <div class="muted">Public photo gallery with categories.</div>
+              </div>
+            </div>
+            <div class="shot-card">
+              <img src="./assets/all-views/public-testimonials.png" alt="Testimonials screenshot" />
+              <div class="body">
+                <div class="title">Testimonials</div>
+                <div class="muted">Approved testimonials and public submission form.</div>
+              </div>
+            </div>
+            <div class="shot-card">
+              <img src="./assets/all-views/admin-login.png" alt="Admin Login screenshot" />
+              <div class="body">
+                <div class="title">Admin Login</div>
+                <div class="muted">Portal entry point for admin users.</div>
+              </div>
+            </div>
+          </div>
+
+          <h3>Admin Screens</h3>
+          <div class="shot-grid">
+            <div class="shot-card"><img src="./assets/all-views/admin-dashboard.png" alt="Dashboard screenshot" /><div class="body"><div class="title">Dashboard</div><div class="muted">Operational summary and module shortcuts.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-registrations.png" alt="Registrations screenshot" /><div class="body"><div class="title">Registrations</div><div class="muted">Admissions review list with filters and export.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-student-form.png" alt="Student Form screenshot" /><div class="body"><div class="title">Student Form</div><div class="muted">Manual student creation form.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-enquiries.png" alt="Enquiries screenshot" /><div class="body"><div class="title">Enquiries</div><div class="muted">Lead inbox with unread workflow.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-courses.png" alt="Courses screenshot" /><div class="body"><div class="title">Courses</div><div class="muted">Manage website course listings.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-course-form.png" alt="Course Form screenshot" /><div class="body"><div class="title">Course Form</div><div class="muted">Create or edit course content.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-notices.png" alt="Notices screenshot" /><div class="body"><div class="title">Notices</div><div class="muted">Announcement management list.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-notice-form.png" alt="Notice Form screenshot" /><div class="body"><div class="title">Notice Form</div><div class="muted">Bilingual notice editor.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-results.png" alt="Results screenshot" /><div class="body"><div class="title">Results</div><div class="muted">Weekly merit result records.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-result-form.png" alt="Result Form screenshot" /><div class="body"><div class="title">Result Form</div><div class="muted">Create weekly result entries.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-materials.png" alt="Materials screenshot" /><div class="body"><div class="title">Materials</div><div class="muted">Study material library management.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-material-form.png" alt="Material Form screenshot" /><div class="body"><div class="title">Material Form</div><div class="muted">Upload notes and worksheets.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-testimonials.png" alt="Testimonials screenshot" /><div class="body"><div class="title">Testimonials</div><div class="muted">Approval and featuring workflow.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-testimonial-form.png" alt="Testimonial Form screenshot" /><div class="body"><div class="title">Testimonial Form</div><div class="muted">Create or edit testimonials.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-homepage-content.png" alt="Homepage Content screenshot" /><div class="body"><div class="title">Homepage Content</div><div class="muted">Homepage stats and testimonial section controls.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-gallery.png" alt="Gallery Admin screenshot" /><div class="body"><div class="title">Gallery Admin</div><div class="muted">Upload and manage gallery items.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-audit-log.png" alt="Audit Log screenshot" /><div class="body"><div class="title">Audit Log</div><div class="muted">Action history and accountability view.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-change-password.png" alt="Change Password screenshot" /><div class="body"><div class="title">Change Password</div><div class="muted">Admin self-service password change.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-portal-accounts.png" alt="Portal Accounts screenshot" /><div class="body"><div class="title">Portal Accounts</div><div class="muted">Teacher/parent account list and reset actions.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-reset-portal-password.png" alt="Reset Portal Password screenshot" /><div class="body"><div class="title">Reset Portal Password</div><div class="muted">Reset password screen for portal users.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-teachers.png" alt="Teachers screenshot" /><div class="body"><div class="title">Teachers</div><div class="muted">Teaching staff master list.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-teacher-form.png" alt="Teacher Form screenshot" /><div class="body"><div class="title">Teacher Form</div><div class="muted">Teacher details and portal credentials form.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-batches.png" alt="Batches screenshot" /><div class="body"><div class="title">Batches</div><div class="muted">Batch management overview.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-batch-form.png" alt="Batch Form screenshot" /><div class="body"><div class="title">Batch Form</div><div class="muted">Create/edit batch metadata.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-batch-detail.png" alt="Batch Detail screenshot" /><div class="body"><div class="title">Batch Detail</div><div class="muted">Student allocation and batch action hub.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-attendance-index.png" alt="Attendance Home screenshot" /><div class="body"><div class="title">Attendance Home</div><div class="muted">Entry point for attendance marking.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-attendance-mark.png" alt="Attendance Mark screenshot" /><div class="body"><div class="title">Attendance Mark</div><div class="muted">Daily attendance sheet.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-attendance-report.png" alt="Attendance Report screenshot" /><div class="body"><div class="title">Attendance Report</div><div class="muted">Batch/student report view.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-exams.png" alt="Exams screenshot" /><div class="body"><div class="title">Exams</div><div class="muted">Exam schedule and publish management.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-exam-form.png" alt="Exam Form screenshot" /><div class="body"><div class="title">Exam Form</div><div class="muted">Schedule a new exam.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-exam-marks.png" alt="Exam Marks screenshot" /><div class="body"><div class="title">Exam Marks</div><div class="muted">Marks entry and ranking screen.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-fees.png" alt="Fees screenshot" /><div class="body"><div class="title">Fees</div><div class="muted">Fee ledger and filter view.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-fee-collect.png" alt="Fee Collect screenshot" /><div class="body"><div class="title">Fee Collect</div><div class="muted">Fee collection and receipt workflow.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-fee-receipt.png" alt="Fee Receipt screenshot" /><div class="body"><div class="title">Fee Receipt</div><div class="muted">Printable fee receipt layout.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-fee-structure.png" alt="Fee Structure screenshot" /><div class="body"><div class="title">Fee Structure</div><div class="muted">Fee structure master data.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-homework.png" alt="Homework screenshot" /><div class="body"><div class="title">Homework</div><div class="muted">Homework listing and tracking.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-homework-form.png" alt="Homework Form screenshot" /><div class="body"><div class="title">Homework Form</div><div class="muted">Admin homework assignment form.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-timetable.png" alt="Timetable screenshot" /><div class="body"><div class="title">Timetable</div><div class="muted">Batch timetable grid.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-timetable-form.png" alt="Timetable Form screenshot" /><div class="body"><div class="title">Timetable Form</div><div class="muted">Add timetable slot form.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/admin-whatsapp.png" alt="WhatsApp Broadcast screenshot" /><div class="body"><div class="title">WhatsApp Broadcast</div><div class="muted">Broadcast panel with QR/status/logs.</div></div></div>
+          </div>
+
+          <h3>Teacher Portal Screens</h3>
+          <div class="shot-grid">
+            <div class="shot-card"><img src="./assets/all-views/teacher-login.png" alt="Teacher Login screenshot" /><div class="body"><div class="title">Teacher Login</div><div class="muted">Teacher authentication view.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/teacher-dashboard.png" alt="Teacher Dashboard screenshot" /><div class="body"><div class="title">Teacher Dashboard</div><div class="muted">Assigned batches and quick actions.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/teacher-attendance.png" alt="Teacher Attendance screenshot" /><div class="body"><div class="title">Teacher Attendance</div><div class="muted">Teacher attendance workflow.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/teacher-homework.png" alt="Teacher Homework screenshot" /><div class="body"><div class="title">Teacher Homework</div><div class="muted">Homework assignment and listing.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/teacher-exams.png" alt="Teacher Exams screenshot" /><div class="body"><div class="title">Teacher Exams</div><div class="muted">Teacher exam list.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/teacher-exam-marks.png" alt="Teacher Exam Marks screenshot" /><div class="body"><div class="title">Teacher Exam Marks</div><div class="muted">Teacher marks entry page.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/teacher-change-password.png" alt="Teacher Change Password screenshot" /><div class="body"><div class="title">Teacher Change Password</div><div class="muted">Teacher password update screen.</div></div></div>
+          </div>
+
+          <h3>Parent Portal Screens</h3>
+          <div class="shot-grid">
+            <div class="shot-card"><img src="./assets/all-views/parent-login.png" alt="Parent Login screenshot" /><div class="body"><div class="title">Parent Login</div><div class="muted">Parent authentication view.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/parent-dashboard.png" alt="Parent Dashboard screenshot" /><div class="body"><div class="title">Parent Dashboard</div><div class="muted">Child summary with attendance, fees, and results.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/parent-attendance.png" alt="Parent Attendance screenshot" /><div class="body"><div class="title">Parent Attendance</div><div class="muted">Attendance history list.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/parent-fees.png" alt="Parent Fees screenshot" /><div class="body"><div class="title">Parent Fees</div><div class="muted">Fee payment history.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/parent-change-password.png" alt="Parent Change Password screenshot" /><div class="body"><div class="title">Parent Change Password</div><div class="muted">Parent password update screen.</div></div></div>
+          </div>
+
+          <h3>System Screens</h3>
+          <div class="shot-grid">
+            <div class="shot-card"><img src="./assets/all-views/shared-access-denied.png" alt="Access Denied screenshot" /><div class="body"><div class="title">Access Denied</div><div class="muted">Role-restricted access feedback screen.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/shared-status-code.png" alt="Status Code Page screenshot" /><div class="body"><div class="title">Status Code Page</div><div class="muted">Friendly HTTP status screen example.</div></div></div>
+            <div class="shot-card"><img src="./assets/all-views/shared-error.png" alt="Error Page screenshot" /><div class="body"><div class="title">Error Page</div><div class="muted">Unhandled error fallback page.</div></div></div>
+          </div>
+        </section>
+
+        <section id="operations" class="section-anchor card">
+          <h2>10. Daily Usage Playbooks</h2>
+
+          <h3>9.1 New Academic Session Setup</h3>
+          <div class="flow">
+            <div class="step"><strong>1. Create courses</strong>Add or update website course listings.</div>
+            <div class="arrow">→</div>
+            <div class="step"><strong>2. Add teachers</strong>Create teacher records and portal logins.</div>
+            <div class="arrow">→</div>
+            <div class="step"><strong>3. Create batches</strong>Set standards, timings, rooms, and strength.</div>
+            <div class="arrow">→</div>
+            <div class="step"><strong>4. Add fee structure</strong>Define class-wise pricing.</div>
+            <div class="arrow">→</div>
+            <div class="step"><strong>5. Build timetable</strong>Add weekly slots and resolve conflicts.</div>
+          </div>
+
+          <h3>9.2 Daily Operations</h3>
+          <div class="checklist">
+            <div class="check"><strong>Morning</strong><br><span class="muted">Review enquiries, registrations, WhatsApp notices, today’s timetable.</span></div>
+            <div class="check"><strong>Class hours</strong><br><span class="muted">Teachers mark attendance and post homework when needed.</span></div>
+            <div class="check"><strong>Assessment</strong><br><span class="muted">Teachers/admin update marks and publish exams/results.</span></div>
+            <div class="check"><strong>Collections</strong><br><span class="muted">Admin records fee payments and prints receipts.</span></div>
+          </div>
+
+          <h3>9.3 Website Content Refresh</h3>
+          <ul class="mini-list">
+            <li>Update homepage statistics from <strong>Homepage Content</strong>.</li>
+            <li>Add latest notices.</li>
+            <li>Upload new study materials and result lists.</li>
+            <li>Approve and feature fresh testimonials.</li>
+            <li>Upload recent event photos to gallery.</li>
+          </ul>
+        </section>
+
+        <section id="faq" class="section-anchor card">
+          <h2>11. FAQ & Notes</h2>
+
+          <h3>Can admin manage whether homepage stats/testimonials appear?</h3>
+          <p>Yes. The <strong>Homepage Content</strong> screen controls visibility and text.</p>
+
+          <h3>Can teachers access admin pages?</h3>
+          <p>No. Admin areas are role-restricted. Teachers use only the teacher portal.</p>
+
+          <h3>Can parents change their own password?</h3>
+          <p>Yes. Parent portal includes a self-service change password screen.</p>
+
+          <h3>Can admin reset teacher and parent passwords?</h3>
+          <p>Yes. Use <strong>Portal Accounts</strong> to reset them.</p>
+
+          <h3>How are admission leads handled?</h3>
+          <p>They enter through Registration or manual admin creation, then move through status updates in Registrations.</p>
+
+          <h3>How are testimonials published?</h3>
+          <p>User testimonials are submitted publicly, then approved by admin before becoming visible.</p>
+
+          <h3>How do WhatsApp broadcasts work?</h3>
+          <p>Admin authenticates WhatsApp using QR, then sends to all parents or a chosen batch. Delivery is logged.</p>
+
+          <div class="notice bad">
+            <strong>Important operating habit:</strong> for parent portal visibility to work smoothly, the student record should have the correct parent mobile / linked portal account information.
+          </div>
+
+          <p class="footer-note">
+            This handbook reflects the current implemented feature set and is intended as a training and operating reference before deployment.
+          </p>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

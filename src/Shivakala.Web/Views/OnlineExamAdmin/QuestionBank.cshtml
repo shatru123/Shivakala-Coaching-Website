@@ -1,0 +1,129 @@
+@model List<Shivakala.Core.Entities.Question>
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Question Bank Repository";
+}
+
+<div class="p-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <span class="badge-soft dark mb-1"><i class="fa-solid fa-database me-1"></i>Centralized Repository</span>
+            <h2 class="fw-bold mb-1" style="color:var(--navy-dark)">Question Bank Repository</h2>
+            <p class="text-muted mb-0 small">Centralized repository for all subject questions, options, and explanations</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Import" class="btn-outline-sk">
+                <i class="fa-solid fa-file-import me-1"></i> Import Document (PDF/Image)
+            </a>
+            <a asp-action="CreateQuestion" class="btn-primary-sk">
+                <i class="fa-solid fa-plus me-1"></i> Add Single Question
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="glass-card p-3 mb-4">
+        <form method="get" asp-action="QuestionBank" class="row g-3 align-items-center">
+            <div class="col-md-3">
+                <input type="text" name="search" class="form-control form-control-sm" placeholder="Search question text..." value="@ViewBag.Search" />
+            </div>
+            <div class="col-md-2">
+                <input type="text" name="subject" class="form-control form-control-sm" placeholder="Subject..." value="@ViewBag.Subject" />
+            </div>
+            <div class="col-md-2">
+                <input type="text" name="standard" class="form-control form-control-sm" placeholder="Standard..." value="@ViewBag.Standard" />
+            </div>
+            <div class="col-md-2">
+                <input type="text" name="topic" class="form-control form-control-sm" placeholder="Topic..." value="@ViewBag.Topic" />
+            </div>
+            <div class="col-md-2">
+                <select name="difficulty" class="form-select form-select-sm">
+                    <option value="">-- Any Difficulty --</option>
+                    <option value="Easy" selected="@(ViewBag.Difficulty == "Easy")">Easy</option>
+                    <option value="Medium" selected="@(ViewBag.Difficulty == "Medium")">Medium</option>
+                    <option value="Hard" selected="@(ViewBag.Difficulty == "Hard")">Hard</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn-primary-sk w-100 justify-content-center py-1.5"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Questions Listing -->
+    <div class="glass-card p-0 overflow-hidden">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="fa-solid fa-folder-open fa-3x text-muted mb-3"></i>
+                <h5 class="fw-bold text-dark mb-1">No Questions Found</h5>
+                <p class="text-muted small mb-3">No matching questions in the repository. Add questions manually or import them.</p>
+                <a asp-action="Import" class="btn-primary-sk me-2">Import from Document</a>
+                <a asp-action="CreateQuestion" class="btn-outline-sk">Add New Question</a>
+            </div>
+        }
+        else
+        {
+            <div class="list-group list-group-flush">
+                @foreach (var q in Model)
+                {
+                    <div class="list-group-item p-4 border-bottom bg-transparent">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                                <span class="badge-soft dark" style="font-size:0.75rem">@q.Subject</span>
+                                <span class="badge-soft dark" style="font-size:0.75rem">Std @q.Standard</span>
+                                @if (!string.IsNullOrWhiteSpace(q.Topic))
+                                {
+                                    <span class="badge-soft" style="font-size:0.75rem"><i class="fa-solid fa-tag me-1"></i>@q.Topic</span>
+                                }
+                                <span class="badge @(q.Difficulty == "Hard" ? "bg-danger" : q.Difficulty == "Easy" ? "bg-success" : "bg-warning text-dark")" style="font-size:0.75rem">@q.Difficulty</span>
+                            </div>
+                            <div>
+                                <span class="fw-bold text-primary">@q.Marks Marks</span>
+                                @if (q.NegativeMarks > 0)
+                                {
+                                    <small class="text-danger ms-1">(-@q.NegativeMarks)</small>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="fs-6 fw-semibold text-dark mb-3">@q.QuestionText</div>
+
+                        @if (!string.IsNullOrWhiteSpace(q.QuestionImageUrl))
+                        {
+                            <div class="mb-3">
+                                <img src="@q.QuestionImageUrl" class="img-fluid rounded-3 border" style="max-height: 200px;" alt="Question Image" />
+                            </div>
+                        }
+
+                        <!-- Options -->
+                        <div class="row g-2 mb-2">
+                            @foreach (var opt in q.Options.OrderBy(o => o.DisplayOrder))
+                            {
+                                var optBg = opt.IsCorrect ? "bg-success text-white fw-bold border-success" : "bg-light text-dark border";
+                                <div class="col-md-6">
+                                    <div class="p-2.5 border rounded-3 d-flex align-items-center @optBg">
+                                        <span class="badge bg-dark text-white me-2">@opt.OptionKey</span>
+                                        <span>@opt.OptionText</span>
+                                        @if (opt.IsCorrect)
+                                        {
+                                            <i class="fa-solid fa-check-circle ms-auto"></i>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(q.Explanation))
+                        {
+                            <div class="small text-muted bg-light p-3 rounded-3 border">
+                                <strong>Explanation:</strong> @q.Explanation
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+

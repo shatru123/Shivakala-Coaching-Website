@@ -1,0 +1,136 @@
+@model Shivakala.Core.ViewModels.OfflineResultEntryViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = $"Enter Marks: {Model.ExamTitle}";
+}
+
+<div class="p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <span class="badge-soft dark mb-1"><i class="fa-solid fa-pen-to-square me-1"></i>Offline Scorecard Entry</span>
+            <h2 class="fw-bold mb-1" style="color:var(--navy-dark)">@Model.ExamTitle</h2>
+            <p class="text-muted mb-0 small">
+                Subject: <strong>@Model.Subject</strong> | Maximum Marks: <strong>@Model.TotalMarks</strong> | Passing Marks: <strong>@Model.PassingMarks</strong>
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="CheckIn" asp-route-id="@Model.ExamId" class="btn-outline-sk">
+                <i class="fa-solid fa-clipboard-check me-1"></i>Attendance Check-In
+            </a>
+            <a asp-action="OfflineExams" class="btn-outline-sk">
+                <i class="fa-solid fa-arrow-left me-1"></i>Back to Exams
+            </a>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4 shadow-sm" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i>@TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-4 shadow-sm" role="alert">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>@TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form asp-action="EnterMarks" asp-route-id="@Model.ExamId" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ExamId" />
+        <input type="hidden" asp-for="ExamTitle" />
+        <input type="hidden" asp-for="Subject" />
+        <input type="hidden" asp-for="TotalMarks" />
+        <input type="hidden" asp-for="PassingMarks" />
+
+        <div class="glass-card p-4 mb-4">
+            @if (!Model.Rows.Any())
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="fa-solid fa-user-xmark fa-3x mb-2 text-muted"></i>
+                    <p class="mb-0">No registered candidates found for this exam.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Seat No</th>
+                                <th>Reg No</th>
+                                <th>Candidate Name</th>
+                                <th style="width:140px;">Marks (Max: @Model.TotalMarks)</th>
+                                <th>Absent?</th>
+                                <th>Rank</th>
+                                <th>Grade</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.Rows.Count; i++)
+                            {
+                                var r = Model.Rows[i];
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-dark font-monospace">@(r.SeatNumber ?? "-")</span>
+                                        <input type="hidden" name="Rows[@i].MpscStudentId" value="@r.MpscStudentId" />
+                                        <input type="hidden" name="Rows[@i].RegistrationNumber" value="@r.RegistrationNumber" />
+                                        <input type="hidden" name="Rows[@i].FullName" value="@r.FullName" />
+                                        <input type="hidden" name="Rows[@i].SeatNumber" value="@r.SeatNumber" />
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-primary font-monospace border">@r.RegistrationNumber</span>
+                                    </td>
+                                    <td>
+                                        <strong>@r.FullName</strong>
+                                    </td>
+                                    <td>
+                                        <input type="number" step="0.25" min="0" max="@Model.TotalMarks"
+                                               name="Rows[@i].MarksObtained"
+                                               value="@(r.MarksObtained?.ToString("G29"))"
+                                               class="form-control form-control-sm text-end fw-bold"
+                                               placeholder="0.00" />
+                                    </td>
+                                    <td>
+                                        <div class="form-check">
+                                            <input type="checkbox" name="Rows[@i].IsAbsent" value="true" class="form-check-input" @(r.IsAbsent ? "checked" : "") />
+                                            <input type="hidden" name="Rows[@i].IsAbsent" value="false" />
+                                            <label class="form-check-label small text-danger">Absent</label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (r.Rank.HasValue)
+                                        {
+                                            <span class="badge bg-warning text-dark">#@r.Rank</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">@(r.Grade ?? "-")</span>
+                                    </td>
+                                    <td>
+                                        <input type="text" name="Rows[@i].Remarks" value="@r.Remarks" class="form-control form-control-sm" placeholder="Optional notes" />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <a asp-action="OfflineExams" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn-primary-sk px-4 py-2">
+                        <i class="fa-solid fa-floppy-disk me-1"></i>Save Results &amp; Compute Ranks
+                    </button>
+                </div>
+            }
+        </div>
+    </form>
+</div>

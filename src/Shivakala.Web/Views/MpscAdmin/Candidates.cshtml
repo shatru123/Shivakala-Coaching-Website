@@ -1,0 +1,179 @@
+@model Shivakala.Core.ViewModels.MpscCandidateListFilterViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "MPSC Candidates Directory";
+}
+
+<div class="p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <span class="badge-soft dark mb-1"><i class="fa-solid fa-users me-1"></i>Directory</span>
+            <h2 class="fw-bold mb-1" style="color:var(--navy-dark)">MPSC Candidates Directory</h2>
+            <p class="text-muted mb-0 small">Total: <strong>@Model.TotalRecords</strong> candidates enrolled in Shivakala MPSC program</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-action="ExportCsv"
+               asp-route-search="@Model.Search"
+               asp-route-status="@Model.Status"
+               asp-route-examInterest="@Model.ExamInterest"
+               asp-route-district="@Model.District"
+               class="btn-outline-sk">
+                <i class="fa-solid fa-file-export me-1"></i>Export CSV
+            </a>
+            <a asp-action="Import" class="btn-primary-sk">
+                <i class="fa-solid fa-file-arrow-up me-1"></i>Import Candidates CSV
+            </a>
+        </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="glass-card p-3 mb-4">
+        <form method="get" asp-action="Candidates" class="row g-2 align-items-center">
+            <div class="col-md-3">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+                    <input asp-for="Search" class="form-control form-control-sm" placeholder="Search name, reg no, email, mobile..." />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <select asp-for="ExamInterest" class="form-select form-select-sm">
+                    <option value="">-- All Target Exams --</option>
+                    <option value="Rajyaseva">Rajyaseva</option>
+                    <option value="Combine Group B">Combine Group B</option>
+                    <option value="Combine Group C">Combine Group C</option>
+                    <option value="PSI">PSI</option>
+                    <option value="STI">STI</option>
+                    <option value="ASO">ASO</option>
+                    <option value="Technical Services">Technical Services</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select asp-for="District" class="form-select form-select-sm">
+                    <option value="">-- All Districts --</option>
+                    @foreach (var d in Model.AvailableDistricts)
+                    {
+                        <option value="@d">@d</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select asp-for="Status" class="form-select form-select-sm">
+                    <option value="">-- All Status --</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select asp-for="PreparationLevel" class="form-select form-select-sm">
+                    <option value="">-- Level --</option>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
+                </select>
+            </div>
+            <div class="col-md-1 d-flex gap-1">
+                <button type="submit" class="btn btn-primary btn-sm w-100"><i class="fa-solid fa-filter"></i></button>
+                <a asp-action="Candidates" class="btn btn-outline-secondary btn-sm"><i class="fa-solid fa-rotate-left"></i></a>
+            </div>
+        </form>
+    </div>
+
+    <!-- CANDIDATES TABLE -->
+    <div class="glass-card p-4">
+        @if (!Model.Candidates.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="fa-regular fa-folder-open fa-3x mb-2 text-muted"></i>
+                <h5>No candidates match the selected filters.</h5>
+                <p class="small mb-0">Try clearing filters or search criteria.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Reg No</th>
+                            <th>Candidate Name</th>
+                            <th>Target Exam</th>
+                            <th>District</th>
+                            <th>Mobile / Email</th>
+                            <th>Qualification</th>
+                            <th>Status</th>
+                            <th>Registered</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in Model.Candidates)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="badge bg-light text-primary font-monospace border">@c.RegistrationNumber</span>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@c.FullName</div>
+                                    @if (!string.IsNullOrWhiteSpace(c.FullNameMarathi))
+                                    {
+                                        <small class="text-muted">@c.FullNameMarathi</small>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary-subtle text-primary">@c.PreferredExam</span>
+                                </td>
+                                <td>@c.District</td>
+                                <td>
+                                    <div class="small"><i class="fa-solid fa-phone text-muted me-1"></i>@c.Mobile</div>
+                                    <div class="small text-muted"><i class="fa-solid fa-envelope text-muted me-1"></i>@c.Email</div>
+                                </td>
+                                <td>
+                                    <small>@c.HighestQualification</small>
+                                </td>
+                                <td>
+                                    <span class="badge @(c.IsActive ? "bg-success" : "bg-secondary")">
+                                        @(c.IsActive ? "Active" : "Inactive")
+                                    </span>
+                                </td>
+                                <td>
+                                    <small class="text-muted">@c.RegistrationDate.ToString("dd MMM yyyy")</small>
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="CandidateDetail" asp-route-id="@c.Id" class="btn btn-outline-primary btn-sm">
+                                        <i class="fa-solid fa-eye me-1"></i>View
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAGINATION -->
+            @if (Model.TotalPages > 1)
+            {
+                <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top flex-wrap gap-2">
+                    <small class="text-muted">
+                        Showing page @Model.Page of @Model.TotalPages (@Model.TotalRecords records)
+                    </small>
+                    <nav>
+                        <ul class="pagination pagination-sm mb-0">
+                            @for (int p = 1; p <= Model.TotalPages; p++)
+                            {
+                                <li class="page-item @(p == Model.Page ? "active" : "")">
+                                    <a class="page-link" asp-action="Candidates"
+                                       asp-route-page="@p"
+                                       asp-route-search="@Model.Search"
+                                       asp-route-examInterest="@Model.ExamInterest"
+                                       asp-route-district="@Model.District"
+                                       asp-route-status="@Model.Status"
+                                       asp-route-preparationLevel="@Model.PreparationLevel">@p</a>
+                                </li>
+                            }
+                        </ul>
+                    </nav>
+                </div>
+            }
+        }
+    </div>
+</div>

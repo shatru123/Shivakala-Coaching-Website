@@ -1,0 +1,164 @@
+@model Shivakala.Core.ViewModels.MpscImportPreviewViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "CSV Import Preview";
+}
+
+<div class="p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <span class="badge-soft dark mb-1"><i class="fa-solid fa-magnifying-glass me-1"></i>Import Preview</span>
+            <h2 class="fw-bold mb-1" style="color:var(--navy-dark)">Review CSV Import Records</h2>
+            <p class="text-muted mb-0 small">File: <strong>@Model.FileName</strong> (Total: @Model.TotalRecords entries)</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Import" class="btn-outline-sk">
+                <i class="fa-solid fa-arrow-left me-1"></i>Cancel &amp; Re-upload
+            </a>
+            @if (Model.ValidCount > 0)
+            {
+                <form asp-action="ImportCommit" method="post">
+                    @Html.AntiForgeryToken()
+                    @for (int i = 0; i < Model.ValidRows.Count; i++)
+                    {
+                        <input type="hidden" name="rows[@i].RowNumber" value="@Model.ValidRows[i].RowNumber" />
+                        <input type="hidden" name="rows[@i].FullName" value="@Model.ValidRows[i].FullName" />
+                        <input type="hidden" name="rows[@i].Mobile" value="@Model.ValidRows[i].Mobile" />
+                        <input type="hidden" name="rows[@i].Email" value="@Model.ValidRows[i].Email" />
+                        <input type="hidden" name="rows[@i].District" value="@Model.ValidRows[i].District" />
+                        <input type="hidden" name="rows[@i].Qualification" value="@Model.ValidRows[i].Qualification" />
+                        <input type="hidden" name="rows[@i].ExamInterest" value="@Model.ValidRows[i].ExamInterest" />
+                        <input type="hidden" name="rows[@i].TargetYear" value="@Model.ValidRows[i].TargetYear" />
+                        <input type="hidden" name="rows[@i].Status" value="Valid" />
+                    }
+                    <button type="submit" class="btn btn-success fw-bold px-4 py-2" onclick="return confirm('Commit @Model.ValidCount valid candidates? This will create candidate records and portal user accounts.');">
+                        <i class="fa-solid fa-check-double me-2"></i>Commit &amp; Import (@Model.ValidCount Candidates)
+                    </button>
+                </form>
+            }
+        </div>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="glass-card p-3 border-start border-4 border-success d-flex align-items-center">
+                <div class="bg-success-subtle text-success rounded-circle p-3 me-3" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <div>
+                    <div class="fs-4 fw-bold">@Model.ValidCount</div>
+                    <div class="text-muted small">Valid Candidates to Import</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-card p-3 border-start border-4 border-warning d-flex align-items-center">
+                <div class="bg-warning-subtle text-warning rounded-circle p-3 me-3" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+                    <i class="fa-solid fa-clone"></i>
+                </div>
+                <div>
+                    <div class="fs-4 fw-bold">@Model.DuplicateCount</div>
+                    <div class="text-muted small">Duplicates (Will be Skipped)</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-card p-3 border-start border-4 border-danger d-flex align-items-center">
+                <div class="bg-danger-subtle text-danger rounded-circle p-3 me-3" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <div class="fs-4 fw-bold">@Model.InvalidCount</div>
+                    <div class="text-muted small">Invalid Rows (Formatting Errors)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VALID ROWS TABLE -->
+    @if (Model.ValidRows.Any())
+    {
+        <div class="glass-card p-4 mb-4">
+            <h5 class="fw-bold mb-3 text-success">
+                <i class="fa-solid fa-circle-check me-2"></i>Valid Candidates (@Model.ValidCount)
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#Row</th>
+                            <th>Full Name</th>
+                            <th>Mobile</th>
+                            <th>Email</th>
+                            <th>District</th>
+                            <th>Qualification</th>
+                            <th>Target Exam</th>
+                            <th>Target Year</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.ValidRows)
+                        {
+                            <tr>
+                                <td>@row.RowNumber</td>
+                                <td><strong>@row.FullName</strong></td>
+                                <td>@row.Mobile</td>
+                                <td>@row.Email</td>
+                                <td>@row.District</td>
+                                <td>@row.Qualification</td>
+                                <td><span class="badge bg-primary-subtle text-primary">@row.ExamInterest</span></td>
+                                <td>@row.TargetYear</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <!-- DUPLICATE & INVALID ROWS TABLE -->
+    @if (Model.DuplicateRows.Any() || Model.InvalidRows.Any())
+    {
+        <div class="glass-card p-4">
+            <h5 class="fw-bold mb-3 text-danger">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>Issues &amp; Skipped Records (@(Model.DuplicateCount + Model.InvalidCount))
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 small">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#Row</th>
+                            <th>Name</th>
+                            <th>Mobile / Email</th>
+                            <th>Issue Type</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var row in Model.DuplicateRows)
+                        {
+                            <tr class="table-warning">
+                                <td>@row.RowNumber</td>
+                                <td>@row.FullName</td>
+                                <td>@row.Mobile / @row.Email</td>
+                                <td><span class="badge bg-warning text-dark">Duplicate</span></td>
+                                <td>@row.Reason</td>
+                            </tr>
+                        }
+                        @foreach (var row in Model.InvalidRows)
+                        {
+                            <tr class="table-danger">
+                                <td>@row.RowNumber</td>
+                                <td>@row.FullName</td>
+                                <td>@row.Mobile / @row.Email</td>
+                                <td><span class="badge bg-danger">Invalid</span></td>
+                                <td>@row.Reason</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

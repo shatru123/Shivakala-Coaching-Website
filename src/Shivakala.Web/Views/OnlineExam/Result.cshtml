@@ -1,0 +1,185 @@
+@model Shivakala.Core.ViewModels.OnlineExamResultViewModel
+@{
+    ViewData["Title"] = "Exam Result - " + Model.ExamTitle;
+    var duration = TimeSpan.FromSeconds(Model.TimeTakenSeconds);
+    var timeString = $"{duration.Minutes}m {duration.Seconds}s";
+}
+
+<section class="page-hero">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <span class="badge-soft"><i class="fa-solid fa-trophy me-1"></i>Scorecard &amp; Performance Summary</span>
+            <h1 class="mt-2">@Model.ExamTitle</h1>
+            <p class="mb-0">
+                <i class="fa-solid fa-user me-1"></i> Candidate: <strong>@Model.StudentName</strong> &bull;
+                <i class="fa-solid fa-graduation-cap ms-1 me-1"></i> Std @Model.Standard (@Model.Subject) &bull;
+                <i class="fa-solid fa-clock ms-1 me-1"></i> Time: <strong>@timeString</strong>
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn-outline-light-sk">
+                <i class="fa-solid fa-print me-1"></i> Print Scorecard
+            </button>
+            <a asp-action="Index" class="btn-gold-sk">
+                <i class="fa-solid fa-arrow-left me-1"></i> Back to Exams
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="section-shell pt-4 pb-5">
+    <div class="container">
+
+        <!-- Overview Score Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3 col-6">
+                <div class="glass-card text-center p-3 h-100" style="border-left:5px solid var(--navy)">
+                    <div class="text-muted small text-uppercase fw-bold">Obtained Score</div>
+                    <div class="fs-2 fw-bold mt-1" style="color:var(--navy)">@Model.Score / @Model.TotalMarks</div>
+                    <span class="badge-soft dark mt-1">Grade @Model.Grade</span>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+                <div class="glass-card text-center p-3 h-100" style="border-left:5px solid @(Model.Passed ? "var(--green)" : "var(--red)")">
+                    <div class="text-muted small text-uppercase fw-bold">Result Status</div>
+                    <div class="fs-2 fw-bold mt-1 @(Model.Passed ? "text-success" : "text-danger")">
+                        @(Model.Passed ? "PASSED" : "FAILED")
+                    </div>
+                    <span class="badge-soft mt-1" style="background:@(Model.Passed ? "rgba(27,122,62,0.15)" : "rgba(192,57,43,0.15)");color:@(Model.Passed ? "var(--green)" : "var(--red)")">
+                        @Model.Percentage.ToString("F1")% Score
+                    </span>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+                <div class="glass-card text-center p-3 h-100" style="border-left:5px solid var(--green)">
+                    <div class="text-muted small text-uppercase fw-bold">Correct Answers</div>
+                    <div class="fs-2 fw-bold text-success mt-1">@Model.CorrectCount</div>
+                    <div class="small text-muted mt-1"><i class="fa-solid fa-circle-check text-success me-1"></i>Accurate</div>
+                </div>
+            </div>
+
+            <div class="col-md-3 col-6">
+                <div class="glass-card text-center p-3 h-100" style="border-left:5px solid var(--gold)">
+                    <div class="text-muted small text-uppercase fw-bold">Incorrect / Skipped</div>
+                    <div class="fs-2 fw-bold text-warning mt-1">@Model.IncorrectCount / @Model.UnansweredCount</div>
+                    <div class="small text-muted mt-1"><i class="fa-solid fa-circle-xmark text-danger me-1"></i>Wrong / Skipped</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Topic Analytics -->
+        @if (Model.TopicAnalytics != null && Model.TopicAnalytics.Any())
+        {
+            <div class="glass-card p-4 mb-4">
+                <h5 class="fw-bold mb-3" style="color:var(--navy-dark)">
+                    <i class="fa-solid fa-chart-pie me-2 text-primary"></i>Topic-wise Performance Analytics
+                </h5>
+                <div class="row g-3">
+                    @foreach (var topic in Model.TopicAnalytics)
+                    {
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 bg-light">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="fw-bold text-dark">@topic.Topic</span>
+                                    <span class="badge-soft dark">@topic.Correct / @topic.Total Correct (@topic.AccuracyPercentage.ToString("F0")%)</span>
+                                </div>
+                                <div class="progress" style="height: 10px; border-radius:6px">
+                                    <div class="progress-bar @(topic.AccuracyPercentage >= 75 ? "bg-success" : topic.AccuracyPercentage >= 50 ? "bg-warning text-dark" : "bg-danger")" 
+                                         role="progressbar" 
+                                         style="width: @(topic.AccuracyPercentage)%" 
+                                         aria-valuenow="@topic.AccuracyPercentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+        <!-- Question Review Section -->
+        @if (Model.CanViewReview && Model.QuestionReviews != null && Model.QuestionReviews.Any())
+        {
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <h5 class="mb-0 fw-bold" style="color:var(--navy-dark)"><i class="fa-solid fa-list-check me-2 text-primary"></i>Detailed Question Review</h5>
+                    <span class="badge-soft dark">Total @Model.QuestionReviews.Count Questions</span>
+                </div>
+                <div class="d-grid gap-3">
+                    @foreach (var q in Model.QuestionReviews)
+                    {
+                        var borderAccent = q.IsCorrect ? "var(--green)" : q.IsUnanswered ? "var(--border)" : "var(--red)";
+                        var statusBadgeClass = q.IsCorrect ? "badge bg-success" : q.IsUnanswered ? "badge bg-secondary" : "badge bg-danger";
+                        var statusText = q.IsCorrect ? "Correct (+" + q.Marks + ")" : q.IsUnanswered ? "Unanswered (0)" : "Incorrect";
+
+                        <div class="p-4 border rounded-3 bg-white" style="border-left:5px solid @borderAccent !important">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge-soft dark">Q#@q.QuestionNumber</span>
+                                <span class="@statusBadgeClass">@statusText</span>
+                            </div>
+
+                            <h6 class="fw-bold text-dark mb-3" style="line-height:1.5">@q.QuestionText</h6>
+
+                            @if (!string.IsNullOrWhiteSpace(q.QuestionImageUrl))
+                            {
+                                <div class="mb-3 text-center">
+                                    <img src="@q.QuestionImageUrl" class="img-fluid rounded border shadow-sm" style="max-height: 240px;" alt="Question Image" />
+                                </div>
+                            }
+
+                            <!-- Options List -->
+                            <div class="row g-2 mb-3">
+                                @foreach (var opt in q.Options)
+                                {
+                                    var isSelected = opt.OptionKey == q.StudentSelectedOptionKey;
+                                    var isCorrectOpt = opt.OptionKey == q.CorrectOptionKey;
+
+                                    var optClass = "border-secondary bg-light text-dark";
+                                    var icon = "";
+
+                                    if (isCorrectOpt)
+                                    {
+                                        optClass = "border-success bg-success text-white fw-bold";
+                                        icon = "<i class=\"fa-solid fa-circle-check me-1\"></i> (Correct Answer)";
+                                    }
+                                    else if (isSelected && !q.IsCorrect)
+                                    {
+                                        optClass = "border-danger bg-danger text-white fw-bold";
+                                        icon = "<i class=\"fa-solid fa-circle-xmark me-1\"></i> (Your Answer)";
+                                    }
+
+                                    <div class="col-md-6">
+                                        <div class="p-2.5 border rounded-3 d-flex align-items-center @optClass">
+                                            <span class="badge bg-dark text-white me-2">@opt.OptionKey</span>
+                                            <span class="flex-grow-1">@opt.OptionText</span>
+                                            @if (!string.IsNullOrEmpty(icon))
+                                            {
+                                                <small class="ms-1">@Html.Raw(icon)</small>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Explanation -->
+                            @if (!string.IsNullOrWhiteSpace(q.Explanation))
+                            {
+                                <div class="p-3 bg-light rounded-3 text-muted small border">
+                                    <i class="fa-solid fa-lightbulb me-1 text-warning"></i> <strong>Explanation / Solution:</strong> @q.Explanation
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else if (!Model.ShowCorrectAnswers)
+        {
+            <div class="glass-card text-center py-4">
+                <i class="fa-solid fa-lock me-2 text-warning fs-4"></i> Detailed question answers and solutions are hidden for this examination per test configuration.
+            </div>
+        }
+    </div>
+</section>
+

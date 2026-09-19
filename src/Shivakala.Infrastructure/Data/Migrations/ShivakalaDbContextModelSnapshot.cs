@@ -117,6 +117,9 @@ namespace Shivakala.Infrastructure.Data.Migrations
                     b.Property<string>("Mobile")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("MpscStudentId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -151,6 +154,8 @@ namespace Shivakala.Infrastructure.Data.Migrations
 
                     b.HasIndex("Email")
                         .IsUnique();
+
+                    b.HasIndex("MpscStudentId");
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -459,30 +464,93 @@ namespace Shivakala.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("AllowMultipleAttempts")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Audience")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.Property<int?>("BatchId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Capacity")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Duration")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("DurationMinutes")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("EndDateTime")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime>("ExamDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ExamMode")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ExamType")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Instructions")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsPublished")
                         .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsRegistrationRequired")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("MaximumAttempts")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("NegativeMarkingEnabled")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("NegativeMarks")
+                        .HasColumnType("REAL");
 
                     b.Property<int>("PassingMarks")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("QuestionCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("RandomizeOptions")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("RandomizeQuestions")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("RegistrationCloseDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("RegistrationOpenDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ResultReleaseMode")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("ShowCorrectAnswers")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Standard")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("StartDateTime")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Subject")
@@ -496,11 +564,77 @@ namespace Shivakala.Infrastructure.Data.Migrations
                     b.Property<int>("TotalMarks")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Venue")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BatchId");
 
                     b.ToTable("Exams");
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.ExamQuestion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ExamId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("MarksOverride")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double?>("NegativeMarksOverride")
+                        .HasColumnType("REAL");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("ExamId", "QuestionId")
+                        .IsUnique();
+
+                    b.ToTable("ExamQuestions");
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.ExamRegistration", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ExamId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("RegisteredAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("StudentId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("ExamId", "StudentId")
+                        .IsUnique();
+
+                    b.ToTable("ExamRegistrations");
                 });
 
             modelBuilder.Entity("Shivakala.Core.Entities.ExamResult", b =>
@@ -894,6 +1028,279 @@ namespace Shivakala.Infrastructure.Data.Migrations
                     b.ToTable("HomeworkSubmissions");
                 });
 
+            modelBuilder.Entity("Shivakala.Core.Entities.MpscExamRegistration", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("AttendanceMarkedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AttendanceRemarks")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AttendanceStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Pending");
+
+                    b.Property<int>("ExamId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Mode")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Online");
+
+                    b.Property<int>("MpscStudentId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("RegisteredAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SeatNumber")
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Registered");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MpscStudentId");
+
+                    b.HasIndex("ExamId", "MpscStudentId")
+                        .IsUnique();
+
+                    b.ToTable("MpscExamRegistrations", (string)null);
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.MpscExamResult", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ExamId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Grade")
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsAbsent")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double?>("MarksObtained")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("Mode")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Offline");
+
+                    b.Property<int>("MpscStudentId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("OnlineAttemptId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("Rank")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Remarks")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MpscStudentId");
+
+                    b.HasIndex("OnlineAttemptId");
+
+                    b.HasIndex("ExamId", "MpscStudentId");
+
+                    b.ToTable("MpscExamResults", (string)null);
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.MpscStudent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AlternateMobile")
+                        .HasMaxLength(15)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("CasteCertificateAvailable")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Open");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("ConsentAccepted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("ConsentAcceptedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ConsentIpAddress")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DateOfBirth")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DegreeOrCourse")
+                        .HasMaxLength(150)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("District")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("EwsCertificateAvailable")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("FullNameMarathi")
+                        .HasMaxLength(150)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Gender")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("HighestQualification")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("LastUpdatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Mobile")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("NonCreamyLayerCertificateAvailable")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("NumberOfPreviousAttempts")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("OtherExamInterest")
+                        .HasMaxLength(250)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PhotoUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Pincode")
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PreferredExam")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Rajyaseva");
+
+                    b.Property<string>("PreparationLevel")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Beginner");
+
+                    b.Property<bool>("PreviousAttempts")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("RegistrationDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RegistrationNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("State")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Maharashtra");
+
+                    b.Property<int?>("TargetAttemptYear")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("University")
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("YearOfPassing")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.HasIndex("Mobile")
+                        .IsUnique();
+
+                    b.HasIndex("RegistrationNumber")
+                        .IsUnique();
+
+                    b.ToTable("MpscStudents", (string)null);
+                });
+
             modelBuilder.Entity("Shivakala.Core.Entities.Notice", b =>
                 {
                     b.Property<int>("Id")
@@ -987,6 +1394,204 @@ namespace Shivakala.Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.OnlineExamAttempt", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AttemptNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("CorrectCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ExamId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("IncorrectCount")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsAutoSubmitted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("MpscStudentId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("Percentage")
+                        .HasColumnType("REAL");
+
+                    b.Property<double>("Score")
+                        .HasColumnType("REAL");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("StudentId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("SubmittedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("TimeTakenSeconds")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("TotalMarks")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("UnansweredCount")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MpscStudentId");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("ExamId", "MpscStudentId");
+
+                    b.HasIndex("ExamId", "StudentId");
+
+                    b.ToTable("OnlineExamAttempts");
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.OnlineExamAttemptAnswer", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("AnsweredAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("AttemptId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsMarkedForReview")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("SelectedOptionId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("SelectedOptionId");
+
+                    b.HasIndex("AttemptId", "QuestionId")
+                        .IsUnique();
+
+                    b.ToTable("OnlineExamAttemptAnswers");
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.Question", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Difficulty")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("Medium");
+
+                    b.Property<string>("Explanation")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Marks")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<double>("NegativeMarks")
+                        .HasColumnType("REAL");
+
+                    b.Property<string>("QuestionImageUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("QuestionText")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("QuestionType")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Standard")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Topic")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Questions");
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.QuestionOption", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("OptionImageUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OptionKey")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("OptionText")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
+
+                    b.ToTable("QuestionOptions");
                 });
 
             modelBuilder.Entity("Shivakala.Core.Entities.Student", b =>
@@ -1418,6 +2023,16 @@ namespace Shivakala.Infrastructure.Data.Migrations
                     b.ToTable("TimetableSlots");
                 });
 
+            modelBuilder.Entity("Shivakala.Core.Entities.AppUser", b =>
+                {
+                    b.HasOne("Shivakala.Core.Entities.MpscStudent", "MpscStudent")
+                        .WithMany()
+                        .HasForeignKey("MpscStudentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("MpscStudent");
+                });
+
             modelBuilder.Entity("Shivakala.Core.Entities.Attendance", b =>
                 {
                     b.HasOne("Shivakala.Core.Entities.Batch", "Batch")
@@ -1467,6 +2082,44 @@ namespace Shivakala.Infrastructure.Data.Migrations
                         .HasForeignKey("BatchId");
 
                     b.Navigation("Batch");
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.ExamQuestion", b =>
+                {
+                    b.HasOne("Shivakala.Core.Entities.Exam", "Exam")
+                        .WithMany("ExamQuestions")
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Shivakala.Core.Entities.Question", "Question")
+                        .WithMany("ExamQuestions")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Exam");
+
+                    b.Navigation("Question");
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.ExamRegistration", b =>
+                {
+                    b.HasOne("Shivakala.Core.Entities.Exam", "Exam")
+                        .WithMany("Registrations")
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Shivakala.Core.Entities.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Exam");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("Shivakala.Core.Entities.ExamResult", b =>
@@ -1533,6 +2186,113 @@ namespace Shivakala.Infrastructure.Data.Migrations
                     b.Navigation("Homework");
 
                     b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.MpscExamRegistration", b =>
+                {
+                    b.HasOne("Shivakala.Core.Entities.Exam", "Exam")
+                        .WithMany("MpscRegistrations")
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Shivakala.Core.Entities.MpscStudent", "MpscStudent")
+                        .WithMany("Registrations")
+                        .HasForeignKey("MpscStudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Exam");
+
+                    b.Navigation("MpscStudent");
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.MpscExamResult", b =>
+                {
+                    b.HasOne("Shivakala.Core.Entities.Exam", "Exam")
+                        .WithMany("MpscResults")
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Shivakala.Core.Entities.MpscStudent", "MpscStudent")
+                        .WithMany("Results")
+                        .HasForeignKey("MpscStudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Shivakala.Core.Entities.OnlineExamAttempt", "OnlineAttempt")
+                        .WithMany()
+                        .HasForeignKey("OnlineAttemptId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Exam");
+
+                    b.Navigation("MpscStudent");
+
+                    b.Navigation("OnlineAttempt");
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.OnlineExamAttempt", b =>
+                {
+                    b.HasOne("Shivakala.Core.Entities.Exam", "Exam")
+                        .WithMany("Attempts")
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Shivakala.Core.Entities.MpscStudent", "MpscStudent")
+                        .WithMany("OnlineAttempts")
+                        .HasForeignKey("MpscStudentId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Shivakala.Core.Entities.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Exam");
+
+                    b.Navigation("MpscStudent");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.OnlineExamAttemptAnswer", b =>
+                {
+                    b.HasOne("Shivakala.Core.Entities.OnlineExamAttempt", "Attempt")
+                        .WithMany("Answers")
+                        .HasForeignKey("AttemptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Shivakala.Core.Entities.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Shivakala.Core.Entities.QuestionOption", "SelectedOption")
+                        .WithMany()
+                        .HasForeignKey("SelectedOptionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Attempt");
+
+                    b.Navigation("Question");
+
+                    b.Navigation("SelectedOption");
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.QuestionOption", b =>
+                {
+                    b.HasOne("Shivakala.Core.Entities.Question", "Question")
+                        .WithMany("Options")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
                 });
 
             modelBuilder.Entity("Shivakala.Core.Entities.StudentBatch", b =>
@@ -1608,12 +2368,43 @@ namespace Shivakala.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("Shivakala.Core.Entities.Exam", b =>
                 {
+                    b.Navigation("Attempts");
+
+                    b.Navigation("ExamQuestions");
+
+                    b.Navigation("MpscRegistrations");
+
+                    b.Navigation("MpscResults");
+
+                    b.Navigation("Registrations");
+
                     b.Navigation("Results");
                 });
 
             modelBuilder.Entity("Shivakala.Core.Entities.Homework", b =>
                 {
                     b.Navigation("Submissions");
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.MpscStudent", b =>
+                {
+                    b.Navigation("OnlineAttempts");
+
+                    b.Navigation("Registrations");
+
+                    b.Navigation("Results");
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.OnlineExamAttempt", b =>
+                {
+                    b.Navigation("Answers");
+                });
+
+            modelBuilder.Entity("Shivakala.Core.Entities.Question", b =>
+                {
+                    b.Navigation("ExamQuestions");
+
+                    b.Navigation("Options");
                 });
 
             modelBuilder.Entity("Shivakala.Core.Entities.Student", b =>

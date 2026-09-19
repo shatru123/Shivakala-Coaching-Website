@@ -1,0 +1,190 @@
+@model Shivakala.Core.ViewModels.MpscAdminDashboardViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "MPSC Module Management";
+}
+
+<div class="p-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <span class="badge-soft dark mb-1"><i class="fa-solid fa-landmark-flag me-1"></i>Administration</span>
+            <h2 class="fw-bold mb-1" style="color:var(--navy-dark)">MPSC Guidance &amp; Candidate Management</h2>
+            <p class="text-muted mb-0 small">Candidate registrations, exam tracking, offline venue attendance, and scorecards</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a asp-action="Candidates" class="btn-primary-sk">
+                <i class="fa-solid fa-users me-1"></i>Candidates Directory
+            </a>
+            <a asp-action="Import" class="btn-outline-sk">
+                <i class="fa-solid fa-file-csv me-1"></i>Bulk Import CSV
+            </a>
+            <a asp-action="OfflineExams" class="btn-outline-sk">
+                <i class="fa-solid fa-clipboard-check me-1"></i>Offline Exams Check-In
+            </a>
+        </div>
+    </div>
+
+    <!-- STAT METRICS ROW -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="glass-card p-3 d-flex align-items-center border-start border-4 border-primary">
+                <div class="bg-primary-subtle text-primary rounded-circle p-3 me-3" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+                    <i class="fa-solid fa-user-graduate"></i>
+                </div>
+                <div>
+                    <div class="fs-4 fw-bold">@Model.TotalCandidates</div>
+                    <div class="text-muted small">Total Candidates (@Model.ActiveCandidates Active)</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="glass-card p-3 d-flex align-items-center border-start border-4 border-success">
+                <div class="bg-success-subtle text-success rounded-circle p-3 me-3" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+                    <i class="fa-solid fa-user-plus"></i>
+                </div>
+                <div>
+                    <div class="fs-4 fw-bold">+@Model.NewRegistrationsThisMonth</div>
+                    <div class="text-muted small">Joined This Month (+@Model.NewRegistrationsToday Today)</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="glass-card p-3 d-flex align-items-center border-start border-4 border-info">
+                <div class="bg-info-subtle text-info rounded-circle p-3 me-3" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+                    <i class="fa-solid fa-laptop"></i>
+                </div>
+                <div>
+                    <div class="fs-4 fw-bold">@Model.OnlineExamRegistrations</div>
+                    <div class="text-muted small">Online Exam Registrations</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="glass-card p-3 d-flex align-items-center border-start border-4 border-warning">
+                <div class="bg-warning-subtle text-warning rounded-circle p-3 me-3" style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+                    <i class="fa-solid fa-building-circle-check"></i>
+                </div>
+                <div>
+                    <div class="fs-4 fw-bold">@Model.OfflineExamRegistrations</div>
+                    <div class="text-muted small">Offline Exam Registrations</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- RECENT CANDIDATES -->
+        <div class="col-lg-8">
+            <div class="glass-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <h5 class="fw-bold mb-0" style="color:var(--navy-dark)">
+                        <i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>Recently Registered Candidates
+                    </h5>
+                    <a asp-action="Candidates" class="btn btn-outline-primary btn-sm">View All Candidates &raquo;</a>
+                </div>
+
+                @if (!Model.RecentCandidates.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="fa-regular fa-user fa-3x mb-2 text-muted"></i>
+                        <p class="mb-0">No MPSC candidates registered yet.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Reg No</th>
+                                    <th>Name</th>
+                                    <th>Target Exam</th>
+                                    <th>District</th>
+                                    <th>Contact</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var cand in Model.RecentCandidates)
+                                {
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-light text-dark font-monospace border">@cand.RegistrationNumber</span>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold">@cand.FullName</div>
+                                            @if (!string.IsNullOrWhiteSpace(cand.FullNameMarathi))
+                                            {
+                                                <small class="text-muted">@cand.FullNameMarathi</small>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary-subtle text-primary">@cand.PreferredExam</span>
+                                        </td>
+                                        <td>@cand.District</td>
+                                        <td>
+                                            <div><i class="fa-solid fa-phone small text-muted me-1"></i>@cand.Mobile</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge @(cand.IsActive ? "bg-success" : "bg-secondary")">
+                                                @(cand.IsActive ? "Active" : "Inactive")
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <a asp-action="CandidateDetail" asp-route-id="@cand.Id" class="btn btn-outline-primary btn-sm">
+                                                <i class="fa-solid fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- UPCOMING MPSC EXAMS & QUICK ACTIONS -->
+        <div class="col-lg-4">
+            <div class="glass-card p-4 mb-4">
+                <h5 class="fw-bold mb-3 pb-2 border-bottom" style="color:var(--navy-dark)">
+                    <i class="fa-solid fa-calendar-days me-2 text-warning"></i>Upcoming MPSC Exams
+                </h5>
+
+                @if (!Model.UpcomingExams.Any())
+                {
+                    <p class="text-muted small mb-0">No upcoming exams scheduled for MPSC audience.</p>
+                }
+                else
+                {
+                    <div class="d-flex flex-column gap-2">
+                        @foreach (var ex in Model.UpcomingExams)
+                        {
+                            <div class="p-2.5 border rounded bg-light-subtle">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="badge @(ex.ExamMode == "Online" ? "bg-primary-subtle text-primary" : "bg-success-subtle text-success") small">
+                                        @ex.ExamMode
+                                    </span>
+                                    <small class="text-muted">@ex.ExamDate.ToString("dd MMM yyyy")</small>
+                                </div>
+                                <div class="fw-semibold small">@ex.Title</div>
+                                <div class="text-muted" style="font-size:0.75rem;">@ex.Subject • @ex.DurationMinutes mins</div>
+                            </div>
+                        }
+                    </div>
+                }
+
+                <div class="mt-3 pt-3 border-top">
+                    <a asp-controller="OnlineExamAdmin" asp-action="Wizard" class="btn btn-outline-primary btn-sm w-100 mb-2">
+                        <i class="fa-solid fa-plus me-1"></i>Create New MPSC Exam
+                    </a>
+                    <a asp-action="OfflineExams" class="btn btn-outline-secondary btn-sm w-100">
+                        <i class="fa-solid fa-clipboard-user me-1"></i>Manage Offline Attendance
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

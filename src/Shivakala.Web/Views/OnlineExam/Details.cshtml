@@ -1,0 +1,132 @@
+@model Shivakala.Core.ViewModels.OnlineExamWizardViewModel
+@using Shivakala.Core.ViewModels
+@{
+    ViewData["Title"] = $"{Model.Title} — Details | Shivakala";
+    var studentInfo = ViewBag.StudentExamInfo as OnlineExamStudentListViewModel;
+    var isStudentLoggedIn = (bool)ViewBag.IsStudentLoggedIn;
+}
+
+<section class="page-hero">
+    <div class="container text-center text-md-start">
+        <span class="badge-soft"><i class="fa-solid fa-graduation-cap me-1"></i>Std @Model.Standard &bull; @Model.Subject</span>
+        <h1 class="mt-2">@Model.Title</h1>
+        <p class="mb-0">Online Examination Guidelines &amp; Candidate Portal</p>
+    </div>
+</section>
+
+<section class="section-shell pt-4 pb-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <div class="glass-card p-4 p-md-5 mb-4">
+                    <h5 class="fw-bold mb-4 pb-2 border-bottom" style="color:var(--navy-dark)">
+                        <i class="fa-solid fa-circle-info text-warning me-2"></i>Examination Overview &amp; Specifications
+                    </h5>
+
+                    <div class="row g-3 text-center mb-4">
+                        <div class="col-6 col-md-3">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <small class="text-muted d-block fw-semibold">Duration</small>
+                                <strong class="fs-4" style="color:var(--navy)">@Model.DurationMinutes Mins</strong>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <small class="text-muted d-block fw-semibold">Total Questions</small>
+                                <strong class="fs-4" style="color:var(--navy)">@Model.SelectedQuestionIds.Count MCQs</strong>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <small class="text-muted d-block fw-semibold">Passing Marks</small>
+                                <strong class="fs-4" style="color:var(--navy)">@Model.PassingMarks Marks</strong>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <small class="text-muted d-block fw-semibold">Negative Marking</small>
+                                <strong class="fs-4 @(Model.NegativeMarkingEnabled ? "text-danger" : "text-success")">
+                                    @(Model.NegativeMarkingEnabled ? $"-{Model.NegativeMarks}" : "None")
+                                </strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Description))
+                    {
+                        <div class="mb-4 p-3 bg-light rounded-3 border">
+                            <h6 class="fw-bold mb-1" style="color:var(--navy)">Exam Description</h6>
+                            <p class="text-muted small mb-0">@Model.Description</p>
+                        </div>
+                    }
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold mb-3" style="color:var(--navy-dark)">
+                            <i class="fa-solid fa-clipboard-list me-2 text-primary"></i>Candidate Guidelines &amp; Rules
+                        </h6>
+                        <ul class="text-muted small ps-3 mb-0" style="line-height:1.8">
+                            <li class="mb-1">Once you click <strong>Start Online Examination</strong>, the server-side timer starts and cannot be paused.</li>
+                            <li class="mb-1">Your responses are saved automatically in real-time as you pick options.</li>
+                            <li class="mb-1">Use the question navigator to flag questions for review or revisit skipped questions.</li>
+                            <li class="mb-1">Do not switch tabs or refresh the window. If internet connection drops, you can resume within remaining time.</li>
+                            <li class="mb-0">The test automatically submits when time expires.</li>
+                        </ul>
+                    </div>
+
+                    <hr class="my-4" />
+
+                    <!-- ACTION BUTTONS -->
+                    @if (!isStudentLoggedIn)
+                    {
+                        <div class="p-4 rounded-3 text-center" style="background:linear-gradient(135deg,rgba(200,168,75,0.12),rgba(27,43,107,0.05));border-left:4px solid var(--gold)">
+                            <h6 class="fw-bold mb-1" style="color:var(--navy-dark)"><i class="fa-solid fa-lock text-warning me-2"></i>Student Authentication Required</h6>
+                            <p class="text-muted small mb-3">Please log in to your student portal account to start this examination.</p>
+                            <div class="d-flex justify-content-center gap-3">
+                                <a asp-controller="StudentPortal" asp-action="Login" asp-route-returnUrl="@Context.Request.Path" class="btn-primary-sk"><i class="fa-solid fa-right-to-bracket me-1"></i>Login to Portal</a>
+                                <a asp-controller="Registration" asp-action="Index" class="btn-outline-sk"><i class="fa-solid fa-user-plus me-1"></i>Register Student</a>
+                            </div>
+                        </div>
+                    }
+                    else if (studentInfo != null)
+                    {
+                        if (studentInfo.IsRegistrationRequired && !studentInfo.IsRegistered)
+                        {
+                            <form asp-controller="OnlineExam" asp-action="Register" asp-route-id="@Model.Id" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-gold-sk w-100 py-3 fs-5 justify-content-center">
+                                    <i class="fa-solid fa-user-plus me-2"></i>Register for Online Exam
+                                </button>
+                            </form>
+                        }
+                        else if (studentInfo.IsAvailableNow)
+                        {
+                            <form asp-controller="OnlineExam" asp-action="Start" asp-route-id="@Model.Id" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-green-sk w-100 py-3 fs-5 justify-content-center">
+                                    <i class="fa-solid fa-play me-2"></i>Start Online Examination Now
+                                </button>
+                            </form>
+                        }
+                        else if (studentInfo.IsCompleted && studentInfo.LatestAttemptId.HasValue)
+                        {
+                            <div class="text-center">
+                                <div class="alert alert-success fw-semibold mb-3"><i class="fa-solid fa-circle-check me-2"></i>You have completed this examination!</div>
+                                <a asp-controller="OnlineExam" asp-action="Result" asp-route-id="@Model.Id" asp-route-attemptId="@studentInfo.LatestAttemptId.Value" class="btn-primary-sk">
+                                    <i class="fa-solid fa-chart-pie me-1"></i>View Scorecard &amp; Topic Analytics
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-secondary text-center mb-0 fw-semibold">
+                                <i class="fa-regular fa-clock me-2"></i>Scheduled to start on @(Model.StartDateTime?.ToString("dd MMM yyyy, hh:mm tt") ?? "TBA").
+                            </div>
+                        }
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+

@@ -19,9 +19,13 @@ public sealed class WhatsAppController(
     [HttpGet("")]
     public async Task<IActionResult> Index(CancellationToken ct)
     {
+        ViewBag.ActiveProvider = wa.ActiveProvider;
+        ViewBag.IsConfigured = wa.IsConfigured;
         ViewBag.IsAuthenticated = await wa.CheckStatusAsync(ct);
         ViewBag.IsSidecarConfigured = !string.IsNullOrWhiteSpace(whatsAppOptions.Value.BaseUrl);
         ViewBag.SidecarBaseUrl = whatsAppOptions.Value.BaseUrl?.Trim();
+        ViewBag.PhoneNumberId = whatsAppOptions.Value.PhoneNumberId?.Trim();
+
         try
         {
             ViewBag.Batches = await batchRepo.GetAllAsync(ct);
@@ -48,7 +52,41 @@ public sealed class WhatsAppController(
     public async Task<IActionResult> Status(CancellationToken ct)
     {
         var isAuth = await wa.CheckStatusAsync(ct);
-        return Json(new { authenticated = isAuth });
+        return Json(new
+        {
+            authenticated = isAuth,
+            provider = wa.ActiveProvider,
+            configured = wa.IsConfigured
+        });
+    }
+
+    [HttpGet("links")]
+    public async Task<IActionResult> GetLinks(string audience, string message, string? batchId, CancellationToken ct)
+    {
+        IReadOnlyList<Student> recipients;
+
+        if (audience == "batch" && int.TryParse(batchId, out var bid))
+        {
+            var batch = await batchRepo.GetByIdWithDetailsAsync(bid, ct);
+            recipients = batch?.StudentBatches
+                .Where(sb => sb.IsActive && sb.Student != null && !string.IsNullOrWhiteSpace(sb.Student.ParentMobile))
+                .Select(sb => sb.Student!)
+                .ToList() ?? [];
+        }
+        else
+        {
+            var all = await studentRepo.ListAsync(ct);
+            recipients = all.Where(s => !string.IsNullOrWhiteSpace(s.ParentMobile)).ToList();
+        }
+
+        var links = recipients.Select(s => new
+        {
+            name = s.FullName,
+            mobile = s.ParentMobile,
+            url = wa.GenerateWhatsAppWebLink(s.ParentMobile!, message)
+        }).ToList();
+
+        return Json(links);
     }
 
     [HttpPost("disconnect"), ValidateAntiForgeryToken]
@@ -56,8 +94,8 @@ public sealed class WhatsAppController(
     {
         var disconnected = await wa.DisconnectAsync(ct);
         TempData["SuccessMessage"] = disconnected
-            ? "WhatsApp disconnected. You can now scan the QR with a different account."
-            : "Could not disconnect WhatsApp right now. Please verify the sidecar is running and reachable.";
+            ? "WhatsApp session cleared."
+            : "Could not clear WhatsApp session right now.";
         return RedirectToAction(nameof(Index));
     }
 
@@ -99,8 +137,8 @@ public sealed class WhatsAppController(
         }, ct);
 
         TempData["SuccessMessage"] = isAuthenticated
-            ? $"Broadcast sent to {sent}/{mobiles.Count} contacts."
-            : "WhatsApp not authenticated — please scan the QR first.";
+            ? $"Broadcast sent to {sent}/{mobiles.Count} contacts via {wa.ActiveProvider}."
+            : "WhatsApp not configured or authenticated — please check provider settings.";
         return RedirectToAction(nameof(Index));
     }
 }

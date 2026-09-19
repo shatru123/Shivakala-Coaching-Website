@@ -1,0 +1,80 @@
+@{
+    ViewData["Title"] = "Registration Successful | Shivakala MPSC Cell";
+    var regNumber = ViewBag.RegNumber as string ?? "SK-MPSC-REG";
+    var fullName = ViewBag.FullName as string ?? "Candidate";
+    var email = ViewBag.Email as string ?? "";
+    var mobile = ViewBag.Mobile as string ?? "";
+    var targetExam = ViewBag.TargetExam as string ?? "Rajyaseva";
+}
+
+<section class="page-hero">
+    <div class="container text-center">
+        <div class="d-inline-flex align-items-center justify-content-center bg-success text-white rounded-circle mb-3 shadow" style="width:70px;height:70px;">
+            <i class="fa-solid fa-check fs-2"></i>
+        </div>
+        <h1>अभिनंदन! नोंदणी यशस्वीरीत्या पूर्ण झाली!</h1>
+        <p class="lead text-white-50">Registration Confirmed for Shivakala MPSC Guidance &amp; Examination Program.</p>
+    </div>
+</section>
+
+<section class="section-shell py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="glass-card p-4 p-md-5 text-center shadow-lg border-top border-4 border-success">
+                    <span class="badge bg-success-subtle text-success px-3 py-2 fs-6 mb-3 rounded-pill">
+                        <i class="fa-solid fa-circle-check me-1"></i>Official Candidate Record Created
+                    </span>
+
+                    <h3 class="fw-bold mb-1" style="color:var(--navy-dark)">@fullName</h3>
+                    <p class="text-muted small mb-4">Targeting: <strong>@targetExam</strong></p>
+
+                    <div class="p-4 rounded-3 bg-light border mb-4 text-start">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-7">
+                                <span class="text-muted small d-block">YOUR OFFICIAL REGISTRATION NUMBER</span>
+                                <span class="fs-3 fw-bolder text-primary font-monospace" id="lblRegNo">@regNumber</span>
+                            </div>
+                            <div class="col-md-5 text-md-end">
+                                <button class="btn btn-outline-primary btn-sm" onclick="navigator.clipboard.writeText('@regNumber'); this.innerHTML='<i class=\'fa-solid fa-check\'></i> Copied!';">
+                                    <i class="fa-regular fa-copy me-1"></i>Copy Reg Number
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 text-start mb-4">
+                        <div class="col-sm-6">
+                            <div class="p-3 border rounded-3 bg-white">
+                                <small class="text-muted d-block">Registered Mobile</small>
+                                <span class="fw-semibold"><i class="fa-solid fa-phone me-1 text-success"></i>+91 @mobile</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="p-3 border rounded-3 bg-white">
+                                <small class="text-muted d-block">Registered Email</small>
+                                <span class="fw-semibold"><i class="fa-solid fa-envelope me-1 text-primary"></i>@email</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info text-start mb-4">
+                        <h6 class="fw-bold mb-1"><i class="fa-solid fa-info-circle me-1"></i>Login Instructions</h6>
+                        <p class="small mb-0">
+                            You can log in to your dedicated candidate portal using your <strong>Registration Number (@regNumber)</strong>, <strong>Mobile Number</strong>, or <strong>Email address</strong> along with the password you created during registration.
+                        </p>
+                    </div>
+
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a asp-action="Login" class="btn-primary-sk btn-lg px-4 py-2">
+                            <i class="fa-solid fa-right-to-bracket me-2"></i>Login to Candidate Portal
+                        </a>
+                        <a asp-controller="OnlineExam" asp-action="Index" class="btn btn-outline-secondary btn-lg px-4 py-2">
+                            <i class="fa-solid fa-laptop me-2"></i>Explore Online Exams
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

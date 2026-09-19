@@ -46,6 +46,19 @@ public sealed class ShivakalaDbContext(DbContextOptions<ShivakalaDbContext> opti
     public DbSet<AuditLog>          AuditLogs          => Set<AuditLog>();
     public DbSet<SyllabusItem>      SyllabusItems      => Set<SyllabusItem>();
 
+    // ── Online Examination Engine ──────────────────────────────────────────
+    public DbSet<Question>                Questions                => Set<Question>();
+    public DbSet<QuestionOption>          QuestionOptions          => Set<QuestionOption>();
+    public DbSet<ExamQuestion>            ExamQuestions            => Set<ExamQuestion>();
+    public DbSet<ExamRegistration>        ExamRegistrations        => Set<ExamRegistration>();
+    public DbSet<OnlineExamAttempt>       OnlineExamAttempts       => Set<OnlineExamAttempt>();
+    public DbSet<OnlineExamAttemptAnswer> OnlineExamAttemptAnswers => Set<OnlineExamAttemptAnswer>();
+
+    // ── MPSC Student Module ────────────────────────────────────────────────
+    public DbSet<MpscStudent>             MpscStudents             => Set<MpscStudent>();
+    public DbSet<MpscExamRegistration>    MpscExamRegistrations    => Set<MpscExamRegistration>();
+    public DbSet<MpscExamResult>          MpscExamResults          => Set<MpscExamResult>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

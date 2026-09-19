@@ -1,0 +1,156 @@
+@model Shivakala.Core.ViewModels.QuestionImportPreviewViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Import Preview - " + Model.FileName;
+    var examId = ViewBag.ExamId as int?;
+}
+
+<div class="p-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <span class="badge-soft dark mb-1"><i class="fa-solid fa-list-check me-1"></i>Extracted Document Review</span>
+            <h2 class="fw-bold mb-1" style="color:var(--navy-dark)">Review Extracted Questions</h2>
+            <p class="text-muted mb-0 small">File: <strong>@Model.FileName</strong></p>
+        </div>
+        <a asp-action="Import" asp-route-examId="@examId" class="btn-outline-sk">
+            <i class="fa-solid fa-arrow-left me-1"></i> Re-upload Document
+        </a>
+    </div>
+
+    <!-- Summary Stats Bar -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-6">
+            <div class="admin-stat-card">
+                <strong>@Model.TotalDetected</strong>
+                <span>Total Detected</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="admin-stat-card" style="border-left-color:var(--green)">
+                <strong class="text-success">@Model.ValidCount</strong>
+                <span>Valid &amp; Ready</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="admin-stat-card" style="border-left-color:var(--gold)">
+                <strong class="text-warning">@Model.NeedsReviewCount</strong>
+                <span>Needs Review</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="admin-stat-card" style="border-left-color:var(--red)">
+                <strong class="text-danger">@Model.InvalidCount</strong>
+                <span>Invalid / Incomplete</span>
+            </div>
+        </div>
+    </div>
+
+    <form asp-action="ConfirmImport" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="examId" value="@examId" />
+        <input type="hidden" asp-for="FileName" />
+        <input type="hidden" asp-for="TotalDetected" />
+        <input type="hidden" asp-for="ValidCount" />
+        <input type="hidden" asp-for="NeedsReviewCount" />
+        <input type="hidden" asp-for="InvalidCount" />
+
+        <div class="glass-card p-0 overflow-hidden mb-4">
+            <div class="p-3 bg-white border-bottom d-flex justify-content-between align-items-center">
+                <span class="fw-bold" style="color:var(--navy-dark)">Extracted Questions</span>
+                <button type="submit" class="btn-green-sk">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> Confirm &amp; Save Selected to Bank
+                </button>
+            </div>
+            <div>
+                @if (!Model.Questions.Any())
+                {
+                    <div class="text-center py-5 text-muted">
+                        <i class="fa-solid fa-triangle-exclamation fs-1 mb-2"></i>
+                        <p>No questions could be parsed from the uploaded document.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="list-group list-group-flush">
+                        @for (int i = 0; i < Model.Questions.Count; i++)
+                        {
+                            var item = Model.Questions[i];
+                            var statusBadge = item.ValidationStatus == "Valid" ? "bg-success" : item.ValidationStatus == "NeedsReview" ? "bg-warning text-dark" : "bg-danger";
+                            var statusBorder = item.ValidationStatus == "Valid" ? "border-success" : item.ValidationStatus == "NeedsReview" ? "border-warning" : "border-danger";
+
+                            <div class="list-group-item p-4 border-start border-4 @statusBorder">
+                                <input type="hidden" name="Questions[@i].TempId" value="@item.TempId" />
+                                <input type="hidden" name="Questions[@i].QuestionNumber" value="@item.QuestionNumber" />
+                                <input type="hidden" name="Questions[@i].ValidationStatus" value="@item.ValidationStatus" />
+
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge bg-dark fs-6">Q#@item.QuestionNumber</span>
+                                        <span class="badge @statusBadge">@item.ValidationStatus</span>
+                                        @if (!string.IsNullOrWhiteSpace(item.ValidationMessage))
+                                        {
+                                            <small class="text-muted ms-2"><i class="fa-solid fa-triangle-exclamation text-warning me-1"></i>@item.ValidationMessage</small>
+                                        }
+                                    </div>
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <div class="input-group input-group-sm" style="width: 130px;">
+                                            <span class="input-group-text">Marks</span>
+                                            <input type="number" name="Questions[@i].Marks" value="@item.Marks" class="form-control" min="1" required />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold small">Question Text</label>
+                                    <textarea name="Questions[@i].QuestionText" class="form-control" rows="2" required>@item.QuestionText</textarea>
+                                </div>
+
+                                <div class="row g-2 mb-3">
+                                    <div class="col-md-4">
+                                        <input type="text" name="Questions[@i].Topic" value="@item.Topic" class="form-control form-control-sm" placeholder="Topic name..." />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select name="Questions[@i].Difficulty" class="form-select form-select-sm">
+                                            <option value="Easy" selected="@(item.Difficulty == "Easy")">Easy</option>
+                                            <option value="Medium" selected="@(item.Difficulty == "Medium")">Medium</option>
+                                            <option value="Hard" selected="@(item.Difficulty == "Hard")">Hard</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" name="Questions[@i].Explanation" value="@item.Explanation" class="form-control form-control-sm" placeholder="Explanation hint..." />
+                                    </div>
+                                </div>
+
+                                <!-- Options -->
+                                <div class="row g-2">
+                                    @for (int j = 0; j < item.Options.Count; j++)
+                                    {
+                                        var opt = item.Options[j];
+                                        var isCorrect = opt.OptionKey == item.CorrectOptionKey || opt.IsCorrect;
+
+                                        <div class="col-md-6">
+                                            <div class="input-group input-group-sm">
+                                                <div class="input-group-text bg-light">
+                                                    <input class="form-check-input mt-0 me-1" type="radio" name="Questions[@i].CorrectOptionKey" value="@opt.OptionKey" @(isCorrect ? "checked" : "") required />
+                                                    <strong>@opt.OptionKey</strong>
+                                                </div>
+                                                <input type="hidden" name="Questions[@i].Options[@j].OptionKey" value="@opt.OptionKey" />
+                                                <input type="hidden" name="Questions[@i].Options[@j].IsCorrect" value="@(isCorrect ? "true" : "false")" />
+                                                <input type="text" name="Questions[@i].Options[@j].OptionText" value="@opt.OptionText" class="form-control" placeholder="Option @opt.OptionKey text..." required />
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="card-footer bg-white py-3 text-end border-top">
+                <button type="submit" class="btn btn-success btn-lg fw-bold px-4">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> Confirm & Save Questions to Bank
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
