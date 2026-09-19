@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -166,7 +166,7 @@ namespace Shivakala.Infrastructure.Data.Migrations
                         column: x => x.OnlineAttemptId,
                         principalTable: "OnlineExamAttempts",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(

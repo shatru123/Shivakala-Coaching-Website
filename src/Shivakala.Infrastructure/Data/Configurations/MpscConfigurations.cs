@@ -106,6 +106,7 @@ public sealed class MpscExamResultConfiguration : IEntityTypeConfiguration<MpscE
         b.HasOne(x => x.OnlineAttempt)
             .WithMany()
             .HasForeignKey(x => x.OnlineAttemptId)
-            .OnDelete(DeleteBehavior.SetNull);
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
+

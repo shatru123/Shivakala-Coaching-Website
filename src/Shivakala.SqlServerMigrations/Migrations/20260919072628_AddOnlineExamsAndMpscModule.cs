@@ -426,7 +426,7 @@ namespace Shivakala.SqlServerMigrations.Migrations
                         column: x => x.OnlineAttemptId,
                         principalTable: "OnlineExamAttempts",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
